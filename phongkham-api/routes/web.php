@@ -2,7 +2,10 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\AdminController;
+use App\Http\Controllers\Admin\BacSiController;
+use App\Http\Controllers\Admin\CaKhamController;
+use App\Http\Controllers\Admin\LichLamViecController;
+use App\Http\Controllers\Admin\PhongKhamController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -15,51 +18,44 @@ Route::get('/me', [AuthController::class, 'me']);
 
 Route::prefix('admin')->group(function () {
 
-    Route::get('/bac-si', [AdminController::class, 'getDanhSachBacSi']);
-    Route::get('/bac-si/{id}', [AdminController::class, 'getChiTietBacSi']);
-    Route::post('/bac-si', [AdminController::class, 'themBacSi']);
-    Route::put('/bac-si/{id}', [AdminController::class, 'capNhatBacSi']);
-    Route::delete('/bac-si/{id}', [AdminController::class, 'xoaBacSi']);
-    Route::patch('/bac-si/{id}/trang-thai', [AdminController::class, 'capNhatTrangThaiBacSi']);
+    // ==================== QUẢN LÝ BÁC SĨ ====================
+    Route::get('/bac-si', [BacSiController::class, 'index']);
+    Route::get('/bac-si/{id}', [BacSiController::class, 'show']);
+    Route::post('/bac-si', [BacSiController::class, 'store']);
+    Route::put('/bac-si/{id}', [BacSiController::class, 'update']);
+    Route::delete('/bac-si/{id}', [BacSiController::class, 'destroy']);
+    Route::patch('/bac-si/{id}/trang-thai', [BacSiController::class, 'updateStatus']);
     
-
     // ==================== QUẢN LÝ CA KHÁM ====================
-    Route::get('/ca-kham', [AdminController::class, 'getDanhSachCaKham']);
-    Route::get('/ca-kham/active', [AdminController::class, 'getDanhSachCaKhamActive']);
-    Route::get('/ca-kham/{id}', [AdminController::class, 'getChiTietCaKham']);
-    Route::post('/ca-kham', [AdminController::class, 'themCaKham']);
-    Route::put('/ca-kham/{id}', [AdminController::class, 'capNhatCaKham']);
-    Route::delete('/ca-kham/{id}', [AdminController::class, 'xoaCaKham']);
+    Route::get('/ca-kham', [CaKhamController::class, 'index']);
+    Route::get('/ca-kham/active', [CaKhamController::class, 'getActive']);
+    Route::get('/ca-kham/{id}', [CaKhamController::class, 'show']);
+    Route::post('/ca-kham', [CaKhamController::class, 'store']);
+    Route::put('/ca-kham/{id}', [CaKhamController::class, 'update']);
+    Route::delete('/ca-kham/{id}', [CaKhamController::class, 'destroy']);
 
     // ==================== QUẢN LÝ LỊCH LÀM VIỆC ====================
-    Route::get('/lich-lam-viec', [AdminController::class, 'getDanhSachLichLamViec']);
-    Route::get('/lich-lam-viec/{id}', [AdminController::class, 'getChiTietLichLamViec']);
-    Route::post('/lich-lam-viec', [AdminController::class, 'taoLichLamViec']);
-    Route::put('/lich-lam-viec/{id}', [AdminController::class, 'capNhatLichLamViec']);
-    Route::delete('/lich-lam-viec/{id}', [AdminController::class, 'xoaLichLamViec']);
-    Route::get('/lich-lam-viec/bac-si/{MaBacSi}', [AdminController::class, 'getLichLamViecBacSi']);
-
-    // ==================== PHÂN CÔNG LỊCH LÀM VIỆC ====================
-    Route::post('/phan-cong-lich-lam-viec', [AdminController::class, 'phanCongLichLamViec']);
-    Route::get('/lich-lam-viec-bac-si/{MaBacSi}', [AdminController::class, 'getDanhSachLichLamViecBacSi']);
-    Route::delete('/huy-cong-viec/{id}', [AdminController::class, 'huyCongViec']);
-    Route::get('/bac-si-lam-viec-ngay', [AdminController::class, 'getDanhSachBacSiLamViecNgay']);
-    Route::get('/bac-si-lam-viec-ca', [AdminController::class, 'getDanhSachBacSiLamViecCa']);
-    Route::put('/lich-lam-viec/{id}/phong', [AdminController::class, 'thayDoiPhongKham']);
+    Route::get('/lich-lam-viec', [LichLamViecController::class, 'index']);
+    Route::get('/lich-lam-viec/{id}', [LichLamViecController::class, 'show']);
+    Route::post('/lich-lam-viec', [LichLamViecController::class, 'store']);
+    Route::put('/lich-lam-viec/{id}', [LichLamViecController::class, 'update']);
+    Route::delete('/lich-lam-viec/{id}', [LichLamViecController::class, 'destroy']);
+    Route::get('/lich-lam-viec/bac-si/{MaBacSi}', [LichLamViecController::class, 'getLichBacSi']);
+    Route::get('/lich-lam-viec/ngay/{ngay}', [LichLamViecController::class, 'getLichNgay']);
+    Route::get('/lich-lam-viec/ca/{maCa}', [LichLamViecController::class, 'getLichCa']);
 
     // ==================== PHÒNG KHÁM ====================
-    Route::get('/phong-kham', [AdminController::class, 'getDanhSachPhongKham']);
-    Route::get('/kiem-tra-phong', [AdminController::class, 'kiemTraPhongTrong']);
-    Route::get('/phong-kham/danh-sach', [AdminController::class, 'getDanhSachPhongKhamAll']);
-    Route::get('/phong-kham/khu/danh-sach', [AdminController::class, 'getDanhSachKhu']);
-    Route::get('/phong-kham/thong-ke', [AdminController::class, 'getThongKePhongKham']);
-    Route::get('/phong-kham/trong', [AdminController::class, 'getPhongKhamTrong']);
-    Route::get('/phong-kham/dang-su-dung', [AdminController::class, 'getPhongKhamDangSuDung']);
-    Route::get('/phong-kham/khu/{khu}', [AdminController::class, 'getPhongKhamTheoKhu']);
-    Route::get('/phong-kham/{id}', [AdminController::class, 'getChiTietPhongKham']);
-    Route::get('/phong-kham/{id}/lich-su', [AdminController::class, 'getLichSuPhongKham']);
-    Route::get('/phong-kham/{id}/trang-thai', [AdminController::class, 'kiemTraTrangThaiPhongKham']);
-    Route::post('/phong-kham', [AdminController::class, 'themPhongKham']);
-    Route::put('/phong-kham/{id}', [AdminController::class, 'capNhatPhongKham']);
-    Route::delete('/phong-kham/{id}', [AdminController::class, 'xoaPhongKham']);
+    Route::get('/phong-kham', [PhongKhamController::class, 'index']);
+    Route::get('/phong-kham/danh-sach', [PhongKhamController::class, 'getAll']);
+    Route::get('/phong-kham/khu/danh-sach', [PhongKhamController::class, 'getKhuList']);
+    Route::get('/phong-kham/thong-ke', [PhongKhamController::class, 'getStatistics']);
+    Route::get('/phong-kham/trong', [PhongKhamController::class, 'getPhongTrong']);
+    Route::get('/phong-kham/dang-su-dung', [PhongKhamController::class, 'getPhongDangSuDung']);
+    Route::get('/phong-kham/khu/{khu}', [PhongKhamController::class, 'getPhongTheoKhu']);
+    Route::get('/phong-kham/{id}', [PhongKhamController::class, 'show']);
+    Route::get('/phong-kham/{id}/lich-su', [PhongKhamController::class, 'getLichSu']);
+    Route::get('/phong-kham/{id}/trang-thai', [PhongKhamController::class, 'checkStatus']);
+    Route::post('/phong-kham', [PhongKhamController::class, 'store']);
+    Route::put('/phong-kham/{id}', [PhongKhamController::class, 'update']);
+    Route::delete('/phong-kham/{id}', [PhongKhamController::class, 'destroy']);
 });
