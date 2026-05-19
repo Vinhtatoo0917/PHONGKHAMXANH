@@ -114,13 +114,24 @@ class AdminController {
     };
   }
 
+  // ─────────────────────────────────────────────────────────────
+  // FORMAT TIME
+  // ─────────────────────────────────────────────────────────────
+  String _formatTime(String time) {
+    // Chuyển đổi HH:mm sang HH:mm:ss
+    if (time.length == 5 && time.contains(':')) {
+      return '$time:00';
+    }
+    return time;
+  }
+
   // ═══════════════════════════════════════════════════════════════
   // QUẢN LÝ BÁC SĨ
   // ═══════════════════════════════════════════════════════════════
 
   /// Lấy danh sách bác sĩ
   /// GET /admin/bac-si
-  Future<List<BacSi>> layDanhSachBacSi({String? search}) async {
+  Future<List<Map<String, dynamic>>> layDanhSachBacSi({String? search}) async {
     try {
       final headers = await _getHeaders();
       var url = '${ApiConfig.baseUrl}/admin/bac-si';
@@ -139,7 +150,7 @@ class AdminController {
         final data = jsonDecode(response.body);
         if (data['success'] == true) {
           final List<dynamic> bacSiList = data['data'];
-          return bacSiList.map((json) => BacSi.fromJson(json)).toList();
+          return bacSiList.cast<Map<String, dynamic>>();
         }
       }
 
@@ -813,6 +824,1170 @@ class AdminController {
     } catch (e) {
       print('❌ [ADMIN] Lỗi kiểm tra trạng thái phòng khám: $e');
       return null;
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // QUẢN LÝ CA KHÁM
+  // ═══════════════════════════════════════════════════════════════
+
+  /// Lấy danh sách ca khám
+  /// GET /admin/ca-kham
+  Future<List<Map<String, dynamic>>> layDanhSachCaKham() async {
+    try {
+      final headers = await _getHeaders();
+      final url = '${ApiConfig.baseUrl}/admin/ca-kham';
+
+      print('🔵 [ADMIN] Lấy danh sách ca khám: $url');
+
+      final response = await http.get(Uri.parse(url), headers: headers);
+
+      print('🔵 [ADMIN] Status: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) {
+          final List<dynamic> caList = data['data'] ?? [];
+          return caList.cast<Map<String, dynamic>>();
+        }
+      }
+
+      return [];
+    } catch (e) {
+      print('❌ [ADMIN] Lỗi lấy danh sách ca khám: $e');
+      return [];
+    }
+  }
+
+  /// Lấy danh sách ca khám đang hoạt động
+  /// GET /admin/ca-kham/active
+  Future<List<Map<String, dynamic>>> layDanhSachCaKhamActive() async {
+    try {
+      final headers = await _getHeaders();
+      final url = '${ApiConfig.baseUrl}/admin/ca-kham/active';
+
+      print('🔵 [ADMIN] Lấy danh sách ca khám active: $url');
+
+      final response = await http.get(Uri.parse(url), headers: headers);
+
+      print('🔵 [ADMIN] Status: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) {
+          final List<dynamic> caList = data['data'] ?? [];
+          return caList.cast<Map<String, dynamic>>();
+        }
+      }
+
+      return [];
+    } catch (e) {
+      print('❌ [ADMIN] Lỗi lấy danh sách ca khám active: $e');
+      return [];
+    }
+  }
+
+  /// Lấy chi tiết ca khám
+  /// GET /admin/ca-kham/{id}
+  Future<Map<String, dynamic>?> layChiTietCaKham(int maCa) async {
+    try {
+      final headers = await _getHeaders();
+      final url = '${ApiConfig.baseUrl}/admin/ca-kham/$maCa';
+
+      print('🔵 [ADMIN] Lấy chi tiết ca khám: $url');
+
+      final response = await http.get(Uri.parse(url), headers: headers);
+
+      print('🔵 [ADMIN] Status: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) {
+          return data['data'];
+        }
+      }
+
+      return null;
+    } catch (e) {
+      print('❌ [ADMIN] Lỗi lấy chi tiết ca khám: $e');
+      return null;
+    }
+  }
+
+  /// Thêm ca khám mới
+  /// POST /admin/ca-kham
+  Future<Map<String, dynamic>> themCaKham({
+    required String tenCa,
+    required String gioBatDau,
+    required String gioKetThuc,
+    required int soLuongToiDa,
+    required int thoiLuongKham,
+    String trangThai = 'active', // Mặc định là active
+  }) async {
+    try {
+      final headers = await _getHeaders();
+      final url = '${ApiConfig.baseUrl}/admin/ca-kham';
+
+      // Chuyển đổi giờ từ HH:mm sang HH:mm:ss
+      final gioBatDauFormatted = _formatTime(gioBatDau);
+      final gioKetThucFormatted = _formatTime(gioKetThuc);
+
+      final body = {
+        'TenCa': tenCa,
+        'GioBatDau': gioBatDauFormatted,
+        'GioKetThuc': gioKetThucFormatted,
+        'SoLuongToiDa': soLuongToiDa,
+        'ThoiLuongKham': thoiLuongKham,
+        'TrangThai': trangThai,
+      };
+
+      print('🔵 [ADMIN] Thêm ca khám: $url');
+      print('🔵 [ADMIN] Body: ${jsonEncode(body)}');
+
+      final response = await http.post(
+        Uri.parse(url),
+        headers: headers,
+        body: jsonEncode(body),
+      );
+
+      print('🔵 [ADMIN] Status: ${response.statusCode}');
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        return {
+          'success': true,
+          'message': data['message'] ?? 'Thêm ca khám thành công',
+          'data': data['data'],
+        };
+      } else {
+        return {
+          'success': false,
+          'message': data['message'] ?? 'Thêm ca khám thất bại',
+        };
+      }
+    } catch (e) {
+      print('❌ [ADMIN] Lỗi thêm ca khám: $e');
+      return {'success': false, 'message': 'Không thể kết nối đến server'};
+    }
+  }
+
+  /// Cập nhật ca khám
+  /// PUT /admin/ca-kham/{id}
+  Future<Map<String, dynamic>> capNhatCaKham({
+    required int maCa,
+    String? tenCa,
+    String? gioBatDau,
+    String? gioKetThuc,
+    int? soLuongToiDa,
+    int? thoiLuongKham,
+    String? trangThai,
+  }) async {
+    try {
+      final headers = await _getHeaders();
+      final url = '${ApiConfig.baseUrl}/admin/ca-kham/$maCa';
+
+      final body = <String, dynamic>{};
+      if (tenCa != null) body['TenCa'] = tenCa;
+      if (gioBatDau != null) body['GioBatDau'] = _formatTime(gioBatDau);
+      if (gioKetThuc != null) body['GioKetThuc'] = _formatTime(gioKetThuc);
+      if (soLuongToiDa != null) body['SoLuongToiDa'] = soLuongToiDa;
+      if (thoiLuongKham != null) body['ThoiLuongKham'] = thoiLuongKham;
+      if (trangThai != null) body['TrangThai'] = trangThai;
+
+      print('🔵 [ADMIN] Cập nhật ca khám: $url');
+      print('🔵 [ADMIN] Body: ${jsonEncode(body)}');
+
+      final response = await http.put(
+        Uri.parse(url),
+        headers: headers,
+        body: jsonEncode(body),
+      );
+
+      print('🔵 [ADMIN] Status: ${response.statusCode}');
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        return {
+          'success': true,
+          'message': data['message'] ?? 'Cập nhật ca khám thành công',
+        };
+      } else {
+        return {
+          'success': false,
+          'message': data['message'] ?? 'Cập nhật ca khám thất bại',
+        };
+      }
+    } catch (e) {
+      print('❌ [ADMIN] Lỗi cập nhật ca khám: $e');
+      return {'success': false, 'message': 'Không thể kết nối đến server'};
+    }
+  }
+
+  /// Xóa ca khám
+  /// DELETE /admin/ca-kham/{id}
+  Future<Map<String, dynamic>> xoaCaKham(int maCa) async {
+    try {
+      final headers = await _getHeaders();
+      final url = '${ApiConfig.baseUrl}/admin/ca-kham/$maCa';
+
+      print('🔵 [ADMIN] Xóa ca khám: $url');
+
+      final response = await http.delete(Uri.parse(url), headers: headers);
+
+      print('🔵 [ADMIN] Status: ${response.statusCode}');
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        return {
+          'success': true,
+          'message': data['message'] ?? 'Xóa ca khám thành công',
+        };
+      } else {
+        return {
+          'success': false,
+          'message': data['message'] ?? 'Xóa ca khám thất bại',
+        };
+      }
+    } catch (e) {
+      print('❌ [ADMIN] Lỗi xóa ca khám: $e');
+      return {'success': false, 'message': 'Không thể kết nối đến server'};
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // QUẢN LÝ LỊCH LÀM VIỆC
+  // ═══════════════════════════════════════════════════════════════
+
+  /// Lấy danh sách lịch làm việc
+  /// GET /admin/lich-lam-viec
+  Future<List<Map<String, dynamic>>> layDanhSachLichLamViec({
+    String? ngay,
+    int? maBacSi,
+    int? maCa,
+    int? maPhong,
+    String? tuNgay,
+    String? denNgay,
+  }) async {
+    try {
+      final headers = await _getHeaders();
+      var url = '${ApiConfig.baseUrl}/admin/lich-lam-viec';
+
+      final params = <String>[];
+      if (ngay != null) params.add('ngay=$ngay');
+      if (maBacSi != null) params.add('MaBacSi=$maBacSi');
+      if (maCa != null) params.add('MaCa=$maCa');
+      if (maPhong != null) params.add('MaPhong=$maPhong');
+      if (tuNgay != null) params.add('tu_ngay=$tuNgay');
+      if (denNgay != null) params.add('den_ngay=$denNgay');
+
+      if (params.isNotEmpty) {
+        url += '?${params.join('&')}';
+      }
+
+      print('🔵 [ADMIN] Lấy danh sách lịch làm việc: $url');
+
+      final response = await http.get(Uri.parse(url), headers: headers);
+
+      print('🔵 [ADMIN] Status: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) {
+          final List<dynamic> lichList = data['data'] ?? [];
+          return lichList.cast<Map<String, dynamic>>();
+        }
+      }
+
+      return [];
+    } catch (e) {
+      print('❌ [ADMIN] Lỗi lấy danh sách lịch làm việc: $e');
+      return [];
+    }
+  }
+
+  /// Lấy chi tiết lịch làm việc
+  /// GET /admin/lich-lam-viec/{id}
+  Future<Map<String, dynamic>?> layChiTietLichLamViec(int maLichLamViec) async {
+    try {
+      final headers = await _getHeaders();
+      final url = '${ApiConfig.baseUrl}/admin/lich-lam-viec/$maLichLamViec';
+
+      print('🔵 [ADMIN] Lấy chi tiết lịch làm việc: $url');
+
+      final response = await http.get(Uri.parse(url), headers: headers);
+
+      print('🔵 [ADMIN] Status: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) {
+          return data['data'];
+        }
+      }
+
+      return null;
+    } catch (e) {
+      print('❌ [ADMIN] Lỗi lấy chi tiết lịch làm việc: $e');
+      return null;
+    }
+  }
+
+  /// Thêm lịch làm việc mới
+  /// POST /admin/lich-lam-viec
+  Future<Map<String, dynamic>> themLichLamViec({
+    required int maBacSi,
+    required String ngay,
+    required int maCa,
+    required int maPhong,
+  }) async {
+    try {
+      final headers = await _getHeaders();
+      final url = '${ApiConfig.baseUrl}/admin/lich-lam-viec';
+
+      final body = {
+        'MaBacSi': maBacSi,
+        'Ngay': ngay,
+        'MaCa': maCa,
+        'MaPhong': maPhong,
+      };
+
+      print('🔵 [ADMIN] Thêm lịch làm việc: $url');
+      print('🔵 [ADMIN] Body: ${jsonEncode(body)}');
+
+      final response = await http.post(
+        Uri.parse(url),
+        headers: headers,
+        body: jsonEncode(body),
+      );
+
+      print('🔵 [ADMIN] Status: ${response.statusCode}');
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        return {
+          'success': true,
+          'message': data['message'] ?? 'Thêm lịch làm việc thành công',
+          'data': data['data'],
+        };
+      } else {
+        return {
+          'success': false,
+          'message': data['message'] ?? 'Thêm lịch làm việc thất bại',
+        };
+      }
+    } catch (e) {
+      print('❌ [ADMIN] Lỗi thêm lịch làm việc: $e');
+      return {'success': false, 'message': 'Không thể kết nối đến server'};
+    }
+  }
+
+  /// Cập nhật lịch làm việc
+  /// PUT /admin/lich-lam-viec/{id}
+  Future<Map<String, dynamic>> capNhatLichLamViec({
+    required int maLichLamViec,
+    int? maBacSi,
+    String? ngay,
+    int? maCa,
+    int? maPhong,
+  }) async {
+    try {
+      final headers = await _getHeaders();
+      final url = '${ApiConfig.baseUrl}/admin/lich-lam-viec/$maLichLamViec';
+
+      final body = <String, dynamic>{};
+      if (maBacSi != null) body['MaBacSi'] = maBacSi;
+      if (ngay != null) body['Ngay'] = ngay;
+      if (maCa != null) body['MaCa'] = maCa;
+      if (maPhong != null) body['MaPhong'] = maPhong;
+
+      print('🔵 [ADMIN] Cập nhật lịch làm việc: $url');
+      print('🔵 [ADMIN] Body: ${jsonEncode(body)}');
+
+      final response = await http.put(
+        Uri.parse(url),
+        headers: headers,
+        body: jsonEncode(body),
+      );
+
+      print('🔵 [ADMIN] Status: ${response.statusCode}');
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        return {
+          'success': true,
+          'message': data['message'] ?? 'Cập nhật lịch làm việc thành công',
+        };
+      } else {
+        return {
+          'success': false,
+          'message': data['message'] ?? 'Cập nhật lịch làm việc thất bại',
+        };
+      }
+    } catch (e) {
+      print('❌ [ADMIN] Lỗi cập nhật lịch làm việc: $e');
+      return {'success': false, 'message': 'Không thể kết nối đến server'};
+    }
+  }
+
+  /// Xóa lịch làm việc
+  /// DELETE /admin/lich-lam-viec/{id}
+  Future<Map<String, dynamic>> xoaLichLamViec(int maLichLamViec) async {
+    try {
+      final headers = await _getHeaders();
+      final url = '${ApiConfig.baseUrl}/admin/lich-lam-viec/$maLichLamViec';
+
+      print('🔵 [ADMIN] Xóa lịch làm việc: $url');
+
+      final response = await http.delete(Uri.parse(url), headers: headers);
+
+      print('🔵 [ADMIN] Status: ${response.statusCode}');
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        return {
+          'success': true,
+          'message': data['message'] ?? 'Xóa lịch làm việc thành công',
+        };
+      } else {
+        return {
+          'success': false,
+          'message': data['message'] ?? 'Xóa lịch làm việc thất bại',
+        };
+      }
+    } catch (e) {
+      print('❌ [ADMIN] Lỗi xóa lịch làm việc: $e');
+      return {'success': false, 'message': 'Không thể kết nối đến server'};
+    }
+  }
+
+  /// Lấy lịch làm việc của bác sĩ
+  /// GET /admin/lich-lam-viec/bac-si/{MaBacSi}
+  Future<List<Map<String, dynamic>>> layLichLamViecBacSi({
+    required int maBacSi,
+    String? tuNgay,
+    String? denNgay,
+  }) async {
+    try {
+      final headers = await _getHeaders();
+      var url = '${ApiConfig.baseUrl}/admin/lich-lam-viec/bac-si/$maBacSi';
+
+      final params = <String>[];
+      if (tuNgay != null) params.add('tu_ngay=$tuNgay');
+      if (denNgay != null) params.add('den_ngay=$denNgay');
+
+      if (params.isNotEmpty) {
+        url += '?${params.join('&')}';
+      }
+
+      print('🔵 [ADMIN] Lấy lịch làm việc bác sĩ: $url');
+
+      final response = await http.get(Uri.parse(url), headers: headers);
+
+      print('🔵 [ADMIN] Status: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) {
+          final List<dynamic> lichList = data['data'] ?? [];
+          return lichList.cast<Map<String, dynamic>>();
+        }
+      }
+
+      return [];
+    } catch (e) {
+      print('❌ [ADMIN] Lỗi lấy lịch làm việc bác sĩ: $e');
+      return [];
+    }
+  }
+
+  /// Lấy danh sách bác sĩ làm việc trong ngày
+  /// GET /admin/lich-lam-viec/ngay/{ngay}
+  Future<List<Map<String, dynamic>>> layLichLamViecNgay(String ngay) async {
+    try {
+      final headers = await _getHeaders();
+      final url = '${ApiConfig.baseUrl}/admin/lich-lam-viec/ngay/$ngay';
+
+      print('🔵 [ADMIN] Lấy lịch làm việc ngày: $url');
+
+      final response = await http.get(Uri.parse(url), headers: headers);
+
+      print('🔵 [ADMIN] Status: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) {
+          final List<dynamic> lichList = data['data'] ?? [];
+          return lichList.cast<Map<String, dynamic>>();
+        }
+      }
+
+      return [];
+    } catch (e) {
+      print('❌ [ADMIN] Lỗi lấy lịch làm việc ngày: $e');
+      return [];
+    }
+  }
+
+  /// Lấy danh sách bác sĩ làm việc trong ca
+  /// GET /admin/lich-lam-viec/ca/{maCa}
+  Future<List<Map<String, dynamic>>> layLichLamViecCa({
+    required int maCa,
+    required String ngay,
+  }) async {
+    try {
+      final headers = await _getHeaders();
+      final url =
+          '${ApiConfig.baseUrl}/admin/lich-lam-viec/ca/$maCa?Ngay=$ngay';
+
+      print('🔵 [ADMIN] Lấy lịch làm việc ca: $url');
+
+      final response = await http.get(Uri.parse(url), headers: headers);
+
+      print('🔵 [ADMIN] Status: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) {
+          final List<dynamic> lichList = data['data'] ?? [];
+          return lichList.cast<Map<String, dynamic>>();
+        }
+      }
+
+      return [];
+    } catch (e) {
+      print('❌ [ADMIN] Lỗi lấy lịch làm việc ca: $e');
+      return [];
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // QUẢN LÝ KHOA
+  // ═══════════════════════════════════════════════════════════════
+
+  /// Lấy danh sách khoa
+  /// GET /admin/khoa
+  Future<List<Map<String, dynamic>>> layDanhSachKhoa({String? search}) async {
+    try {
+      final headers = await _getHeaders();
+      var url = '${ApiConfig.baseUrl}/admin/khoa';
+
+      if (search != null && search.isNotEmpty) {
+        url += '?search=$search';
+      }
+
+      print('🔵 [ADMIN] Lấy danh sách khoa: $url');
+
+      final response = await http.get(Uri.parse(url), headers: headers);
+
+      print('🔵 [ADMIN] Status: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) {
+          final List<dynamic> khoaList = data['data'] ?? [];
+          return khoaList.cast<Map<String, dynamic>>();
+        }
+      }
+
+      return [];
+    } catch (e) {
+      print('❌ [ADMIN] Lỗi lấy danh sách khoa: $e');
+      return [];
+    }
+  }
+
+  /// Lấy chi tiết khoa
+  /// GET /admin/khoa/{id}
+  Future<Map<String, dynamic>?> layChiTietKhoa(String maKhoa) async {
+    try {
+      final headers = await _getHeaders();
+      final url = '${ApiConfig.baseUrl}/admin/khoa/$maKhoa';
+
+      print('🔵 [ADMIN] Lấy chi tiết khoa: $url');
+
+      final response = await http.get(Uri.parse(url), headers: headers);
+
+      print('🔵 [ADMIN] Status: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) {
+          return data['data'];
+        }
+      }
+
+      return null;
+    } catch (e) {
+      print('❌ [ADMIN] Lỗi lấy chi tiết khoa: $e');
+      return null;
+    }
+  }
+
+  /// Thêm khoa mới
+  /// POST /admin/khoa
+  /// Lưu ý: Mã khoa (MaKhoa) sẽ được tự động tạo bởi server
+  Future<Map<String, dynamic>> themKhoa({
+    required String tenKhoa,
+    required String maChuyenKhoa,
+  }) async {
+    try {
+      final headers = await _getHeaders();
+      final url = '${ApiConfig.baseUrl}/admin/khoa';
+
+      final body = {'TenKhoa': tenKhoa, 'machuyenkhoa': maChuyenKhoa};
+
+      print('🔵 [ADMIN] Thêm khoa: $url');
+      print('🔵 [ADMIN] Body: ${jsonEncode(body)}');
+
+      final response = await http.post(
+        Uri.parse(url),
+        headers: headers,
+        body: jsonEncode(body),
+      );
+
+      print('🔵 [ADMIN] Status: ${response.statusCode}');
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        return {
+          'success': true,
+          'message': data['message'] ?? 'Thêm khoa thành công',
+          'data': data['data'],
+        };
+      } else {
+        return {
+          'success': false,
+          'message': data['message'] ?? 'Thêm khoa thất bại',
+        };
+      }
+    } catch (e) {
+      print('❌ [ADMIN] Lỗi thêm khoa: $e');
+      return {'success': false, 'message': 'Không thể kết nối đến server'};
+    }
+  }
+
+  /// Cập nhật khoa
+  /// PUT /admin/khoa/{id}
+  Future<Map<String, dynamic>> capNhatKhoa({
+    required String maKhoa,
+    required String tenKhoa,
+  }) async {
+    try {
+      final headers = await _getHeaders();
+      final url = '${ApiConfig.baseUrl}/admin/khoa/$maKhoa';
+
+      final body = {'TenKhoa': tenKhoa};
+
+      print('🔵 [ADMIN] Cập nhật khoa: $url');
+      print('🔵 [ADMIN] Body: ${jsonEncode(body)}');
+
+      final response = await http.put(
+        Uri.parse(url),
+        headers: headers,
+        body: jsonEncode(body),
+      );
+
+      print('🔵 [ADMIN] Status: ${response.statusCode}');
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        return {
+          'success': true,
+          'message': data['message'] ?? 'Cập nhật khoa thành công',
+        };
+      } else {
+        return {
+          'success': false,
+          'message': data['message'] ?? 'Cập nhật khoa thất bại',
+        };
+      }
+    } catch (e) {
+      print('❌ [ADMIN] Lỗi cập nhật khoa: $e');
+      return {'success': false, 'message': 'Không thể kết nối đến server'};
+    }
+  }
+
+  /// Xóa khoa
+  /// DELETE /admin/khoa/{id}
+  Future<Map<String, dynamic>> xoaKhoa(String maKhoa) async {
+    try {
+      final headers = await _getHeaders();
+      final url = '${ApiConfig.baseUrl}/admin/khoa/$maKhoa';
+
+      print('🔵 [ADMIN] Xóa khoa: $url');
+
+      final response = await http.delete(Uri.parse(url), headers: headers);
+
+      print('🔵 [ADMIN] Status: ${response.statusCode}');
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        return {
+          'success': true,
+          'message': data['message'] ?? 'Xóa khoa thành công',
+        };
+      } else {
+        return {
+          'success': false,
+          'message': data['message'] ?? 'Xóa khoa thất bại',
+        };
+      }
+    } catch (e) {
+      print('❌ [ADMIN] Lỗi xóa khoa: $e');
+      return {'success': false, 'message': 'Không thể kết nối đến server'};
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // QUẢN LÝ BỆNH
+  // ═══════════════════════════════════════════════════════════════
+
+  /// Lấy danh sách bệnh
+  /// GET /admin/benh
+  Future<List<Map<String, dynamic>>> layDanhSachBenh({String? search}) async {
+    try {
+      final headers = await _getHeaders();
+      var url = '${ApiConfig.baseUrl}/admin/benh';
+
+      if (search != null && search.isNotEmpty) {
+        url += '?search=$search';
+      }
+
+      print('🔵 [ADMIN] Lấy danh sách bệnh: $url');
+
+      final response = await http.get(Uri.parse(url), headers: headers);
+
+      print('🔵 [ADMIN] Status: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) {
+          final List<dynamic> benhList = data['data'] ?? [];
+          return benhList.cast<Map<String, dynamic>>();
+        }
+      }
+
+      return [];
+    } catch (e) {
+      print('❌ [ADMIN] Lỗi lấy danh sách bệnh: $e');
+      return [];
+    }
+  }
+
+  /// Lấy chi tiết bệnh
+  /// GET /admin/benh/{id}
+  Future<Map<String, dynamic>?> layChiTietBenh(String maBenh) async {
+    try {
+      final headers = await _getHeaders();
+      final url = '${ApiConfig.baseUrl}/admin/benh/$maBenh';
+
+      print('🔵 [ADMIN] Lấy chi tiết bệnh: $url');
+
+      final response = await http.get(Uri.parse(url), headers: headers);
+
+      print('🔵 [ADMIN] Status: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) {
+          return data['data'];
+        }
+      }
+
+      return null;
+    } catch (e) {
+      print('❌ [ADMIN] Lỗi lấy chi tiết bệnh: $e');
+      return null;
+    }
+  }
+
+  /// Thêm bệnh mới
+  /// POST /admin/benh
+  /// Lưu ý: Mã bệnh (MaBenh) sẽ được tự động tạo bởi server
+  Future<Map<String, dynamic>> themBenh({
+    required String tenBenh,
+    required String maBenhLy,
+    String? moTa,
+  }) async {
+    try {
+      final headers = await _getHeaders();
+      final url = '${ApiConfig.baseUrl}/admin/benh';
+
+      final body = {
+        'TenBenh': tenBenh,
+        'mabenhly': maBenhLy,
+        'MoTa': moTa ?? '',
+      };
+
+      print('🔵 [ADMIN] Thêm bệnh: $url');
+      print('🔵 [ADMIN] Body: ${jsonEncode(body)}');
+
+      final response = await http.post(
+        Uri.parse(url),
+        headers: headers,
+        body: jsonEncode(body),
+      );
+
+      print('🔵 [ADMIN] Status: ${response.statusCode}');
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        return {
+          'success': true,
+          'message': data['message'] ?? 'Thêm bệnh thành công',
+          'data': data['data'],
+        };
+      } else {
+        return {
+          'success': false,
+          'message': data['message'] ?? 'Thêm bệnh thất bại',
+        };
+      }
+    } catch (e) {
+      print('❌ [ADMIN] Lỗi thêm bệnh: $e');
+      return {'success': false, 'message': 'Không thể kết nối đến server'};
+    }
+  }
+
+  /// Cập nhật bệnh
+  /// PUT /admin/benh/{id}
+  Future<Map<String, dynamic>> capNhatBenh({
+    required String maBenh,
+    required String tenBenh,
+    String? moTa,
+  }) async {
+    try {
+      final headers = await _getHeaders();
+      final url = '${ApiConfig.baseUrl}/admin/benh/$maBenh';
+
+      final body = {'TenBenh': tenBenh, 'MoTa': moTa ?? ''};
+
+      print('🔵 [ADMIN] Cập nhật bệnh: $url');
+      print('🔵 [ADMIN] Body: ${jsonEncode(body)}');
+
+      final response = await http.put(
+        Uri.parse(url),
+        headers: headers,
+        body: jsonEncode(body),
+      );
+
+      print('🔵 [ADMIN] Status: ${response.statusCode}');
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        return {
+          'success': true,
+          'message': data['message'] ?? 'Cập nhật bệnh thành công',
+        };
+      } else {
+        return {
+          'success': false,
+          'message': data['message'] ?? 'Cập nhật bệnh thất bại',
+        };
+      }
+    } catch (e) {
+      print('❌ [ADMIN] Lỗi cập nhật bệnh: $e');
+      return {'success': false, 'message': 'Không thể kết nối đến server'};
+    }
+  }
+
+  /// Xóa bệnh
+  /// DELETE /admin/benh/{id}
+  Future<Map<String, dynamic>> xoaBenh(String maBenh) async {
+    try {
+      final headers = await _getHeaders();
+      final url = '${ApiConfig.baseUrl}/admin/benh/$maBenh';
+
+      print('🔵 [ADMIN] Xóa bệnh: $url');
+
+      final response = await http.delete(Uri.parse(url), headers: headers);
+
+      print('🔵 [ADMIN] Status: ${response.statusCode}');
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        return {
+          'success': true,
+          'message': data['message'] ?? 'Xóa bệnh thành công',
+        };
+      } else {
+        return {
+          'success': false,
+          'message': data['message'] ?? 'Xóa bệnh thất bại',
+        };
+      }
+    } catch (e) {
+      print('❌ [ADMIN] Lỗi xóa bệnh: $e');
+      return {'success': false, 'message': 'Không thể kết nối đến server'};
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // QUẢN LÝ DỊCH VỤ
+  // ═══════════════════════════════════════════════════════════════
+
+  /// Lấy danh sách dịch vụ
+  /// GET /admin/dich-vu
+  Future<List<Map<String, dynamic>>> layDanhSachDichVu({
+    String? search,
+    String? maKhoa,
+  }) async {
+    try {
+      final headers = await _getHeaders();
+      var url = '${ApiConfig.baseUrl}/admin/dich-vu';
+
+      final params = <String>[];
+      if (search != null && search.isNotEmpty) {
+        params.add('search=$search');
+      }
+      if (maKhoa != null && maKhoa.isNotEmpty) {
+        params.add('MaKhoa=$maKhoa');
+      }
+
+      if (params.isNotEmpty) {
+        url += '?${params.join('&')}';
+      }
+
+      print('🔵 [ADMIN] Lấy danh sách dịch vụ: $url');
+
+      final response = await http.get(Uri.parse(url), headers: headers);
+
+      print('🔵 [ADMIN] Status: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) {
+          final List<dynamic> dichVuList = data['data'] ?? [];
+          return dichVuList.cast<Map<String, dynamic>>();
+        }
+      }
+
+      return [];
+    } catch (e) {
+      print('❌ [ADMIN] Lỗi lấy danh sách dịch vụ: $e');
+      return [];
+    }
+  }
+
+  /// Lấy chi tiết dịch vụ
+  /// GET /admin/dich-vu/{id}
+  Future<Map<String, dynamic>?> layChiTietDichVu(String maDichVu) async {
+    try {
+      final headers = await _getHeaders();
+      final url = '${ApiConfig.baseUrl}/admin/dich-vu/$maDichVu';
+
+      print('🔵 [ADMIN] Lấy chi tiết dịch vụ: $url');
+
+      final response = await http.get(Uri.parse(url), headers: headers);
+
+      print('🔵 [ADMIN] Status: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) {
+          return data['data'];
+        }
+      }
+
+      return null;
+    } catch (e) {
+      print('❌ [ADMIN] Lỗi lấy chi tiết dịch vụ: $e');
+      return null;
+    }
+  }
+
+  /// Thêm dịch vụ mới
+  /// POST /admin/dich-vu
+  /// Lưu ý: Mã dịch vụ (MaDichVu) sẽ được tự động tạo bởi server
+  Future<Map<String, dynamic>> themDichVu({
+    required String tenDichVu,
+    required double gia,
+    required String maDichVuYte,
+    int? maKhoa,
+  }) async {
+    try {
+      final headers = await _getHeaders();
+      final url = '${ApiConfig.baseUrl}/admin/dich-vu';
+
+      final body = {
+        'TenDichVu': tenDichVu,
+        'Gia': gia,
+        'madichvuyte': maDichVuYte,
+        'MaKhoa': maKhoa,
+      };
+
+      print('🔵 [ADMIN] Thêm dịch vụ: $url');
+      print('🔵 [ADMIN] Body: ${jsonEncode(body)}');
+
+      final response = await http.post(
+        Uri.parse(url),
+        headers: headers,
+        body: jsonEncode(body),
+      );
+
+      print('🔵 [ADMIN] Status: ${response.statusCode}');
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        return {
+          'success': true,
+          'message': data['message'] ?? 'Thêm dịch vụ thành công',
+          'data': data['data'],
+        };
+      } else {
+        return {
+          'success': false,
+          'message': data['message'] ?? 'Thêm dịch vụ thất bại',
+        };
+      }
+    } catch (e) {
+      print('❌ [ADMIN] Lỗi thêm dịch vụ: $e');
+      return {'success': false, 'message': 'Không thể kết nối đến server'};
+    }
+  }
+
+  /// Cập nhật dịch vụ
+  /// PUT /admin/dich-vu/{id}
+  Future<Map<String, dynamic>> capNhatDichVu({
+    required String maDichVu,
+    required String tenDichVu,
+    required double gia,
+    String? maKhoa,
+  }) async {
+    try {
+      final headers = await _getHeaders();
+      final url = '${ApiConfig.baseUrl}/admin/dich-vu/$maDichVu';
+
+      final body = {'TenDichVu': tenDichVu, 'Gia': gia, 'MaKhoa': maKhoa};
+
+      print('🔵 [ADMIN] Cập nhật dịch vụ: $url');
+      print('🔵 [ADMIN] Body: ${jsonEncode(body)}');
+
+      final response = await http.put(
+        Uri.parse(url),
+        headers: headers,
+        body: jsonEncode(body),
+      );
+
+      print('🔵 [ADMIN] Status: ${response.statusCode}');
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        return {
+          'success': true,
+          'message': data['message'] ?? 'Cập nhật dịch vụ thành công',
+        };
+      } else {
+        return {
+          'success': false,
+          'message': data['message'] ?? 'Cập nhật dịch vụ thất bại',
+        };
+      }
+    } catch (e) {
+      print('❌ [ADMIN] Lỗi cập nhật dịch vụ: $e');
+      return {'success': false, 'message': 'Không thể kết nối đến server'};
+    }
+  }
+
+  /// Xóa dịch vụ
+  /// DELETE /admin/dich-vu/{id}
+  Future<Map<String, dynamic>> xoaDichVu(String maDichVu) async {
+    try {
+      final headers = await _getHeaders();
+      final url = '${ApiConfig.baseUrl}/admin/dich-vu/$maDichVu';
+
+      print('🔵 [ADMIN] Xóa dịch vụ: $url');
+
+      final response = await http.delete(Uri.parse(url), headers: headers);
+
+      print('🔵 [ADMIN] Status: ${response.statusCode}');
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        return {
+          'success': true,
+          'message': data['message'] ?? 'Xóa dịch vụ thành công',
+        };
+      } else {
+        return {
+          'success': false,
+          'message': data['message'] ?? 'Xóa dịch vụ thất bại',
+        };
+      }
+    } catch (e) {
+      print('❌ [ADMIN] Lỗi xóa dịch vụ: $e');
+      return {'success': false, 'message': 'Không thể kết nối đến server'};
+    }
+  }
+
+  /// Lấy dịch vụ theo khoa
+  /// GET /admin/dich-vu/khoa/{maKhoa}
+  Future<List<Map<String, dynamic>>> layDichVuTheoKhoa(String maKhoa) async {
+    try {
+      final headers = await _getHeaders();
+      final url = '${ApiConfig.baseUrl}/admin/dich-vu/khoa/$maKhoa';
+
+      print('🔵 [ADMIN] Lấy dịch vụ theo khoa: $url');
+
+      final response = await http.get(Uri.parse(url), headers: headers);
+
+      print('🔵 [ADMIN] Status: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) {
+          final List<dynamic> dichVuList = data['data'] ?? [];
+          return dichVuList.cast<Map<String, dynamic>>();
+        }
+      }
+
+      return [];
+    } catch (e) {
+      print('❌ [ADMIN] Lỗi lấy dịch vụ theo khoa: $e');
+      return [];
+    }
+  }
+
+  /// Lấy dịch vụ theo bệnh
+  /// GET /admin/dich-vu/benh/{maBenh}
+  Future<List<Map<String, dynamic>>> layDichVuTheoBenh(String maBenh) async {
+    try {
+      final headers = await _getHeaders();
+      final url = '${ApiConfig.baseUrl}/admin/dich-vu/benh/$maBenh';
+
+      print('🔵 [ADMIN] Lấy dịch vụ theo bệnh: $url');
+
+      final response = await http.get(Uri.parse(url), headers: headers);
+
+      print('🔵 [ADMIN] Status: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) {
+          final List<dynamic> dichVuList = data['data'] ?? [];
+          return dichVuList.cast<Map<String, dynamic>>();
+        }
+      }
+
+      return [];
+    } catch (e) {
+      print('❌ [ADMIN] Lỗi lấy dịch vụ theo bệnh: $e');
+      return [];
     }
   }
 }

@@ -40,11 +40,20 @@ dependencies:
   # HTTP package để gọi API
   http: ^1.2.0
   
+  # Dio - HTTP client
+  dio: ^5.4.0
+  
+  # GetX - State management
+  get: ^4.6.6
+  
   # Lưu trữ dữ liệu local (token, user info)
   shared_preferences: ^2.2.2
   
   # Format ngày tháng
   intl: ^0.20.2
+  
+  # Data table for desktop views
+  data_table_2: ^2.7.2
 
 dev_dependencies:
   flutter_test:

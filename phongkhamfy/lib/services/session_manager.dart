@@ -37,6 +37,12 @@ class SessionManager {
     return prefs.getString(_keyToken);
   }
 
+  // Static method để dễ sử dụng
+  static Future<String?> getTokenStatic() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_keyToken);
+  }
+
   // ═══════════════════════════════════════════════════════════════
   // LẤY THÔNG TIN USER
   // ═══════════════════════════════════════════════════════════════

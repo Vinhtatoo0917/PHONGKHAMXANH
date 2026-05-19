@@ -8,9 +8,9 @@ import 'quan_ly_lich_lam_viec_view.dart';
 import 'quan_ly_bac_si_view.dart';
 import 'quan_ly_phong_kham_view.dart';
 import 'quan_ly_ca_kham_view.dart';
-import 'quan_ly_khoa_view.dart';
-import 'quan_ly_benh_view.dart';
-import 'quan_ly_dich_vu_view.dart';
+import 'khoa_view.dart';
+import 'benh_view.dart';
+import 'dich_vu_view.dart';
 import '../../controllers/auth_controller.dart';
 import '../auth/login_view.dart';
 
@@ -251,7 +251,7 @@ class _AdminHomeViewState extends State<AdminHomeView> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const QuanLyKhoaView(),
+                          builder: (context) => const KhoaView(),
                         ),
                       );
                     },
@@ -264,7 +264,7 @@ class _AdminHomeViewState extends State<AdminHomeView> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const QuanLyBenhView(),
+                          builder: (context) => const BenhView(),
                         ),
                       );
                     },
@@ -277,7 +277,7 @@ class _AdminHomeViewState extends State<AdminHomeView> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const QuanLyDichVuView(),
+                          builder: (context) => const DichVuView(),
                         ),
                       );
                     },

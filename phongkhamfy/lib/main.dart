@@ -5,6 +5,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:get/get.dart';
 import 'views/auth/login_view.dart';
 import 'views/home/home_view.dart';
 import 'views/admin/admin_home_view.dart';
@@ -19,7 +20,7 @@ class UngDungPhongKham extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       title: 'Phòng Khám Xanh',
       debugShowCheckedModeBanner: false,
       localizationsDelegates: const [
@@ -100,11 +101,10 @@ class _TrangThaiManHinhKhoiDong extends State<ManHinhKhoiDong> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => ManHinhTrangChu(
+            builder: (context) => HomeView(
               tenNguoiDung:
                   userData['email'] ?? userData['sdt'] ?? 'Người dùng',
               email: userData['email'] ?? userData['sdt'] ?? '',
-              vaiTro: vaiTro,
             ),
           ),
         );

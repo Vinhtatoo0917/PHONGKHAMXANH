@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: May 09, 2026 at 07:36 AM
+-- Generation Time: May 15, 2026 at 09:39 PM
 -- Server version: 8.4.3
 -- PHP Version: 8.3.30
 
@@ -39,6 +39,13 @@ CREATE TABLE `bacsi` (
   `KinhNghiem` varchar(255) COLLATE utf8mb4_vietnamese_ci DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_vietnamese_ci;
 
+--
+-- Dumping data for table `bacsi`
+--
+
+INSERT INTO `bacsi` (`MaBacSi`, `MaTaiKhoan`, `ho`, `ten`, `ngaysinh`, `gioitinh`, `ChuyenKhoa`, `BangCap`, `KinhNghiem`) VALUES
+(3, 10, 'Kiều', 'Vi', '2005-11-15', 'Nữ', 'Tim mạch', 'Thạc sĩ', '1 năm');
+
 -- --------------------------------------------------------
 
 --
@@ -46,9 +53,10 @@ CREATE TABLE `bacsi` (
 --
 
 CREATE TABLE `benh` (
-  `MaBenh` varchar(50) COLLATE utf8mb4_vietnamese_ci NOT NULL,
+  `MaBenh` int NOT NULL,
   `TenBenh` varchar(255) COLLATE utf8mb4_vietnamese_ci NOT NULL,
-  `MoTa` text COLLATE utf8mb4_vietnamese_ci
+  `MoTa` text COLLATE utf8mb4_vietnamese_ci,
+  `mabenhly` varchar(50) COLLATE utf8mb4_vietnamese_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_vietnamese_ci;
 
 -- --------------------------------------------------------
@@ -106,6 +114,16 @@ CREATE TABLE `cakham` (
   `TrangThai` varchar(50) COLLATE utf8mb4_vietnamese_ci DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_vietnamese_ci;
 
+--
+-- Dumping data for table `cakham`
+--
+
+INSERT INTO `cakham` (`MaCa`, `TenCa`, `SoLuongToiDa`, `ThoiLuongKham`, `GioBatDau`, `GioKetThuc`, `TrangThai`) VALUES
+(2, 'Ca Chiều', 20, 15, '13:00:00', '17:30:00', 'active'),
+(3, 'Ca Tối', 15, 15, '18:00:00', '21:00:00', 'active'),
+(4, 'Ca Đêm', 10, 20, '21:00:00', '23:59:00', 'inactive'),
+(5, 'ca sáng', 30, 15, '07:00:00', '11:00:00', 'active');
+
 -- --------------------------------------------------------
 
 --
@@ -115,7 +133,7 @@ CREATE TABLE `cakham` (
 CREATE TABLE `chitietlichkham` (
   `MaChiTiet` int NOT NULL,
   `MaLichKham` int NOT NULL,
-  `MaDichVu` varchar(50) COLLATE utf8mb4_vietnamese_ci NOT NULL,
+  `MaDichVu` int NOT NULL,
   `SoLuong` int NOT NULL DEFAULT '1',
   `DonGia` decimal(18,2) DEFAULT NULL,
   `ThanhTien` decimal(18,2) DEFAULT NULL
@@ -130,7 +148,7 @@ CREATE TABLE `chitietlichkham` (
 CREATE TABLE `chitietphieuchidinh` (
   `MaChiTietPhieu` int NOT NULL,
   `MaPhieu` int NOT NULL,
-  `MaDichVu` varchar(50) COLLATE utf8mb4_vietnamese_ci NOT NULL,
+  `MaDichVu` int NOT NULL,
   `TrangThai` varchar(50) COLLATE utf8mb4_vietnamese_ci DEFAULT NULL,
   `KetQua` text COLLATE utf8mb4_vietnamese_ci,
   `ChiSo` varchar(100) COLLATE utf8mb4_vietnamese_ci DEFAULT NULL,
@@ -176,10 +194,11 @@ CREATE TABLE `ct_hoadon` (
 --
 
 CREATE TABLE `dichvu` (
-  `MaDichVu` varchar(50) COLLATE utf8mb4_vietnamese_ci NOT NULL,
+  `MaDichVu` int NOT NULL,
   `TenDichVu` varchar(255) COLLATE utf8mb4_vietnamese_ci NOT NULL,
   `Gia` decimal(18,2) DEFAULT NULL,
-  `MaKhoa` varchar(50) COLLATE utf8mb4_vietnamese_ci DEFAULT NULL
+  `MaKhoa` int DEFAULT NULL,
+  `madichvuyte` varchar(50) COLLATE utf8mb4_vietnamese_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_vietnamese_ci;
 
 -- --------------------------------------------------------
@@ -189,8 +208,8 @@ CREATE TABLE `dichvu` (
 --
 
 CREATE TABLE `dichvu_benh` (
-  `MaDichVu` varchar(50) COLLATE utf8mb4_vietnamese_ci NOT NULL,
-  `MaBenh` varchar(50) COLLATE utf8mb4_vietnamese_ci NOT NULL
+  `MaDichVu` int NOT NULL,
+  `MaBenh` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_vietnamese_ci;
 
 -- --------------------------------------------------------
@@ -277,8 +296,9 @@ CREATE TABLE `ketluannoitru` (
 --
 
 CREATE TABLE `khoa` (
-  `MaKhoa` varchar(50) COLLATE utf8mb4_vietnamese_ci NOT NULL,
-  `TenKhoa` varchar(255) COLLATE utf8mb4_vietnamese_ci NOT NULL
+  `MaKhoa` int NOT NULL,
+  `TenKhoa` varchar(255) COLLATE utf8mb4_vietnamese_ci NOT NULL,
+  `machuyenkhoa` varchar(50) COLLATE utf8mb4_vietnamese_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_vietnamese_ci;
 
 -- --------------------------------------------------------
@@ -313,6 +333,15 @@ CREATE TABLE `lichlamviec` (
   `MaCa` int NOT NULL,
   `MaPhong` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_vietnamese_ci;
+
+--
+-- Dumping data for table `lichlamviec`
+--
+
+INSERT INTO `lichlamviec` (`MaLichLamViec`, `MaBacSi`, `Ngay`, `MaCa`, `MaPhong`) VALUES
+(1, 3, '2026-05-14', 2, 1),
+(2, 3, '2026-05-15', 5, 3),
+(4, 3, '2026-05-14', 5, 1);
 
 -- --------------------------------------------------------
 
@@ -439,6 +468,14 @@ CREATE TABLE `phongkham` (
   `Khu` varchar(100) COLLATE utf8mb4_vietnamese_ci DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_vietnamese_ci;
 
+--
+-- Dumping data for table `phongkham`
+--
+
+INSERT INTO `phongkham` (`MaPhong`, `TenPhong`, `Khu`) VALUES
+(1, 'Phong 101', 'Tầng 1 - Phòng Khám Ngoại Trú'),
+(3, 'Phong 102', 'Tầng 1 - Phòng Khám Ngoại Trú');
+
 -- --------------------------------------------------------
 
 --
@@ -462,13 +499,13 @@ CREATE TABLE `taikhoan` (
 --
 
 INSERT INTO `taikhoan` (`MaTaiKhoan`, `sdt`, `email`, `MatKhau`, `VaiTro`, `AccessToken`, `trangthaihoatdong`, `dangnhaplancuoi`, `ngaytao`) VALUES
-(1, 901234567, 'admin@gmail.com', '123456', 'admin', 'token_admin', 'active', '2026-05-02 10:38:38', '2026-05-02 10:38:38'),
+(1, 967287418, 'admin@gmail.com', '$2y$12$k2jZ8Hom.gigcfO1EA4r4.GXhzbcNFh9wJfW6ghZKa2uhYq/Cpq6y', 'admin', '2e9000d390bc238cdd82c611aebb05c5fa4f414d0413d776c713b7fbe9ca44ed', 'active', '2026-05-14 07:26:47', '2026-05-02 10:38:38'),
 (2, 912345678, 'bacsi1@gmail.com', '123456', 'bacsi', 'token_bs1', 'active', '2026-05-02 10:38:38', '2026-05-02 10:38:38'),
 (3, 923456789, 'benhnhan1@gmail.com', '123456', 'user', 'token_bn1', 'active', '2026-05-02 10:38:38', '2026-05-02 10:38:38'),
 (4, 934567890, 'checkin@gmail.com', '123456', 'checkin', 'token_ci', 'active', '2026-05-02 10:38:38', '2026-05-02 10:38:38'),
 (5, 945678901, 'thungan@gmail.com', '123456', 'thungan', 'token_tn', 'active', '2026-05-02 10:38:38', '2026-05-02 10:38:38'),
-(6, 967287418, 'test@example.com', '$2y$12$6RoymUS7gzxx/hEFvNHOW.JFRWgic2Z219cxnW1maWD6vJSCDwyJK', 'BenhNhan', '55426ac920815c6077cdb2bd6647150f267ff4d8a3c397f5aeb3e817e315c86f', 'active', '2026-05-06 07:40:48', '2026-05-06 07:39:37'),
-(7, 363455205, 'vinhtatoo0917@gmail.com', '$2y$12$k2jZ8Hom.gigcfO1EA4r4.GXhzbcNFh9wJfW6ghZKa2uhYq/Cpq6y', 'BenhNhan', '93f1dfe0f475e516807561e655d99c5d27160ecfed3639d03fc00a37803575f3', 'active', '2026-05-07 00:44:51', '2026-05-06 07:41:26');
+(7, 363455205, 'vinhtatoo0917@gmail.com', '$2y$12$k2jZ8Hom.gigcfO1EA4r4.GXhzbcNFh9wJfW6ghZKa2uhYq/Cpq6y', 'BenhNhan', '93f1dfe0f475e516807561e655d99c5d27160ecfed3639d03fc00a37803575f3', 'active', '2026-05-07 00:44:51', '2026-05-06 07:41:26'),
+(10, 363455203, 'kieuvi15112005@gmail.com', '$2y$10$uaqn27Bf45x16dzbjdkkGuB3JiM6F3Xgwdtbyk3SyFJy7g5THfeQW', 'bacsi', 'c4f3f0b0274c7b4e930c2a0b79c6ddb406c66b7062db086f13c287435940d61e', 'active', NULL, '2026-05-09 16:19:09');
 
 -- --------------------------------------------------------
 
@@ -586,7 +623,7 @@ ALTER TABLE `cakham`
 --
 ALTER TABLE `chitietlichkham`
   ADD PRIMARY KEY (`MaChiTiet`),
-  ADD KEY `FK_ChiTiet_DichVu` (`MaDichVu`);
+  ADD KEY `MaDichVu` (`MaDichVu`);
 
 --
 -- Indexes for table `chitietphieuchidinh`
@@ -594,7 +631,7 @@ ALTER TABLE `chitietlichkham`
 ALTER TABLE `chitietphieuchidinh`
   ADD PRIMARY KEY (`MaChiTietPhieu`),
   ADD KEY `FK_CTPhieu_Phieu` (`MaPhieu`),
-  ADD KEY `FK_CTPhieu_DichVu` (`MaDichVu`);
+  ADD KEY `MaDichVu` (`MaDichVu`);
 
 --
 -- Indexes for table `ct_donthuoc`
@@ -616,14 +653,14 @@ ALTER TABLE `ct_hoadon`
 --
 ALTER TABLE `dichvu`
   ADD PRIMARY KEY (`MaDichVu`),
-  ADD KEY `FK_DichVu_Khoa` (`MaKhoa`);
+  ADD KEY `MaKhoa` (`MaKhoa`);
 
 --
 -- Indexes for table `dichvu_benh`
 --
 ALTER TABLE `dichvu_benh`
-  ADD PRIMARY KEY (`MaDichVu`,`MaBenh`),
-  ADD KEY `MaBenh` (`MaBenh`);
+  ADD KEY `MaBenh` (`MaBenh`),
+  ADD KEY `MaDichVu` (`MaDichVu`);
 
 --
 -- Indexes for table `donthuoc`
@@ -792,7 +829,13 @@ ALTER TABLE `xuatvien`
 -- AUTO_INCREMENT for table `bacsi`
 --
 ALTER TABLE `bacsi`
-  MODIFY `MaBacSi` int NOT NULL AUTO_INCREMENT;
+  MODIFY `MaBacSi` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT for table `benh`
+--
+ALTER TABLE `benh`
+  MODIFY `MaBenh` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `benhnhan`
@@ -810,7 +853,7 @@ ALTER TABLE `bhyt`
 -- AUTO_INCREMENT for table `cakham`
 --
 ALTER TABLE `cakham`
-  MODIFY `MaCa` int NOT NULL AUTO_INCREMENT;
+  MODIFY `MaCa` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `chitietlichkham`
@@ -876,7 +919,7 @@ ALTER TABLE `lichkham`
 -- AUTO_INCREMENT for table `lichlamviec`
 --
 ALTER TABLE `lichlamviec`
-  MODIFY `MaLichLamViec` int NOT NULL AUTO_INCREMENT;
+  MODIFY `MaLichLamViec` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `migrations`
@@ -924,13 +967,13 @@ ALTER TABLE `phongbenh`
 -- AUTO_INCREMENT for table `phongkham`
 --
 ALTER TABLE `phongkham`
-  MODIFY `MaPhong` int NOT NULL AUTO_INCREMENT;
+  MODIFY `MaPhong` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `taikhoan`
 --
 ALTER TABLE `taikhoan`
-  MODIFY `MaTaiKhoan` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `MaTaiKhoan` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `thanhtoan`
@@ -982,13 +1025,13 @@ ALTER TABLE `bhyt`
 -- Constraints for table `chitietlichkham`
 --
 ALTER TABLE `chitietlichkham`
-  ADD CONSTRAINT `FK_ChiTiet_DichVu` FOREIGN KEY (`MaDichVu`) REFERENCES `dichvu` (`MaDichVu`) ON UPDATE CASCADE;
+  ADD CONSTRAINT `chitietlichkham_ibfk_1` FOREIGN KEY (`MaDichVu`) REFERENCES `dichvu` (`MaDichVu`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 --
 -- Constraints for table `chitietphieuchidinh`
 --
 ALTER TABLE `chitietphieuchidinh`
-  ADD CONSTRAINT `FK_CTPhieu_DichVu` FOREIGN KEY (`MaDichVu`) REFERENCES `dichvu` (`MaDichVu`),
+  ADD CONSTRAINT `chitietphieuchidinh_ibfk_1` FOREIGN KEY (`MaDichVu`) REFERENCES `dichvu` (`MaDichVu`) ON DELETE RESTRICT ON UPDATE CASCADE,
   ADD CONSTRAINT `FK_CTPhieu_Phieu` FOREIGN KEY (`MaPhieu`) REFERENCES `phieuchidinh` (`MaPhieu`) ON DELETE CASCADE;
 
 --
@@ -1008,14 +1051,14 @@ ALTER TABLE `ct_hoadon`
 -- Constraints for table `dichvu`
 --
 ALTER TABLE `dichvu`
-  ADD CONSTRAINT `FK_DichVu_Khoa` FOREIGN KEY (`MaKhoa`) REFERENCES `khoa` (`MaKhoa`);
+  ADD CONSTRAINT `dichvu_ibfk_1` FOREIGN KEY (`MaKhoa`) REFERENCES `khoa` (`MaKhoa`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 --
 -- Constraints for table `dichvu_benh`
 --
 ALTER TABLE `dichvu_benh`
-  ADD CONSTRAINT `dichvu_benh_ibfk_1` FOREIGN KEY (`MaDichVu`) REFERENCES `dichvu` (`MaDichVu`) ON DELETE CASCADE,
-  ADD CONSTRAINT `dichvu_benh_ibfk_2` FOREIGN KEY (`MaBenh`) REFERENCES `benh` (`MaBenh`) ON DELETE CASCADE;
+  ADD CONSTRAINT `dichvu_benh_ibfk_1` FOREIGN KEY (`MaBenh`) REFERENCES `benh` (`MaBenh`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  ADD CONSTRAINT `dichvu_benh_ibfk_2` FOREIGN KEY (`MaDichVu`) REFERENCES `dichvu` (`MaDichVu`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 --
 -- Constraints for table `donthuoc`
@@ -1041,7 +1084,6 @@ ALTER TABLE `hoadon`
 -- Constraints for table `ketluankham`
 --
 ALTER TABLE `ketluankham`
-  ADD CONSTRAINT `FK_KetLuan_Benh` FOREIGN KEY (`MaBenh`) REFERENCES `benh` (`MaBenh`),
   ADD CONSTRAINT `FK_KetLuan_LichKham` FOREIGN KEY (`MaLichKham`) REFERENCES `lichkham` (`MaLichKham`);
 
 --

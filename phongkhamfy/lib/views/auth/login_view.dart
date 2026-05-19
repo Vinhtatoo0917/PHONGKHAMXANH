@@ -188,13 +188,12 @@ class _TrangThaiManHinhDangNhap extends State<ManHinhDangNhap> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => ManHinhTrangChu(
+          builder: (context) => HomeView(
             tenNguoiDung:
                 thongTinNguoiDung['ten'] ??
                 thongTinNguoiDung['name'] ??
                 'Người dùng',
             email: thongTinNguoiDung['email'] ?? thongTinNguoiDung['sdt'] ?? '',
-            vaiTro: vaiTro,
           ),
         ),
       );
