@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: May 15, 2026 at 09:39 PM
+-- Generation Time: May 20, 2026 at 08:56 AM
 -- Server version: 8.4.3
 -- PHP Version: 8.3.30
 
@@ -44,7 +44,8 @@ CREATE TABLE `bacsi` (
 --
 
 INSERT INTO `bacsi` (`MaBacSi`, `MaTaiKhoan`, `ho`, `ten`, `ngaysinh`, `gioitinh`, `ChuyenKhoa`, `BangCap`, `KinhNghiem`) VALUES
-(3, 10, 'Kiều', 'Vi', '2005-11-15', 'Nữ', 'Tim mạch', 'Thạc sĩ', '1 năm');
+(3, 10, 'Kiều', 'Vi', '2005-11-15', 'Nữ', 'Tim mạch', 'Thạc sĩ', '1 năm'),
+(4, 11, 'Thế', 'Vinh', '2004-10-24', 'Nam', 'Khoa Khám bệnh', 'Bác sĩ', '0 năm');
 
 -- --------------------------------------------------------
 
@@ -58,6 +59,13 @@ CREATE TABLE `benh` (
   `MoTa` text COLLATE utf8mb4_vietnamese_ci,
   `mabenhly` varchar(50) COLLATE utf8mb4_vietnamese_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_vietnamese_ci;
+
+--
+-- Dumping data for table `benh`
+--
+
+INSERT INTO `benh` (`MaBenh`, `TenBenh`, `MoTa`, `mabenhly`) VALUES
+(1, 'Cảm lạnh thông thường', 'Người bệnh thường nghẹt mũi, chảy mũi, hắt hơi, đau họng nhẹ, ho ít, có thể sốt nhẹ. Thường tự khỏi sau vài ngày, hay gặp khi thay đổi thời tiết hoặc tiếp xúc người đang bệnh.', 'J00');
 
 -- --------------------------------------------------------
 
@@ -76,6 +84,13 @@ CREATE TABLE `benhnhan` (
   `diachi` varchar(255) COLLATE utf8mb4_vietnamese_ci DEFAULT NULL,
   `BHYT` varchar(50) COLLATE utf8mb4_vietnamese_ci DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_vietnamese_ci;
+
+--
+-- Dumping data for table `benhnhan`
+--
+
+INSERT INTO `benhnhan` (`MaBenhNhan`, `MaTaiKhoan`, `ho`, `ten`, `ngaysinh`, `gioitinh`, `cccd`, `diachi`, `BHYT`) VALUES
+(1, 7, '', '363455205', NULL, NULL, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -136,8 +151,17 @@ CREATE TABLE `chitietlichkham` (
   `MaDichVu` int NOT NULL,
   `SoLuong` int NOT NULL DEFAULT '1',
   `DonGia` decimal(18,2) DEFAULT NULL,
-  `ThanhTien` decimal(18,2) DEFAULT NULL
+  `ThanhTien` decimal(18,2) DEFAULT NULL,
+  `MOTA` varchar(50) COLLATE utf8mb4_vietnamese_ci DEFAULT NULL,
+  `TRANGTHAIDUYET` varchar(50) COLLATE utf8mb4_vietnamese_ci DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_vietnamese_ci;
+
+--
+-- Dumping data for table `chitietlichkham`
+--
+
+INSERT INTO `chitietlichkham` (`MaChiTiet`, `MaLichKham`, `MaDichVu`, `SoLuong`, `DonGia`, `ThanhTien`, `MOTA`, `TRANGTHAIDUYET`) VALUES
+(1, 1, 1, 1, 150000.00, 150000.00, 'Cần cập nhật thông tin', NULL);
 
 -- --------------------------------------------------------
 
@@ -200,6 +224,13 @@ CREATE TABLE `dichvu` (
   `MaKhoa` int DEFAULT NULL,
   `madichvuyte` varchar(50) COLLATE utf8mb4_vietnamese_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_vietnamese_ci;
+
+--
+-- Dumping data for table `dichvu`
+--
+
+INSERT INTO `dichvu` (`MaDichVu`, `TenDichVu`, `Gia`, `MaKhoa`, `madichvuyte`) VALUES
+(1, 'Khám Nội tổng quát', 150000.00, 1, 'KB_NOI_TQ');
 
 -- --------------------------------------------------------
 
@@ -301,6 +332,13 @@ CREATE TABLE `khoa` (
   `machuyenkhoa` varchar(50) COLLATE utf8mb4_vietnamese_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_vietnamese_ci;
 
+--
+-- Dumping data for table `khoa`
+--
+
+INSERT INTO `khoa` (`MaKhoa`, `TenKhoa`, `machuyenkhoa`) VALUES
+(1, 'Khoa Khám bệnh', 'KB');
+
 -- --------------------------------------------------------
 
 --
@@ -319,6 +357,13 @@ CREATE TABLE `lichkham` (
   `MaNhanVienCheckIn` int DEFAULT NULL,
   `MaLichLamViec` int DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_vietnamese_ci;
+
+--
+-- Dumping data for table `lichkham`
+--
+
+INSERT INTO `lichkham` (`MaLichKham`, `MaBenhNhan`, `SoThuTu`, `TrangThai`, `TrangThaiThanhToan`, `TongTien`, `ThoiDiemCheckIn`, `ThoiDiemCheckOut`, `MaNhanVienCheckIn`, `MaLichLamViec`) VALUES
+(1, 1, 1, 'rejected', 'unpaid', 150000.00, NULL, NULL, NULL, 5);
 
 -- --------------------------------------------------------
 
@@ -341,7 +386,8 @@ CREATE TABLE `lichlamviec` (
 INSERT INTO `lichlamviec` (`MaLichLamViec`, `MaBacSi`, `Ngay`, `MaCa`, `MaPhong`) VALUES
 (1, 3, '2026-05-14', 2, 1),
 (2, 3, '2026-05-15', 5, 3),
-(4, 3, '2026-05-14', 5, 1);
+(4, 3, '2026-05-14', 5, 1),
+(5, 4, '2026-05-20', 5, 1);
 
 -- --------------------------------------------------------
 
@@ -499,13 +545,12 @@ CREATE TABLE `taikhoan` (
 --
 
 INSERT INTO `taikhoan` (`MaTaiKhoan`, `sdt`, `email`, `MatKhau`, `VaiTro`, `AccessToken`, `trangthaihoatdong`, `dangnhaplancuoi`, `ngaytao`) VALUES
-(1, 967287418, 'admin@gmail.com', '$2y$12$k2jZ8Hom.gigcfO1EA4r4.GXhzbcNFh9wJfW6ghZKa2uhYq/Cpq6y', 'admin', '2e9000d390bc238cdd82c611aebb05c5fa4f414d0413d776c713b7fbe9ca44ed', 'active', '2026-05-14 07:26:47', '2026-05-02 10:38:38'),
-(2, 912345678, 'bacsi1@gmail.com', '123456', 'bacsi', 'token_bs1', 'active', '2026-05-02 10:38:38', '2026-05-02 10:38:38'),
-(3, 923456789, 'benhnhan1@gmail.com', '123456', 'user', 'token_bn1', 'active', '2026-05-02 10:38:38', '2026-05-02 10:38:38'),
+(1, 967287418, 'admin@gmail.com', '$2y$12$k2jZ8Hom.gigcfO1EA4r4.GXhzbcNFh9wJfW6ghZKa2uhYq/Cpq6y', 'admin', '53c50b6f7cd92b64287f06ff1e7a4a39adaaf5d442dc39de7801c97ccae8fead', 'active', '2026-05-20 08:53:35', '2026-05-02 10:38:38'),
 (4, 934567890, 'checkin@gmail.com', '123456', 'checkin', 'token_ci', 'active', '2026-05-02 10:38:38', '2026-05-02 10:38:38'),
 (5, 945678901, 'thungan@gmail.com', '123456', 'thungan', 'token_tn', 'active', '2026-05-02 10:38:38', '2026-05-02 10:38:38'),
-(7, 363455205, 'vinhtatoo0917@gmail.com', '$2y$12$k2jZ8Hom.gigcfO1EA4r4.GXhzbcNFh9wJfW6ghZKa2uhYq/Cpq6y', 'BenhNhan', '93f1dfe0f475e516807561e655d99c5d27160ecfed3639d03fc00a37803575f3', 'active', '2026-05-07 00:44:51', '2026-05-06 07:41:26'),
-(10, 363455203, 'kieuvi15112005@gmail.com', '$2y$10$uaqn27Bf45x16dzbjdkkGuB3JiM6F3Xgwdtbyk3SyFJy7g5THfeQW', 'bacsi', 'c4f3f0b0274c7b4e930c2a0b79c6ddb406c66b7062db086f13c287435940d61e', 'active', NULL, '2026-05-09 16:19:09');
+(7, 363455205, 'vinhtatoo0917@gmail.com', '$2y$12$k2jZ8Hom.gigcfO1EA4r4.GXhzbcNFh9wJfW6ghZKa2uhYq/Cpq6y', 'BenhNhan', 'd4a1b0ea17953209f5c80406a6b504d835bfd07accb7c294e8d57e648af1b40d', 'active', '2026-05-20 08:53:41', '2026-05-06 07:41:26'),
+(10, 363455203, 'kieuvi15112005@gmail.com', '$2y$10$uaqn27Bf45x16dzbjdkkGuB3JiM6F3Xgwdtbyk3SyFJy7g5THfeQW', 'bacsi', '6ab547710d1df3c72b5ac56ce102e3d0c543f4e738a91a9cd4995ef1d35a8e3f', 'active', '2026-05-19 08:20:43', '2026-05-09 16:19:09'),
+(11, 967287419, 'vinhtatoo0911@gmail.com', '$2y$12$Hpwim0LCPd53ci35CVuUgeQRwq3hR9ySgNcfhJjsNNeOgcWftrA3O', 'bacsi', '767a384affc7e974357aebf8d3094431e904c23302ca2624529502e2366f6aaf', 'active', NULL, '2026-05-19 17:09:17');
 
 -- --------------------------------------------------------
 
@@ -829,19 +874,19 @@ ALTER TABLE `xuatvien`
 -- AUTO_INCREMENT for table `bacsi`
 --
 ALTER TABLE `bacsi`
-  MODIFY `MaBacSi` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `MaBacSi` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `benh`
 --
 ALTER TABLE `benh`
-  MODIFY `MaBenh` int NOT NULL AUTO_INCREMENT;
+  MODIFY `MaBenh` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `benhnhan`
 --
 ALTER TABLE `benhnhan`
-  MODIFY `MaBenhNhan` int NOT NULL AUTO_INCREMENT;
+  MODIFY `MaBenhNhan` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `bhyt`
@@ -859,7 +904,7 @@ ALTER TABLE `cakham`
 -- AUTO_INCREMENT for table `chitietlichkham`
 --
 ALTER TABLE `chitietlichkham`
-  MODIFY `MaChiTiet` int NOT NULL AUTO_INCREMENT;
+  MODIFY `MaChiTiet` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `chitietphieuchidinh`
@@ -913,13 +958,13 @@ ALTER TABLE `ketluannoitru`
 -- AUTO_INCREMENT for table `lichkham`
 --
 ALTER TABLE `lichkham`
-  MODIFY `MaLichKham` int NOT NULL AUTO_INCREMENT;
+  MODIFY `MaLichKham` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `lichlamviec`
 --
 ALTER TABLE `lichlamviec`
-  MODIFY `MaLichLamViec` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `MaLichLamViec` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `migrations`
@@ -973,7 +1018,7 @@ ALTER TABLE `phongkham`
 -- AUTO_INCREMENT for table `taikhoan`
 --
 ALTER TABLE `taikhoan`
-  MODIFY `MaTaiKhoan` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `MaTaiKhoan` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `thanhtoan`

@@ -16,7 +16,8 @@ class ChiTietLichKham extends Model
         'MaDichVu',
         'SoLuong',
         'DonGia',
-        'ThanhTien'
+        'ThanhTien',
+        'MOTA'
     ];
 
     protected $casts = [

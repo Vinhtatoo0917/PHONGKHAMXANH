@@ -20,7 +20,10 @@ return Application::configure(basePath: dirname(__DIR__))
             '/register',
             '/logout',
             '/me',
+            '/lich-kham/*',
             '/admin/*',
+            '/profile/*',
+            '/bacsi/*',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

@@ -1,5 +1,11 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
+import 'package:phongkhamfy/controllers/auth_controller.dart';
+import 'package:phongkhamfy/views/auth/login_view.dart';
 import 'package:phongkhamfy/views/patient/dat_lich_kham_view.dart';
+import 'package:phongkhamfy/views/patient/lich_kham_cua_toi_view.dart';
+import 'package:phongkhamfy/widgets/dialog_dang_xuat.dart';
+import 'package:phongkhamfy/widgets/loading_dang_xuat.dart';
+import 'package:phongkhamfy/views/patient/edit_profile_view.dart';
 
 class HomeView extends StatefulWidget {
   final String tenNguoiDung;
@@ -14,53 +20,60 @@ class HomeView extends StatefulWidget {
 class _HomeViewState extends State<HomeView> {
   int _selectedBottomIndex = 0;
   int _currentNewsIndex = 0;
+  final _dichVuXacThuc = DichVuXacThuc();
 
   static const Color _mauChinh = Color(0xFF1E88E5);
   static const Color _mauNen = Color(0xFFF5F7FA);
   static const Color _mauBeMat = Colors.white;
   static const Color _mauChuChinh = Color(0xFF1A2B3D);
   static const Color _mauChuPhu = Color(0xFF6B7C8A);
+  static const Color _mauVien = Color(0xFFE3E8EF);
+  static const Color _mauLoi = Color(0xFFE53935);
 
   final List<Map<String, String>> _tinTuc = [
     {
-      'tieu_de': 'Xác nhận báo hiểm y tế ngay khi đặt khám trên UMC Care',
+      'tieu_de': 'Xác nhận bảo hiểm y tế ngay khi đặt khám trên UMC Care',
       'mo_ta': 'Giảm thời gian chờ tại bệnh viện',
       'hinh_anh': 'assets/news1.png',
     },
     {
       'tieu_de':
-          'Chương trình sinh hoạt Câu lạc bộ Người bệnh "Bảo vệ thận – Giữ gìn môi trường"',
+          'Chương trình sinh hoạt Câu lạc bộ Người bệnh "Bảo vệ thận - Giữ gìn môi trường"',
       'mo_ta': 'Cùng tham gia và bảo vệ sức khỏe',
       'hinh_anh': 'assets/news2.png',
     },
   ];
 
   void _hienThiDialogDangXuat() {
-    showDialog(
+    DialogDangXuat.hienThi(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        title: const Text('Đăng xuất'),
-        content: const Text('Bạn có chắc chắn muốn đăng xuất?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Hủy'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              Navigator.pushNamedAndRemoveUntil(
-                context,
-                '/login',
-                (route) => false,
-              );
-            },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Đăng xuất'),
-          ),
-        ],
-      ),
+      onXacNhan: _dangXuat,
+      mauChinh: _mauChinh,
+      mauError: _mauLoi,
+      mauBeMat: _mauBeMat,
+      mauChuChinh: _mauChuChinh,
+      mauChuPhu: _mauChuPhu,
+      mauVien: _mauVien,
+    );
+  }
+
+  Future<void> _dangXuat() async {
+    LoadingDangXuat.hienThi(
+      context: context,
+      mauChinh: _mauChinh,
+      mauBeMat: _mauBeMat,
+      mauChuChinh: _mauChuChinh,
+      mauChuPhu: _mauChuPhu,
+    );
+
+    await _dichVuXacThuc.dangXuat();
+
+    if (!mounted) return;
+
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => const ManHinhDangNhap()),
+      (route) => false,
     );
   }
 
@@ -110,7 +123,7 @@ class _HomeViewState extends State<HomeView> {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [_mauChinh, _mauChinh.withOpacity(0.8)],
+          colors: [_mauChinh, _mauChinh.withValues(alpha: 0.8)],
         ),
       ),
       padding: const EdgeInsets.fromLTRB(16, 48, 16, 20),
@@ -231,7 +244,7 @@ class _HomeViewState extends State<HomeView> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -252,7 +265,7 @@ class _HomeViewState extends State<HomeView> {
               child: Icon(
                 Icons.article_rounded,
                 size: 48,
-                color: _mauChinh.withOpacity(0.5),
+                color: _mauChinh.withValues(alpha: 0.5),
               ),
             ),
           ),
@@ -322,7 +335,7 @@ class _HomeViewState extends State<HomeView> {
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withValues(alpha: 0.05),
                       blurRadius: 10,
                       offset: const Offset(0, 2),
                     ),
@@ -354,7 +367,14 @@ class _HomeViewState extends State<HomeView> {
                       icon: Icons.history_rounded,
                       label: 'Lịch sử đặt khám',
                       color: const Color(0xFF4CAF50),
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const LichKhamCuaToiView(),
+                          ),
+                        );
+                      },
                     ),
                     _buildMainFeatureItem(
                       icon: Icons.payment_rounded,
@@ -481,7 +501,7 @@ class _HomeViewState extends State<HomeView> {
             width: 52,
             height: 52,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(icon, color: color, size: 26),
@@ -523,7 +543,7 @@ class _HomeViewState extends State<HomeView> {
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -554,7 +574,7 @@ class _HomeViewState extends State<HomeView> {
           Icon(Icons.notifications_outlined, size: 64, color: Colors.grey[400]),
           const SizedBox(height: 16),
           Text(
-            'Chưa có thông báo',
+            'Chua có thông báo',
             style: TextStyle(fontSize: 16, color: Colors.grey[600]),
           ),
         ],
@@ -604,7 +624,14 @@ class _HomeViewState extends State<HomeView> {
                   icon: Icons.history_rounded,
                   label: 'Lịch sử đặt khám',
                   color: const Color(0xFF4CAF50),
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const LichKhamCuaToiView(),
+                      ),
+                    );
+                  },
                 ),
                 _buildFullFeatureItem(
                   icon: Icons.payment_rounded,
@@ -656,7 +683,7 @@ class _HomeViewState extends State<HomeView> {
                 ),
                 _buildFullFeatureItem(
                   icon: Icons.search_rounded,
-                  label: 'Tiềm chủng',
+                  label: 'Tiêm chủng',
                   color: const Color(0xFF43A047),
                   onTap: () {},
                 ),
@@ -688,7 +715,7 @@ class _HomeViewState extends State<HomeView> {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 10,
               offset: const Offset(0, 2),
             ),
@@ -701,7 +728,7 @@ class _HomeViewState extends State<HomeView> {
               width: 56,
               height: 56,
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                color: color.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(icon, color: color, size: 32),
@@ -730,76 +757,178 @@ class _HomeViewState extends State<HomeView> {
 
   Widget _buildProfileTab() {
     return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
       child: Column(
         children: [
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [_mauChinh, _mauChinh.withOpacity(0.8)],
-              ),
-            ),
-            padding: const EdgeInsets.fromLTRB(16, 48, 16, 24),
-            child: Column(
-              children: [
-                CircleAvatar(
-                  radius: 40,
-                  backgroundColor: Colors.white,
-                  child: Icon(Icons.person_rounded, size: 48, color: _mauChinh),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  widget.tenNguoiDung,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
+          // Header cao cấp
+          Stack(
+            children: [
+              Container(
+                height: 240,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [_mauChinh, _mauChinh.withValues(alpha: 0.8), const Color(0xFF1565C0)],
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  widget.email,
-                  style: const TextStyle(color: Colors.white70, fontSize: 14),
+              ),
+              Positioned(
+                top: -50,
+                right: -50,
+                child: CircleAvatar(
+                  radius: 100,
+                  backgroundColor: Colors.white.withValues(alpha: 0.05),
                 ),
-              ],
+              ),
+              Column(
+                children: [
+                  const SizedBox(height: 60),
+                  Center(
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.2),
+                        shape: BoxShape.circle,
+                      ),
+                      child: CircleAvatar(
+                        radius: 46,
+                        backgroundColor: Colors.white,
+                        child: Icon(Icons.person_rounded, size: 56, color: _mauChinh),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    widget.tenNguoiDung,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      widget.email,
+                      style: const TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w500),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          
+          // Noi dung ben duoi
+          Transform.translate(
+            offset: const Offset(0, -20),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+              decoration: const BoxDecoration(
+                color: _mauNen,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildMenuSectionTitle('TÀI KHOẢN'),
+                  const SizedBox(height: 12),
+                  _buildProfileMenuItem(
+                    icon: Icons.person_outline_rounded,
+                    title: 'Thông tin cá nhân',
+                    subtitle: 'Cập nhật hồ sơ và thông tin y tế',
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const EditProfileView()),
+                      );
+                    },
+                  ),
+                  _buildProfileMenuItem(
+                    icon: Icons.lock_outline_rounded,
+                    title: 'Đổi mật khẩu',
+                    subtitle: 'Bảo mật tài khoản của bạn',
+                    onTap: () {},
+                  ),
+                  
+                  const SizedBox(height: 24),
+                  _buildMenuSectionTitle('ỨNG DỤNG'),
+                  const SizedBox(height: 12),
+                  _buildProfileMenuItem(
+                    icon: Icons.settings_outlined,
+                    title: 'Cài đặt',
+                    subtitle: 'Thông báo, ngôn ngữ và giao diện',
+                    onTap: () {},
+                  ),
+                  _buildProfileMenuItem(
+                    icon: Icons.help_outline_rounded,
+                    title: 'Trợ giúp',
+                    subtitle: 'Câu hỏi thường gặp và hỗ trợ',
+                    onTap: () {},
+                  ),
+                  _buildProfileMenuItem(
+                    icon: Icons.info_outline_rounded,
+                    title: 'Về chúng tôi',
+                    subtitle: 'Thông tin về Phòng Khám Xanh',
+                    onTap: () {},
+                  ),
+                  
+                  const SizedBox(height: 32),
+                  // Nut dang xuat kieu moi
+                  Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: _hienThiDialogDangXuat,
+                      borderRadius: BorderRadius.circular(16),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: _mauLoi.withValues(alpha: 0.3)),
+                          borderRadius: BorderRadius.circular(16),
+                          color: _mauLoi.withValues(alpha: 0.05),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.logout_rounded, color: _mauLoi, size: 20),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Đăng xuất',
+                              style: TextStyle(color: _mauLoi, fontWeight: FontWeight.w800, fontSize: 16),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 60),
+                ],
+              ),
             ),
           ),
-          const SizedBox(height: 16),
-          _buildProfileMenuItem(
-            icon: Icons.person_outline_rounded,
-            title: 'Thông tin cá nhân',
-            onTap: () {},
-          ),
-          _buildProfileMenuItem(
-            icon: Icons.lock_outline_rounded,
-            title: 'Đổi mật khẩu',
-            onTap: () {},
-          ),
-          _buildProfileMenuItem(
-            icon: Icons.settings_outlined,
-            title: 'Cài đặt',
-            onTap: () {},
-          ),
-          _buildProfileMenuItem(
-            icon: Icons.help_outline_rounded,
-            title: 'Trợ giúp',
-            onTap: () {},
-          ),
-          _buildProfileMenuItem(
-            icon: Icons.info_outline_rounded,
-            title: 'Về chúng tôi',
-            onTap: () {},
-          ),
-          const SizedBox(height: 8),
-          _buildProfileMenuItem(
-            icon: Icons.logout_rounded,
-            title: 'Đăng xuất',
-            onTap: _hienThiDialogDangXuat,
-            isDestructive: true,
-          ),
-          const SizedBox(height: 24),
         ],
+      ),
+    );
+  }
+
+  Widget _buildMenuSectionTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 8),
+      child: Text(
+        title,
+        style: TextStyle(
+          color: _mauChuPhu.withValues(alpha: 0.6),
+          fontSize: 12,
+          fontWeight: FontWeight.w800,
+          letterSpacing: 1.2,
+        ),
       ),
     );
   }
@@ -807,37 +936,61 @@ class _HomeViewState extends State<HomeView> {
   Widget _buildProfileMenuItem({
     required IconData icon,
     required String title,
+    required String subtitle,
     required VoidCallback onTap,
-    bool isDestructive = false,
   }) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: _mauBeMat,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
           ),
         ],
       ),
-      child: ListTile(
-        leading: Icon(icon, color: isDestructive ? Colors.red : _mauChinh),
-        title: Text(
-          title,
-          style: TextStyle(
-            color: isDestructive ? Colors.red : _mauChuChinh,
-            fontWeight: FontWeight.w500,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(18),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: _mauChinh.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(icon, color: _mauChinh, size: 22),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(color: _mauChuChinh, fontWeight: FontWeight.w700, fontSize: 15),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle,
+                        style: TextStyle(color: _mauChuPhu, fontSize: 12),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(Icons.arrow_forward_ios_rounded, size: 14, color: _mauChuPhu.withValues(alpha: 0.5)),
+              ],
+            ),
           ),
         ),
-        trailing: Icon(
-          Icons.arrow_forward_ios_rounded,
-          size: 16,
-          color: isDestructive ? Colors.red : _mauChuPhu,
-        ),
-        onTap: onTap,
       ),
     );
   }
@@ -848,7 +1001,7 @@ class _HomeViewState extends State<HomeView> {
         color: _mauBeMat,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, -2),
           ),

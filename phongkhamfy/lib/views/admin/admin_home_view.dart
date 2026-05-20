@@ -5,12 +5,14 @@
 
 import 'package:flutter/material.dart';
 import 'quan_ly_lich_lam_viec_view.dart';
+import 'quan_ly_lich_kham_view.dart';
 import 'quan_ly_bac_si_view.dart';
 import 'quan_ly_phong_kham_view.dart';
 import 'quan_ly_ca_kham_view.dart';
 import 'khoa_view.dart';
 import 'benh_view.dart';
 import 'dich_vu_view.dart';
+import 'manage_thuoc_view.dart';
 import '../../controllers/auth_controller.dart';
 import '../auth/login_view.dart';
 
@@ -184,6 +186,19 @@ class _AdminHomeViewState extends State<AdminHomeView> {
                 childAspectRatio: 0.85,
                 children: [
                   _xayDungMenuCard(
+                    icon: Icons.event_available,
+                    tieude: 'Lịch khám',
+                    mau: const Color(0xFF0F9F7A),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const QuanLyLichKhamView(),
+                        ),
+                      );
+                    },
+                  ),
+                  _xayDungMenuCard(
                     icon: Icons.calendar_month,
                     tieude: 'Lịch làm việc',
                     mau: Colors.blue,
@@ -278,6 +293,19 @@ class _AdminHomeViewState extends State<AdminHomeView> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => const DichVuView(),
+                        ),
+                      );
+                    },
+                  ),
+                  _xayDungMenuCard(
+                    icon: Icons.medication_rounded,
+                    tieude: 'Thuốc',
+                    mau: Colors.deepOrange,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ManageThuocView(),
                         ),
                       );
                     },

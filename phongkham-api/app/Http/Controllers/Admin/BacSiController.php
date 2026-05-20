@@ -55,6 +55,7 @@ class BacSiController extends Controller
 
         $query = DB::table('bacsi as bs')
             ->join('taikhoan as tk', 'bs.MaTaiKhoan', '=', 'tk.MaTaiKhoan')
+            ->leftJoin('khoa as k', 'bs.ChuyenKhoa', '=', 'k.TenKhoa')
             ->select(
                 'bs.MaBacSi',
                 DB::raw("CONCAT(bs.ho, ' ', bs.ten) as HoTen"),
@@ -63,6 +64,8 @@ class BacSiController extends Controller
                 'bs.ngaysinh',
                 'bs.gioitinh',
                 'bs.ChuyenKhoa',
+                'k.MaKhoa',
+                'k.TenKhoa',
                 'bs.BangCap',
                 'bs.KinhNghiem',
                 'tk.email',
@@ -110,6 +113,7 @@ class BacSiController extends Controller
 
         $bacsi = DB::table('bacsi as bs')
             ->join('taikhoan as tk', 'bs.MaTaiKhoan', '=', 'tk.MaTaiKhoan')
+            ->leftJoin('khoa as k', 'bs.ChuyenKhoa', '=', 'k.TenKhoa')
             ->where('bs.MaBacSi', $id)
             ->select(
                 'bs.MaBacSi',
@@ -119,6 +123,8 @@ class BacSiController extends Controller
                 'bs.ngaysinh',
                 'bs.gioitinh',
                 'bs.ChuyenKhoa',
+                'k.MaKhoa',
+                'k.TenKhoa',
                 'bs.BangCap',
                 'bs.KinhNghiem',
                 'tk.email',
@@ -154,7 +160,7 @@ class BacSiController extends Controller
             'ten' => 'required|string|max:50',
             'ngaysinh' => 'required|date',
             'gioitinh' => 'required|in:Nam,Nữ',
-            'ChuyenKhoa' => 'required|string|max:100',
+            'ChuyenKhoa' => 'required|string|max:100|exists:khoa,TenKhoa',
             'BangCap' => 'required|string|max:100',
             'KinhNghiem' => 'nullable|string|max:255',
             'email' => 'required|email|unique:taikhoan,email',
@@ -229,7 +235,7 @@ class BacSiController extends Controller
             'ten' => 'sometimes|required|string|max:50',
             'ngaysinh' => 'sometimes|required|date',
             'gioitinh' => 'sometimes|required|in:Nam,Nữ',
-            'ChuyenKhoa' => 'sometimes|required|string|max:100',
+            'ChuyenKhoa' => 'sometimes|required|string|max:100|exists:khoa,TenKhoa',
             'BangCap' => 'sometimes|required|string|max:100',
             'KinhNghiem' => 'nullable|string|max:255',
             'email' => 'sometimes|required|email|unique:taikhoan,email,' . $bacsi->MaTaiKhoan . ',MaTaiKhoan',

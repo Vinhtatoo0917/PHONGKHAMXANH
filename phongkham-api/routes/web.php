@@ -2,14 +2,18 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\LichKhamController;
+use App\Http\Controllers\benhnhan\LichKhamController as BenhNhanLichKhamController;
 use App\Http\Controllers\Admin\BacSiController;
+use App\Http\Controllers\Admin\LichKhamController as AdminLichKhamController;
 use App\Http\Controllers\Admin\CaKhamController;
 use App\Http\Controllers\Admin\LichLamViecController;
 use App\Http\Controllers\Admin\PhongKhamController;
 use App\Http\Controllers\Admin\KhoaController;
 use App\Http\Controllers\Admin\BenhController;
 use App\Http\Controllers\Admin\DichVuController;
+use App\Http\Controllers\Admin\ThuocController;
+use App\Http\Controllers\benhnhan\ProfileController;
+use App\Http\Controllers\bacsi\LichKhamController as BacSiLichKhamController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -21,16 +25,20 @@ Route::post('/logout', [AuthController::class, 'logout']);
 Route::get('/me', [AuthController::class, 'me']);
 
 // ==================== LỊCH KHÁM ====================
-Route::get('/lich-kham/available', [LichKhamController::class, 'getAvailableSchedules']);
-Route::get('/lich-kham/my-appointments', [LichKhamController::class, 'getMyAppointments']);
-Route::post('/lich-kham/book', [LichKhamController::class, 'bookAppointment']);
-Route::delete('/lich-kham/{maLichKham}/cancel', [LichKhamController::class, 'cancelAppointment']);
-Route::get('/lich-kham/doctor-schedule', [LichKhamController::class, 'getDoctorSchedule']);
+Route::get('/lich-kham/available', [BenhNhanLichKhamController::class, 'getAvailableSchedules']);
+Route::get('/lich-kham/my-appointments', [BenhNhanLichKhamController::class, 'getMyAppointments']);
+Route::post('/lich-kham/book', [BenhNhanLichKhamController::class, 'bookAppointment']);
+Route::delete('/lich-kham/{maLichKham}/cancel', [BenhNhanLichKhamController::class, 'cancelAppointment']);
+Route::get('/lich-kham/doctor-schedule', [BenhNhanLichKhamController::class, 'getDoctorSchedule']);
+
+// ==================== THÔNG TIN CÁ NHÂN ====================
+Route::get('/profile', [ProfileController::class, 'show']);
+Route::post('/profile/update', [ProfileController::class, 'update']);
 
 Route::prefix('admin')->group(function () {
     // ==================== QUẢN LÝ LỊCH KHÁM ====================
-    Route::get('/lich-kham', [LichKhamController::class, 'getAllAppointments']);
-    Route::patch('/lich-kham/{maLichKham}/status', [LichKhamController::class, 'updateAppointmentStatus']);
+    Route::get('/lich-kham', [AdminLichKhamController::class, 'index']);
+    Route::patch('/lich-kham/{maLichKham}/status', [AdminLichKhamController::class, 'updateStatus']);
 
     // ==================== QUẢN LÝ KHOA ====================
     Route::get('/khoa', [KhoaController::class, 'index']);
@@ -56,6 +64,13 @@ Route::prefix('admin')->group(function () {
     Route::delete('/dich-vu/{id}', [DichVuController::class, 'destroy']);
     Route::get('/dich-vu/khoa/{maKhoa}', [DichVuController::class, 'getByKhoa']);
     Route::get('/dich-vu/benh/{maBenh}', [DichVuController::class, 'getByBenh']);
+
+    // ==================== QUẢN LÝ THUỐC ====================
+    Route::get('/thuoc', [ThuocController::class, 'index']);
+    Route::get('/thuoc/{id}', [ThuocController::class, 'show']);
+    Route::post('/thuoc', [ThuocController::class, 'store']);
+    Route::put('/thuoc/{id}', [ThuocController::class, 'update']);
+    Route::delete('/thuoc/{id}', [ThuocController::class, 'destroy']);
 
     // ==================== QUẢN LÝ BÁC SĨ ====================
     Route::get('/bac-si', [BacSiController::class, 'index']);
@@ -97,4 +112,18 @@ Route::prefix('admin')->group(function () {
     Route::post('/phong-kham', [PhongKhamController::class, 'store']);
     Route::put('/phong-kham/{id}', [PhongKhamController::class, 'update']);
     Route::delete('/phong-kham/{id}', [PhongKhamController::class, 'destroy']);
+});
+
+Route::prefix('bacsi')->group(function () {
+    Route::get('/lich-kham', [BacSiLichKhamController::class, 'index']);
+    Route::patch('/lich-kham/{maLichKham}/status', [BacSiLichKhamController::class, 'updateStatus']);
+    Route::get('/benh', [BacSiLichKhamController::class, 'getBenhList']);
+    Route::get('/benh/{maBenh}/dich-vu', [BacSiLichKhamController::class, 'getServicesByBenh']);
+    Route::post('/ket-luan', [BacSiLichKhamController::class, 'ketLuanKham']);
+    Route::get('/thuoc', [ThuocController::class, 'index']);
+    
+    // ==================== PHIẾU CHỈ ĐỊNH ====================
+    Route::get('/testing-doctors', [BacSiLichKhamController::class, 'getTestingDoctors']);
+    Route::get('/all-services', [BacSiLichKhamController::class, 'getAllServices']);
+    Route::post('/tao-phieu-chi-dinh', [BacSiLichKhamController::class, 'taoPhieuChiDinh']);
 });

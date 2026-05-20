@@ -62,6 +62,10 @@ class AuthController extends Controller
                 'dangnhaplancuoi' => now()
             ]);
 
+        $maBenhNhan = DB::table('benhnhan')
+            ->where('MaTaiKhoan', $taikhoan->MaTaiKhoan)
+            ->value('MaBenhNhan');
+
         return response()->json([
             'success' => true,
             'message' => 'Đăng nhập thành công',
@@ -69,6 +73,7 @@ class AuthController extends Controller
                 'token' => $token,
                 'user' => [
                     'MaTaiKhoan' => $taikhoan->MaTaiKhoan,
+                    'MaBenhNhan' => $maBenhNhan,
                     'email' => $taikhoan->email,
                     'sdt' => $taikhoan->sdt,
                     'VaiTro' => $taikhoan->VaiTro,
@@ -116,15 +121,29 @@ class AuthController extends Controller
         $token = bin2hex(random_bytes(32));
 
         // Thêm tài khoản mới với vai trò mặc định là BenhNhan
-        $MaTaiKhoan = DB::table('taikhoan')->insertGetId([
-            'sdt' => $request->sdt,
-            'email' => $request->email,
-            'MatKhau' => Hash::make($request->MatKhau),
-            'VaiTro' => 'BenhNhan', // Mặc định là Bệnh Nhân
-            'Accesstoken' => $token,
-            'trangthaihoatdong' => 'active',
-            'ngaytao' => now(),
-        ]);
+        $MaTaiKhoan = DB::transaction(function () use ($request, $token) {
+            $maTaiKhoan = DB::table('taikhoan')->insertGetId([
+                'sdt' => $request->sdt,
+                'email' => $request->email,
+                'MatKhau' => Hash::make($request->MatKhau),
+                'VaiTro' => 'BenhNhan', // Mặc định là Bệnh Nhân
+                'Accesstoken' => $token,
+                'trangthaihoatdong' => 'active',
+                'ngaytao' => now(),
+            ]);
+
+            DB::table('benhnhan')->insert([
+                'MaTaiKhoan' => $maTaiKhoan,
+                'ho' => '',
+                'ten' => $request->sdt,
+            ]);
+
+            return $maTaiKhoan;
+        });
+
+        $maBenhNhan = DB::table('benhnhan')
+            ->where('MaTaiKhoan', $MaTaiKhoan)
+            ->value('MaBenhNhan');
 
         return response()->json([
             'success' => true,
@@ -133,6 +152,7 @@ class AuthController extends Controller
                 'token' => $token,
                 'user' => [
                     'MaTaiKhoan' => $MaTaiKhoan,
+                    'MaBenhNhan' => $maBenhNhan,
                     'sdt' => $request->sdt,
                     'email' => $request->email,
                     'VaiTro' => 'BenhNhan',
@@ -195,6 +215,9 @@ class AuthController extends Controller
             'success' => true,
             'data' => [
                 'MaTaiKhoan' => $taikhoan->MaTaiKhoan,
+                'MaBenhNhan' => DB::table('benhnhan')
+                    ->where('MaTaiKhoan', $taikhoan->MaTaiKhoan)
+                    ->value('MaBenhNhan'),
                 'email' => $taikhoan->email,
                 'sdt' => $taikhoan->sdt,
                 'VaiTro' => $taikhoan->VaiTro,

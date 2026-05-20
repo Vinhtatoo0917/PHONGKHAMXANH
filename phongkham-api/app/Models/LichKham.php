@@ -43,4 +43,14 @@ class LichKham extends Model
     {
         return $this->hasMany(ChiTietLichKham::class, 'MaLichKham', 'MaLichKham');
     }
+
+    public function ketLuanKham()
+    {
+        return $this->hasOne(KetLuanKham::class, 'MaLichKham', 'MaLichKham');
+    }
+
+    public function donThuoc()
+    {
+        return $this->hasOne(DonThuoc::class, 'MaLichKham', 'MaLichKham');
+    }
 }

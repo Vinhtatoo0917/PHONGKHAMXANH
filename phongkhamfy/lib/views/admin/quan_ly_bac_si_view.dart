@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../controllers/admin_controller.dart';
@@ -15,6 +17,7 @@ class _QuanLyBacSiViewState extends State<QuanLyBacSiView> {
   // State
   List<Map<String, dynamic>> _danhSachBacSi = [];
   List<Map<String, dynamic>> _danhSachBacSiFiltered = [];
+  List<Map<String, dynamic>> _danhSachKhoa = [];
   bool _isLoading = false;
   String _searchQuery = '';
   String? _filterChuyenKhoa;
@@ -35,19 +38,10 @@ class _QuanLyBacSiViewState extends State<QuanLyBacSiView> {
   bool _isEditing = false;
   int? _editingBacSiId;
 
-  // Danh sách dropdown
-  final List<String> _danhSachChuyenKhoa = [
-    'Tim mạch',
-    'Nội khoa',
-    'Nhi khoa',
-    'Sản phụ khoa',
-    'Ngoại khoa',
-    'Da liễu',
-    'Mắt',
-    'Tai mũi họng',
-    'Răng hàm mặt',
-    'Thần kinh',
-  ];
+  List<String> get _danhSachChuyenKhoa => _danhSachKhoa
+      .map((khoa) => khoa['TenKhoa']?.toString() ?? '')
+      .where((tenKhoa) => tenKhoa.isNotEmpty)
+      .toList();
 
   final List<String> _danhSachBangCap = [
     'Bác sĩ',
@@ -95,10 +89,16 @@ class _QuanLyBacSiViewState extends State<QuanLyBacSiView> {
   Future<void> _taiDanhSachBacSi() async {
     setState(() => _isLoading = true);
     try {
-      final danhSach = await _adminController.layDanhSachBacSi();
+      final results = await Future.wait([
+        _adminController.layDanhSachBacSi(),
+        _adminController.layDanhSachKhoa(),
+      ]);
+      final danhSach = results[0];
+      final danhSachKhoa = results[1];
       if (mounted) {
         setState(() {
           _danhSachBacSi = danhSach;
+          _danhSachKhoa = danhSachKhoa;
           _applyFilters();
           _isLoading = false;
         });
@@ -236,7 +236,7 @@ class _QuanLyBacSiViewState extends State<QuanLyBacSiView> {
         _tenController.text.isEmpty ||
         _emailController.text.isEmpty ||
         _sdtController.text.isEmpty ||
-        _matKhauController.text.isEmpty ||
+        (!_isEditing && _matKhauController.text.isEmpty) ||
         _ngaySinh == null ||
         _chuyenKhoa == null ||
         _bangCap == null) {
@@ -252,7 +252,8 @@ class _QuanLyBacSiViewState extends State<QuanLyBacSiView> {
       _showSnackBar('Số điện thoại phải có 9-11 chữ số', isError: true);
       return false;
     }
-    if (_matKhauController.text.length < 6) {
+    if (_matKhauController.text.isNotEmpty &&
+        _matKhauController.text.length < 6) {
       _showSnackBar('Mật khẩu phải có ít nhất 6 ký tự', isError: true);
       return false;
     }

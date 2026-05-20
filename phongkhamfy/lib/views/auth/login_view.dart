@@ -13,6 +13,7 @@ import 'register_view.dart';
 import 'forgot_password_view.dart';
 import '../home/home_view.dart';
 import '../admin/admin_home_view.dart';
+import '../doctor/doctor_home_view.dart';
 
 // ═══════════════════════════════════════════════════════════════
 // WIDGET CHÍNH: Màn hình đăng nhập
@@ -180,11 +181,25 @@ class _TrangThaiManHinhDangNhap extends State<ManHinhDangNhap> {
           ),
         ),
       );
+    } else if (vaiTro.toString().toLowerCase() == 'bacsi') {
+      print('✅ [DEBUG] Đang chuyển đến màn hình Bác sĩ');
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => DoctorHomeView(
+            tenNguoiDung:
+                thongTinNguoiDung['ten'] ??
+                thongTinNguoiDung['name'] ??
+                'Bác sĩ',
+            email: thongTinNguoiDung['email'] ?? thongTinNguoiDung['sdt'] ?? '',
+          ),
+        ),
+      );
     } else {
       print(
-        '❌ [DEBUG] Vai trò không phải admin, chuyển đến màn hình bệnh nhân',
+        '❌ [DEBUG] Vai trò không phải admin/bacsi, chuyển đến màn hình bệnh nhân',
       );
-      // Chuyển đến màn hình bệnh nhân
+      // Chuyển đến màn hình bệnh nhận
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
