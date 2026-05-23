@@ -6,6 +6,7 @@ import 'package:phongkhamfy/services/session_manager.dart';
 import 'package:phongkhamfy/views/auth/login_view.dart';
 import 'package:phongkhamfy/widgets/dialog_dang_xuat.dart';
 import 'package:phongkhamfy/widgets/loading_dang_xuat.dart';
+import 'package:phongkhamfy/views/cashier/xu_ly_thanh_toan_view.dart';
 import 'package:dio/dio.dart';
 import 'package:phongkhamfy/config/api_config.dart';
 
@@ -290,7 +291,10 @@ class _CashierHomeViewState extends State<CashierHomeView> {
                   'Nhận thanh toán từ bệnh nhân và cập nhật trạng thái',
                   Icons.payment_rounded,
                   const Color(0xFF2196F3),
-                  () => setState(() => _selectedIndex = 1),
+                  () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const XuLyThanhToanView()),
+                  ),
                 ),
                 _buildQuickActionCard(
                   'Xem báo cáo',

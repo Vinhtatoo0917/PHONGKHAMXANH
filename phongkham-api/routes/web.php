@@ -13,7 +13,7 @@ use App\Http\Controllers\Admin\BenhController;
 use App\Http\Controllers\Admin\DichVuController;
 use App\Http\Controllers\Admin\ThuocController;
 use App\Http\Controllers\benhnhan\ProfileController;
-use App\Http\Controllers\bacsi\LichKhamController as BacSiLichKhamController;
+use App\Http\Controllers\cashier\HoaDonController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -145,4 +145,9 @@ Route::prefix('bacsi')->group(function () {
     Route::get('/phieu-chi-dinh-cua-toi', [BacSiLichKhamController::class, 'phieuChiDinhCuaToi']);
     Route::patch('/phieu-chi-dinh/{maPhieu}/tiep-nhan', [BacSiLichKhamController::class, 'tiepNhanPhieuChiDinh']);
     Route::post('/phieu-chi-dinh/{maPhieu}/hoan-tat', [BacSiLichKhamController::class, 'hoanTatPhieuChiDinh']);
+});
+
+Route::prefix('cashier')->group(function () {
+    Route::get('/unpaid-invoices', [HoaDonController::class, 'getUnpaidInvoices']);
+    Route::post('/invoices/{maHoaDon}/mark-paid', [HoaDonController::class, 'markInvoicePaid']);
 });
