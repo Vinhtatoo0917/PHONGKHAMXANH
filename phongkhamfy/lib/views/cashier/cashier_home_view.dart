@@ -256,6 +256,13 @@ class _CashierHomeViewState extends State<CashierHomeView> {
                               ),
                             ),
                             IconButton(
+                              onPressed: _loadInvoiceStatistics,
+                              icon: const Icon(
+                                Icons.refresh_rounded,
+                                color: Colors.white,
+                              ),
+                            ),
+                            IconButton(
                               onPressed: _onLogout,
                               icon: const Icon(
                                 Icons.logout_rounded,
@@ -291,10 +298,14 @@ class _CashierHomeViewState extends State<CashierHomeView> {
                   'Nhận thanh toán từ bệnh nhân và cập nhật trạng thái',
                   Icons.payment_rounded,
                   const Color(0xFF2196F3),
-                  () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const XuLyThanhToanView()),
-                  ),
+                  () async {
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const XuLyThanhToanView()),
+                    );
+                    // Refresh statistics when returning
+                    _loadInvoiceStatistics();
+                  },
                 ),
                 _buildQuickActionCard(
                   'Xem báo cáo',
