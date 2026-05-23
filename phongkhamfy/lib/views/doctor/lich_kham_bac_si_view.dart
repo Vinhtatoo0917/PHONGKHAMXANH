@@ -424,22 +424,18 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
                     Row(
                       children: [
                         Expanded(
-                          child: _buildActionButtonWithLock(
-                            patient['TrangThai'] == 'completed'
-                              ? Icons.edit_note_rounded
-                              : Icons.assignment_turned_in_rounded,
-                            patient['TrangThai'] == 'completed'
-                              ? 'Chỉnh sửa kết luận'
-                              : 'Kết luận khám',
-                            patient['TrangThai'] == 'completed'
-                              ? _warning
-                              : _success,
-                            () => _showConclusionForm(patient),
-                            patient,
-                          ),
+                          child: patient['TrangThai'] == 'completed'
+                            ? _buildCompletedStatus()
+                            : _buildActionButtonWithLock(
+                              Icons.assignment_turned_in_rounded,
+                              'Kết luận khám',
+                              _success,
+                              () => _showConclusionForm(patient),
+                              patient,
+                            ),
                         ),
                         const SizedBox(width: 12),
-                        // Nút Tạo phiếu chỉ định mới
+                        // Nút Tạo phiếu chỉ định mới (chỉ hiển thị khi chưa hoàn tất)
                         if (patient['TrangThai'] != 'completed')
                           Expanded(
                             child: _buildActionButtonWithLock(
@@ -551,6 +547,33 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
+      ),
+    );
+  }
+
+  Widget _buildCompletedStatus() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: _success.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: _success.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.done_all_rounded, color: _success, size: 24),
+          const SizedBox(width: 12),
+          const Expanded(
+            child: Text(
+              'Đã hoàn thành khám',
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
+                color: Color(0xFF2C3E50),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
