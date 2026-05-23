@@ -14,6 +14,7 @@ import 'forgot_password_view.dart';
 import '../home/home_view.dart';
 import '../admin/admin_home_view.dart';
 import '../doctor/doctor_home_view.dart';
+import '../cashier/cashier_home_view.dart';
 import '../../widgets/loading_overlay.dart';
 
 // ═══════════════════════════════════════════════════════════════
@@ -196,9 +197,17 @@ class _TrangThaiManHinhDangNhap extends State<ManHinhDangNhap> {
           ),
         ),
       );
+    } else if (vaiTro.toString().toLowerCase() == 'thungan') {
+      print('✅ [DEBUG] Đang chuyển đến màn hình Thu ngân');
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const CashierHomeView(),
+        ),
+      );
     } else {
       print(
-        '❌ [DEBUG] Vai trò không phải admin/bacsi/checkin, chuyển đến màn hình bệnh nhân',
+        '❌ [DEBUG] Vai trò không phải admin/bacsi/thungan, chuyển đến màn hình bệnh nhân',
       );
       // Chuyển đến màn hình bệnh nhận
       Navigator.pushReplacement(

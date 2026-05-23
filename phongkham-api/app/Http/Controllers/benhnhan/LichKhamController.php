@@ -859,6 +859,71 @@ class LichKhamController extends Controller
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
+    /**
+     * Lấy danh sách hóa đơn của bệnh nhân đang đăng nhập
+     */
+    public function getMyInvoices(Request $request)
+    {
+        try {
+            $maBenhNhan = $this->currentPatientId($request);
+
+            if (!$maBenhNhan) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không tìm thấy thông tin bệnh nhân',
+                ], 401);
+            }
+
+            // Lấy danh sách hóa đơn
+            $invoices = DB::table('hoadon as hd')
+                ->leftJoin('benhnhan as bn', 'hd.MaBenhNhan', '=', 'bn.MaBenhNhan')
+                ->leftJoin('lichkham as lk', 'hd.MaLichKham', '=', 'lk.MaLichKham')
+                ->leftJoin('lichlamviec as llv', 'lk.MaLichLamViec', '=', 'llv.MaLichLamViec')
+                ->leftJoin('bacsi as bs', 'llv.MaBacSi', '=', 'bs.MaBacSi')
+                ->where('hd.MaBenhNhan', $maBenhNhan)
+                ->select(
+                    'hd.MaHoaDon',
+                    'hd.MaBenhNhan',
+                    DB::raw("CONCAT(bn.ho, ' ', bn.ten) as TenBenhNhan"),
+                    DB::raw("CONCAT(COALESCE(bs.ho, ''), ' ', COALESCE(bs.ten, '')) as TenBacSi"),
+                    'bs.ChuyenKhoa',
+                    'hd.LoaiHoaDon',
+                    'hd.TongTien',
+                    'hd.GiamBHYT',
+                    'hd.SoTienPhaiTra',
+                    'hd.TrangThai',
+                    'hd.NgayTao'
+                )
+                ->orderBy('hd.NgayTao', 'desc')
+                ->get();
+
+            // Lấy chi tiết cho mỗi hóa đơn
+            $invoicesWithDetails = $invoices->map(function ($invoice) {
+                $details = DB::table('ct_hoadon')
+                    ->where('MaHoaDon', $invoice->MaHoaDon)
+                    ->select(
+                        'TenHienThi',
+                        'SoLuong',
+                        'DonGia',
+                        'ThanhTien'
+                    )
+                    ->get();
+
+                return (object) array_merge((array) $invoice, [
+                    'ChiTiet' => $details
+                ]);
+            });
+
+            return response()->json([
+                'success' => true,
+                'data' => $invoicesWithDetails,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
     }
 }
 

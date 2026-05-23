@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -175,7 +176,7 @@ class _LichKhamCuaToiViewState extends State<LichKhamCuaToiView> {
     final upcoming = appointments
         .where(
           (item) =>
-              item.trangThai == 'pending' || item.trangThai == 'confirmed',
+              item.trangThai == 'pending' || item.trangThai == 'confirmed' || item.trangThai == 'examining',
         )
         .length;
     final completed = appointments
@@ -348,6 +349,8 @@ class _LichKhamCuaToiViewState extends State<LichKhamCuaToiView> {
         return _warning;
       case 'confirmed':
         return _primary;
+      case 'examining':
+        return _primary;
       case 'completed':
         return _secondary;
       case 'cancelled':
@@ -365,6 +368,8 @@ class _LichKhamCuaToiViewState extends State<LichKhamCuaToiView> {
         return 'Chờ xác nhận';
       case 'confirmed':
         return 'Đã xác nhận';
+      case 'examining':
+        return 'Đang khám';
       case 'completed':
         return 'Đã hoàn thành';
       case 'cancelled':
@@ -1060,66 +1065,254 @@ class _DetailSheet extends StatelessWidget {
     );
   }
 
-  void _showPrescriptionModal(BuildContext context, Map<String, dynamic> donThuoc) {
+  void _showPrescriptionModal(BuildContext buildCtx, Map<String, dynamic> donThuoc) {
     final chiTiet = donThuoc['ChiTiet'] as List? ?? [];
+
+    const primary = Color(0xFF1565C0);
+    const text = Color(0xFF172033);
+    const muted = Color(0xFF667085);
 
     Get.dialog(
       Dialog(
+        backgroundColor: Colors.transparent,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        child: Container(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text('Toa thuốc', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900)),
-              const SizedBox(height: 20),
-              if (chiTiet.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 20),
-                  child: Text('Không có thông tin thuốc.'),
-                )
-              else
-                ConstrainedBox(
-                  constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.5),
-                  child: ListView.separated(
-                    shrinkWrap: true,
-                    itemCount: chiTiet.length,
-                    separatorBuilder: (_, _) => const Divider(height: 24),
-                    itemBuilder: (context, index) {
-                      final item = chiTiet[index];
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Text('${index + 1}. ', style: const TextStyle(fontWeight: FontWeight.bold)),
-                              Expanded(child: Text(item['TenThuoc'] ?? 'Thuốc', style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16))),
-                              Text('x${item['SoLuong']}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(24),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            child: Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Colors.white.withValues(alpha: 0.95),
+                    Colors.white.withValues(alpha: 0.92),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(
+                  color: primary.withValues(alpha: 0.2),
+                  width: 1.5,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: primary.withValues(alpha: 0.1),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              primary.withValues(alpha: 0.2),
+                              primary.withValues(alpha: 0.1),
                             ],
                           ),
-                          Padding(
-                            padding: const EdgeInsets.only(left: 18, top: 4),
-                            child: Text('${item['HamLuong']} - ${item['DonViTinh']}', style: const TextStyle(color: Colors.grey, fontSize: 13)),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: primary.withValues(alpha: 0.3),
                           ),
-                          Padding(
-                            padding: const EdgeInsets.only(left: 18, top: 4),
-                            child: Text('HD: ${item['LieuDung']}', style: const TextStyle(color: _LichKhamCuaToiViewState._primary, fontWeight: FontWeight.w600, fontSize: 13)),
+                        ),
+                        child: const Icon(
+                          Icons.medication_liquid_rounded,
+                          color: primary,
+                          size: 24,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'Toa thuốc',
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w900,
+                            color: text,
                           ),
-                        ],
-                      );
-                    },
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton(
-                  onPressed: () => Get.back(),
-                  style: FilledButton.styleFrom(backgroundColor: _LichKhamCuaToiViewState._primary),
-                  child: const Text('Đóng'),
-                ),
+                  const SizedBox(height: 24),
+                  if (chiTiet.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 20),
+                      child: Text(
+                        'Không có thông tin thuốc.',
+                        style: TextStyle(color: muted, fontSize: 14),
+                      ),
+                    )
+                  else
+                    ConstrainedBox(
+                      constraints:
+                          BoxConstraints(maxHeight: MediaQuery.of(buildCtx).size.height * 0.5),
+                      child: ListView.separated(
+                        shrinkWrap: true,
+                        itemCount: chiTiet.length,
+                        separatorBuilder: (_, _) => Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          child: Divider(
+                            color: primary.withValues(alpha: 0.1),
+                            height: 1,
+                          ),
+                        ),
+                        itemBuilder: (context, index) {
+                          final item = chiTiet[index];
+                          return Container(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Container(
+                                      width: 28,
+                                      height: 28,
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          begin: Alignment.topLeft,
+                                          end: Alignment.bottomRight,
+                                          colors: [
+                                            primary.withValues(alpha: 0.3),
+                                            primary.withValues(alpha: 0.15),
+                                          ],
+                                        ),
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
+                                          color: primary.withValues(alpha: 0.4),
+                                        ),
+                                      ),
+                                      child: Center(
+                                        child: Text(
+                                          '${index + 1}',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 12,
+                                            color: primary,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            item['TenThuoc'] ?? 'Thuốc',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w900,
+                                              fontSize: 16,
+                                              color: text,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            '${item['HamLuong']} - ${item['DonViTinh']}',
+                                            style: TextStyle(
+                                              color: muted,
+                                              fontSize: 13,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 6,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          begin: Alignment.topLeft,
+                                          end: Alignment.bottomRight,
+                                          colors: [
+                                            primary.withValues(alpha: 0.15),
+                                            primary.withValues(alpha: 0.08),
+                                          ],
+                                        ),
+                                        borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(
+                                          color: primary.withValues(alpha: 0.3),
+                                        ),
+                                      ),
+                                      child: Text(
+                                        'x${item['SoLuong']}',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 14,
+                                          color: primary,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 40),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 8,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: primary.withValues(alpha: 0.08),
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(
+                                        color: primary.withValues(alpha: 0.2),
+                                      ),
+                                    ),
+                                    child: Text(
+                                      'Hướng dẫn: ${item['LieuDung']}',
+                                      style: TextStyle(
+                                        color: primary,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton(
+                      onPressed: () => Get.back(),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: primary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      child: const Text(
+                        'Đóng',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),

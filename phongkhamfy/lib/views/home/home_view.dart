@@ -3,6 +3,7 @@ import 'package:phongkhamfy/controllers/auth_controller.dart';
 import 'package:phongkhamfy/views/auth/login_view.dart';
 import 'package:phongkhamfy/views/patient/dat_lich_kham_view.dart';
 import 'package:phongkhamfy/views/patient/lich_kham_cua_toi_view.dart';
+import 'package:phongkhamfy/views/patient/hoa_don_cua_toi_view.dart';
 import 'package:phongkhamfy/widgets/dialog_dang_xuat.dart';
 import 'package:phongkhamfy/widgets/loading_dang_xuat.dart';
 import 'package:phongkhamfy/views/patient/edit_profile_view.dart';
@@ -388,10 +389,17 @@ class _HomeViewState extends State<HomeView> {
                       onTap: () {},
                     ),
                     _buildMainFeatureItem(
-                      icon: Icons.receipt_long_rounded,
-                      label: 'Hóa đơn',
+                      icon: Icons.payment_rounded,
+                      label: 'Thanh toán hoá đơn',
                       color: const Color(0xFFE91E63),
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const HoaDonCuaToiView(),
+                          ),
+                        );
+                      },
                     ),
                     _buildMainFeatureItem(
                       icon: Icons.medical_information_rounded,

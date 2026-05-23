@@ -31,6 +31,7 @@ Route::post('/lich-kham/book', [BenhNhanLichKhamController::class, 'bookAppointm
 Route::delete('/lich-kham/{maLichKham}/cancel', [BenhNhanLichKhamController::class, 'cancelAppointment']);
 Route::get('/lich-kham/doctor-schedule', [BenhNhanLichKhamController::class, 'getDoctorSchedule']);
 Route::get('/lich-kham/{maLichKham}/hoa-don', [BenhNhanLichKhamController::class, 'getHoaDon']);
+Route::get('/benhnhan/my-invoices', [BenhNhanLichKhamController::class, 'getMyInvoices']);
 
 // ==================== CHECK-IN / CHECK-OUT ====================
 Route::get('/admin/lich-kham-hom-nay', [BenhNhanLichKhamController::class, 'getLichKhamHomNay']);
