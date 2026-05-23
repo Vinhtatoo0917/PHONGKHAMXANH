@@ -859,6 +859,8 @@ class LichKhamController extends Controller
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
+    }
+
     /**
      * Lấy danh sách hóa đơn của bệnh nhân đang đăng nhập
      */
