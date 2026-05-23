@@ -1105,11 +1105,11 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      Colors.blue.withValues(alpha: 0.1),
-                      Colors.blue.withValues(alpha: 0.05),
+                      _primary.withValues(alpha: 0.1),
+                      _primary.withValues(alpha: 0.05),
                     ],
                   ),
-                  borderColor: Colors.blue,
+                  borderColor: _primary,
                 ),
                 const SizedBox(height: 14),
                 _glassmorphicCard(
@@ -1120,11 +1120,11 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      Colors.purple.withValues(alpha: 0.1),
-                      Colors.purple.withValues(alpha: 0.05),
+                      _accent.withValues(alpha: 0.1),
+                      _accent.withValues(alpha: 0.05),
                     ],
                   ),
-                  borderColor: Colors.purple,
+                  borderColor: _accent,
                 ),
                 const SizedBox(height: 14),
                 _glassmorphicCard(
@@ -1135,11 +1135,11 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      Colors.teal.withValues(alpha: 0.1),
-                      Colors.teal.withValues(alpha: 0.05),
+                      _success.withValues(alpha: 0.1),
+                      _success.withValues(alpha: 0.05),
                     ],
                   ),
-                  borderColor: Colors.teal,
+                  borderColor: _success,
                 ),
                 const SizedBox(height: 14),
                 _glassmorphicCard(
@@ -1150,11 +1150,11 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      Colors.orange.withValues(alpha: 0.1),
-                      Colors.orange.withValues(alpha: 0.05),
+                      _warning.withValues(alpha: 0.1),
+                      _warning.withValues(alpha: 0.05),
                     ],
                   ),
-                  borderColor: Colors.orange,
+                  borderColor: _warning,
                 ),
                 if (donThuoc.isNotEmpty && (donThuoc['ChiTiet'] as List? ?? []).isNotEmpty) ...[
                   const SizedBox(height: 28),
@@ -1176,18 +1176,18 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                               colors: [
-                                Colors.amber.withValues(alpha: 0.15),
-                                Colors.amber.withValues(alpha: 0.05),
+                                _warning.withValues(alpha: 0.15),
+                                _warning.withValues(alpha: 0.05),
                               ],
                             ),
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
-                              color: Colors.amber.withValues(alpha: 0.4),
+                              color: _warning.withValues(alpha: 0.4),
                               width: 1.5,
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.amber.withValues(alpha: 0.08),
+                                color: _warning.withValues(alpha: 0.08),
                                 blurRadius: 15,
                                 offset: const Offset(0, 8),
                               ),
@@ -1202,17 +1202,17 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
                                     begin: Alignment.topLeft,
                                     end: Alignment.bottomRight,
                                     colors: [
-                                      Colors.amber.withValues(alpha: 0.3),
-                                      Colors.amber.withValues(alpha: 0.1),
+                                      _warning.withValues(alpha: 0.3),
+                                      _warning.withValues(alpha: 0.1),
                                     ],
                                   ),
                                   borderRadius: BorderRadius.circular(14),
                                   border: Border.all(
-                                    color: Colors.amber.withValues(alpha: 0.5),
+                                    color: _warning.withValues(alpha: 0.5),
                                     width: 1,
                                   ),
                                 ),
-                                child: const Icon(Icons.local_pharmacy_rounded, color: Color(0xFFFF8F00), size: 24),
+                                child: Icon(Icons.local_pharmacy_rounded, color: _warning, size: 24),
                               ),
                               const SizedBox(width: 14),
                               Expanded(
