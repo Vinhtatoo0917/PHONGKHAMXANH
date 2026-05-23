@@ -1032,112 +1032,187 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
     final ketLuan = patient['KetLuan'] as Map<String, dynamic>? ?? {};
     final donThuoc = patient['DonThuoc'] as Map<String, dynamic>? ?? {};
 
-    Get.dialog(
-      Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        child: Container(
-          constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.8),
-          padding: const EdgeInsets.all(24),
+    Get.bottomSheet(
+      isScrollControlled: true,
+      Container(
+        height: MediaQuery.of(context).size.height * 0.85,
+        decoration: const BoxDecoration(color: Colors.white, borderRadius: BorderRadius.vertical(top: Radius.circular(32))),
+        padding: const EdgeInsets.all(24),
+        child: SingleChildScrollView(
           child: Column(
-            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Chi tiết kết luận khám', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Color(0xFF2C3E50))),
-                  IconButton(onPressed: () => Get.back(), icon: const Icon(Icons.close_rounded))
+                  const Text('Chi tiết kết luận khám', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900)),
+                  IconButton(onPressed: () => Get.back(), icon: const Icon(Icons.close_rounded)),
                 ],
               ),
-              const SizedBox(height: 20),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (ketLuan.isNotEmpty) ...[
-                        const Text('Loại bệnh', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14, color: Color(0xFF2C3E50))),
-                        const SizedBox(height: 8),
+              const SizedBox(height: 24),
+              if (ketLuan.isNotEmpty) ...[
+                // Loại bệnh
+                _detailCard(
+                  icon: Icons.coronavirus_rounded,
+                  label: 'Loại bệnh',
+                  value: ketLuan['Benh']?['TenBenh'] ?? 'N/A',
+                  color: _primary,
+                ),
+                const SizedBox(height: 12),
+
+                // Chẩn đoán
+                _detailCard(
+                  icon: Icons.description_rounded,
+                  label: 'Chẩn đoán',
+                  value: ketLuan['ChanDoan'] ?? 'N/A',
+                  color: _accent,
+                ),
+                const SizedBox(height: 12),
+
+                // Tình trạng
+                _detailCard(
+                  icon: Icons.monitor_heart_rounded,
+                  label: 'Tình trạng',
+                  value: ketLuan['TinhTrang'] ?? 'N/A',
+                  color: const Color(0xFF0097A7),
+                ),
+                const SizedBox(height: 12),
+
+                // Hướng điều trị
+                _detailCard(
+                  icon: Icons.healing_rounded,
+                  label: 'Hướng điều trị',
+                  value: ketLuan['HuongDieuTri'] ?? 'N/A',
+                  color: _warning,
+                ),
+
+                // Đơn thuốc
+                if (donThuoc.isNotEmpty && (donThuoc['ChiTiet'] as List? ?? []).isNotEmpty) ...[
+                  const SizedBox(height: 24),
+                  const Text('Đơn thuốc', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900)),
+                  const SizedBox(height: 12),
+                  ...(donThuoc['ChiTiet'] as List? ?? []).map((ct) => Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.grey[200]!),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.03),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Colors.grey[100],
+                            color: const Color(0xFFFFF3E0),
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: Text(
-                            ketLuan['Benh']?['TenBenh'] ?? 'N/A',
-                            style: const TextStyle(fontWeight: FontWeight.w600),
-                          ),
+                          child: const Icon(Icons.local_pharmacy_rounded, color: Color(0xFFFF6F00)),
                         ),
-                        const SizedBox(height: 16),
-                        const Text('Chẩn đoán', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14, color: Color(0xFF2C3E50))),
-                        const SizedBox(height: 8),
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.grey[100],
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(ketLuan['ChanDoan'] ?? 'N/A'),
-                        ),
-                        const SizedBox(height: 16),
-                        const Text('Tình trạng', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14, color: Color(0xFF2C3E50))),
-                        const SizedBox(height: 8),
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.grey[100],
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(ketLuan['TinhTrang'] ?? 'N/A'),
-                        ),
-                        const SizedBox(height: 16),
-                        const Text('Hướng điều trị', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14, color: Color(0xFF2C3E50))),
-                        const SizedBox(height: 8),
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.grey[100],
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(ketLuan['HuongDieuTri'] ?? 'N/A'),
-                        ),
-                      ] else
-                        const Center(child: Text('Chưa có kết luận khám')),
-                      if (donThuoc.isNotEmpty && ketLuan.isNotEmpty) ...[
-                        const SizedBox(height: 24),
-                        const Text('Đơn thuốc', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14, color: Color(0xFF2C3E50))),
-                        const SizedBox(height: 12),
-                        ...(donThuoc['ChiTiet'] as List? ?? []).map((ct) => Container(
-                          margin: const EdgeInsets.only(bottom: 8),
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.grey[50],
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.grey[300]!),
-                          ),
+                        const SizedBox(width: 12),
+                        Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
                                 ct['TenThuoc'] ?? 'N/A',
-                                style: const TextStyle(fontWeight: FontWeight.w700),
+                                style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                'Liều dùng: ${ct['LieuDung'] ?? 'N/A'} | Số lượng: ${ct['SoLuong'] ?? 'N/A'}',
-                                style: const TextStyle(fontSize: 12, color: Colors.grey),
+                                '${ct['HamLuong'] ?? 'N/A'} ${ct['DonViTinh'] ?? ''}',
+                                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Liều dùng: ${ct['LieuDung'] ?? 'N/A'} | SL: ${ct['SoLuong'] ?? 1}',
+                                style: TextStyle(fontSize: 11, color: Colors.grey[500]),
                               ),
                             ],
                           ),
-                        )),
+                        ),
                       ],
+                    ),
+                  )),
+                ],
+              ] else
+                Center(
+                  child: Column(
+                    children: [
+                      Icon(Icons.info_outline_rounded, size: 48, color: Colors.grey[300]),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Chưa có kết luận khám',
+                        style: TextStyle(color: Colors.grey[600], fontWeight: FontWeight.w600),
+                      ),
                     ],
                   ),
                 ),
-              ),
+              const SizedBox(height: 40),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _detailCard({
+    required IconData icon,
+    required String label,
+    required String value,
+    required Color color,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey[200]!),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: color, size: 28),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(fontSize: 12, color: Colors.grey[600], fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  value,
+                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
