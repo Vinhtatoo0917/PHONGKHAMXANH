@@ -1378,6 +1378,27 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
   List<Map<String, dynamic>> _sortPatientsBySTT(List<Map<String, dynamic>> patients) {
     final sorted = List<Map<String, dynamic>>.from(patients);
     sorted.sort((a, b) {
+      // Hàm xác định ưu tiên của trạng thái (số nhỏ = ưu tiên cao)
+      int getStatusPriority(String? status) {
+        switch (status) {
+          case 'examining': return 0;    // Đang khám (ưu tiên cao nhất)
+          case 'confirmed': return 1;    // Đang chờ khám
+          case 'pending': return 2;      // Chưa đến
+          case 'cancelled': return 3;    // Đã hủy
+          case 'completed': return 4;    // Đã khám xong (ưu tiên thấp nhất)
+          default: return 5;
+        }
+      }
+
+      final priorityA = getStatusPriority(a['TrangThai']);
+      final priorityB = getStatusPriority(b['TrangThai']);
+
+      // Nếu ưu tiên khác nhau, sắp xếp theo ưu tiên
+      if (priorityA != priorityB) {
+        return priorityA.compareTo(priorityB);
+      }
+
+      // Nếu ưu tiên giống nhau, sắp xếp theo STT
       final soThuTuA = int.tryParse(a['SoThuTu']?.toString() ?? '0') ?? 0;
       final soThuTuB = int.tryParse(b['SoThuTu']?.toString() ?? '0') ?? 0;
       return soThuTuA.compareTo(soThuTuB);
