@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:ui';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:phongkhamfy/controllers/lich_kham_controller.dart';
@@ -1036,7 +1037,28 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
       isScrollControlled: true,
       Container(
         height: MediaQuery.of(context).size.height * 0.85,
-        decoration: const BoxDecoration(color: Colors.white, borderRadius: BorderRadius.vertical(top: Radius.circular(32))),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Colors.white.withValues(alpha: 0.95),
+              Colors.blue.withValues(alpha: 0.05),
+            ],
+          ),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(40)),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.5),
+            width: 1.5,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.1),
+              blurRadius: 30,
+              offset: const Offset(0, -10),
+            ),
+          ],
+        ),
         padding: const EdgeInsets.all(24),
         child: SingleChildScrollView(
           child: Column(
@@ -1045,100 +1067,175 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Chi tiết kết luận khám', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900)),
-                  IconButton(onPressed: () => Get.back(), icon: const Icon(Icons.close_rounded)),
+                  const Text(
+                    'Chi tiết kết luận khám',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: Color(0xFF1A3A52)),
+                  ),
+                  GestureDetector(
+                    onTap: () => Get.back(),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.5),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.white.withValues(alpha: 0.8), width: 1.5),
+                          ),
+                          child: const Icon(Icons.close_rounded, color: Color(0xFF1A3A52)),
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 28),
               if (ketLuan.isNotEmpty) ...[
-                // Loại bệnh
-                _detailCard(
+                _glassmorphicCard(
                   icon: Icons.coronavirus_rounded,
                   label: 'Loại bệnh',
                   value: ketLuan['Benh']?['TenBenh'] ?? 'N/A',
-                  color: _primary,
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Colors.blue.withValues(alpha: 0.1),
+                      Colors.blue.withValues(alpha: 0.05),
+                    ],
+                  ),
+                  borderColor: Colors.blue,
                 ),
-                const SizedBox(height: 12),
-
-                // Chẩn đoán
-                _detailCard(
+                const SizedBox(height: 14),
+                _glassmorphicCard(
                   icon: Icons.description_rounded,
                   label: 'Chẩn đoán',
                   value: ketLuan['ChanDoan'] ?? 'N/A',
-                  color: _accent,
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Colors.purple.withValues(alpha: 0.1),
+                      Colors.purple.withValues(alpha: 0.05),
+                    ],
+                  ),
+                  borderColor: Colors.purple,
                 ),
-                const SizedBox(height: 12),
-
-                // Tình trạng
-                _detailCard(
+                const SizedBox(height: 14),
+                _glassmorphicCard(
                   icon: Icons.monitor_heart_rounded,
                   label: 'Tình trạng',
                   value: ketLuan['TinhTrang'] ?? 'N/A',
-                  color: const Color(0xFF0097A7),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Colors.teal.withValues(alpha: 0.1),
+                      Colors.teal.withValues(alpha: 0.05),
+                    ],
+                  ),
+                  borderColor: Colors.teal,
                 ),
-                const SizedBox(height: 12),
-
-                // Hướng điều trị
-                _detailCard(
+                const SizedBox(height: 14),
+                _glassmorphicCard(
                   icon: Icons.healing_rounded,
                   label: 'Hướng điều trị',
                   value: ketLuan['HuongDieuTri'] ?? 'N/A',
-                  color: _warning,
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Colors.orange.withValues(alpha: 0.1),
+                      Colors.orange.withValues(alpha: 0.05),
+                    ],
+                  ),
+                  borderColor: Colors.orange,
                 ),
-
-                // Đơn thuốc
                 if (donThuoc.isNotEmpty && (donThuoc['ChiTiet'] as List? ?? []).isNotEmpty) ...[
-                  const SizedBox(height: 24),
-                  const Text('Đơn thuốc', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900)),
-                  const SizedBox(height: 12),
-                  ...(donThuoc['ChiTiet'] as List? ?? []).map((ct) => Container(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.grey[200]!),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.03),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(12),
+                  const SizedBox(height: 28),
+                  const Text(
+                    'Đơn thuốc',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Color(0xFF1A3A52)),
+                  ),
+                  const SizedBox(height: 14),
+                  ...(donThuoc['ChiTiet'] as List? ?? []).map((ct) => Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(20),
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                        child: Container(
+                          padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFFFF3E0),
-                            borderRadius: BorderRadius.circular(12),
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                Colors.amber.withValues(alpha: 0.15),
+                                Colors.amber.withValues(alpha: 0.05),
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: Colors.amber.withValues(alpha: 0.4),
+                              width: 1.5,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.amber.withValues(alpha: 0.08),
+                                blurRadius: 15,
+                                offset: const Offset(0, 8),
+                              ),
+                            ],
                           ),
-                          child: const Icon(Icons.local_pharmacy_rounded, color: Color(0xFFFF6F00)),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          child: Row(
                             children: [
-                              Text(
-                                ct['TenThuoc'] ?? 'N/A',
-                                style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+                              Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                    colors: [
+                                      Colors.amber.withValues(alpha: 0.3),
+                                      Colors.amber.withValues(alpha: 0.1),
+                                    ],
+                                  ),
+                                  borderRadius: BorderRadius.circular(14),
+                                  border: Border.all(
+                                    color: Colors.amber.withValues(alpha: 0.5),
+                                    width: 1,
+                                  ),
+                                ),
+                                child: const Icon(Icons.local_pharmacy_rounded, color: Color(0xFFFF8F00), size: 24),
                               ),
-                              const SizedBox(height: 4),
-                              Text(
-                                '${ct['HamLuong'] ?? 'N/A'} ${ct['DonViTinh'] ?? ''}',
-                                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Liều dùng: ${ct['LieuDung'] ?? 'N/A'} | SL: ${ct['SoLuong'] ?? 1}',
-                                style: TextStyle(fontSize: 11, color: Colors.grey[500]),
+                              const SizedBox(width: 14),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      ct['TenThuoc'] ?? 'N/A',
+                                      style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: Color(0xFF1A3A52)),
+                                    ),
+                                    const SizedBox(height: 6),
+                                    Text(
+                                      '${ct['HamLuong'] ?? 'N/A'} ${ct['DonViTinh'] ?? ''}',
+                                      style: TextStyle(fontSize: 12, color: Colors.grey[600], fontWeight: FontWeight.w600),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'Liều dùng: ${ct['LieuDung'] ?? 'N/A'} | SL: ${ct['SoLuong'] ?? 1}',
+                                      style: TextStyle(fontSize: 11, color: Colors.grey[500]),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ],
                           ),
                         ),
-                      ],
+                      ),
                     ),
                   )),
                 ],
@@ -1163,56 +1260,77 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
     );
   }
 
-  Widget _detailCard({
+  Widget _glassmorphicCard({
     required IconData icon,
     required String label,
     required String value,
-    required Color color,
+    required Gradient gradient,
+    required Color borderColor,
   }) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey[200]!),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(20),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            gradient: gradient,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: borderColor.withValues(alpha: 0.4),
+              width: 1.5,
             ),
-            child: Icon(icon, color: color, size: 28),
+            boxShadow: [
+              BoxShadow(
+                color: borderColor.withValues(alpha: 0.08),
+                blurRadius: 15,
+                offset: const Offset(0, 8),
+              ),
+            ],
           ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: TextStyle(fontSize: 12, color: Colors.grey[600], fontWeight: FontWeight.w600),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      borderColor.withValues(alpha: 0.3),
+                      borderColor.withValues(alpha: 0.1),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: borderColor.withValues(alpha: 0.5),
+                    width: 1,
+                  ),
                 ),
-                const SizedBox(height: 6),
-                Text(
-                  value,
-                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
+                child: Icon(icon, color: borderColor, size: 24),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: TextStyle(fontSize: 12, color: Colors.grey[600], fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      value,
+                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: Color(0xFF1A3A52)),
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
