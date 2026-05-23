@@ -9,6 +9,7 @@ import '../../widgets/o_nhap_lieu.dart';
 import '../../widgets/hieu_ung_nen.dart';
 import '../../controllers/register_controller.dart';
 import 'login_view.dart';
+import '../../widgets/loading_overlay.dart';
 
 class ManHinhDangKy extends StatefulWidget {
   const ManHinhDangKy({super.key});
@@ -127,36 +128,39 @@ class _TrangThaiManHinhDangKy extends State<ManHinhDangKy> {
 
     return Scaffold(
       backgroundColor: _mauNen,
-      body: Stack(
-        children: [
-          const HieuUngNen(),
-          SafeArea(
-            child: Center(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.all(laDienThoai ? 16 : 32),
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 500),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Logo
-                      const LogoPhongKham(),
-                      const SizedBox(height: 24),
-
-                      // Card đăng ký
-                      _xayDungCardDangKy(laDienThoai),
-
-                      const SizedBox(height: 16),
-
-                      // Footer
-                      _xayDungFooter(),
-                    ],
+      body: LoadingOverlay(
+        isLoading: _dangXuLy,
+        child: Stack(
+          children: [
+            const HieuUngNen(),
+            SafeArea(
+              child: Center(
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.all(laDienThoai ? 16 : 32),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 500),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // Logo
+                        const LogoPhongKham(),
+                        const SizedBox(height: 24),
+  
+                        // Card đăng ký
+                        _xayDungCardDangKy(laDienThoai),
+  
+                        const SizedBox(height: 16),
+  
+                        // Footer
+                        _xayDungFooter(),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

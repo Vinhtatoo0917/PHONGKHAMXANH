@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../services/session_manager.dart';
 import '../config/api_config.dart';
+import '../utils/loading_utils.dart';
 
 class KetQuaDangNhap {
   final bool thanhCong;
@@ -58,6 +59,7 @@ class DichVuXacThuc {
       return KetQuaDangNhap(thanhCong: false, thongBaoLoi: loiMatKhau);
     }
 
+    LoadingUtils.showLoading(message: 'Đang đăng nhập...');
     try {
       final response = await http.post(
         Uri.parse(ApiConfig.getFullUrl(ApiConfig.login)),
@@ -99,6 +101,8 @@ class DichVuXacThuc {
         thanhCong: false,
         thongBaoLoi: 'Không thể kết nối đến server',
       );
+    } finally {
+      LoadingUtils.hideLoading();
     }
   }
 
@@ -113,6 +117,7 @@ class DichVuXacThuc {
       return null;
     }
 
+    LoadingUtils.showLoading(message: 'Đang kiểm tra phiên làm việc...');
     try {
       // Gọi API /me để check token với database
       final response = await http.get(
@@ -139,6 +144,8 @@ class DichVuXacThuc {
     } catch (e) {
       print('❌ [TOKEN] Lỗi check token: $e');
       return null;
+    } finally {
+      LoadingUtils.hideLoading();
     }
   }
 
@@ -148,8 +155,9 @@ class DichVuXacThuc {
   Future<void> dangXuat() async {
     final token = await _sessionManager.getToken();
 
-    if (token != null) {
-      try {
+    LoadingUtils.showLoading(message: 'Đang đăng xuất...');
+    try {
+      if (token != null) {
         // Gọi API logout để xóa token trong database
         await http.post(
           Uri.parse(ApiConfig.getFullUrl(ApiConfig.logout)),
@@ -158,14 +166,15 @@ class DichVuXacThuc {
             'Accept': 'application/json',
           },
         );
-      } catch (e) {
-        print('❌ [LOGOUT] Lỗi: $e');
       }
+    } catch (e) {
+      print('❌ [LOGOUT] Lỗi: $e');
+    } finally {
+      // Xóa token local
+      await _sessionManager.clearSession();
+      LoadingUtils.hideLoading();
+      print('🚪 [AUTH] Đã đăng xuất');
     }
-
-    // Xóa token local
-    await _sessionManager.clearSession();
-    print('🚪 [AUTH] Đã đăng xuất');
   }
 
   // ═══════════════════════════════════════════════════════════════

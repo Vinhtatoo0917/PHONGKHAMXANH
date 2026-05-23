@@ -3,6 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../controllers/admin_controller.dart';
+import '../../utils/loading_utils.dart';
+import '../../widgets/loading_view.dart';
 
 class QuanLyBacSiView extends StatefulWidget {
   const QuanLyBacSiView({super.key});
@@ -18,9 +20,9 @@ class _QuanLyBacSiViewState extends State<QuanLyBacSiView> {
   List<Map<String, dynamic>> _danhSachBacSi = [];
   List<Map<String, dynamic>> _danhSachBacSiFiltered = [];
   List<Map<String, dynamic>> _danhSachKhoa = [];
-  bool _isLoading = false;
   String _searchQuery = '';
   String? _filterChuyenKhoa;
+  bool _isLoading = true;
 
   // Form controllers
   final _hoController = TextEditingController();
@@ -87,27 +89,42 @@ class _QuanLyBacSiViewState extends State<QuanLyBacSiView> {
   }
 
   Future<void> _taiDanhSachBacSi() async {
-    setState(() => _isLoading = true);
+    if (mounted) setState(() => _isLoading = true);
     try {
-      final results = await Future.wait([
-        _adminController.layDanhSachBacSi(),
-        _adminController.layDanhSachKhoa(),
+      final results = await Future.wait<dynamic>([
+        _adminController.layDanhSachBacSi().catchError((e) {
+          debugPrint('❌ [QUAN_LY_BAC_SI] Lỗi tải danh sách bác sĩ: $e');
+          return <Map<String, dynamic>>[];
+        }),
+        _adminController.layDanhSachKhoa().catchError((e) {
+          debugPrint('❌ [QUAN_LY_BAC_SI] Lỗi tải danh sách khoa: $e');
+          return <Map<String, dynamic>>[];
+        }),
       ]);
-      final danhSach = results[0];
-      final danhSachKhoa = results[1];
-      if (mounted) {
-        setState(() {
-          _danhSachBacSi = danhSach;
-          _danhSachKhoa = danhSachKhoa;
-          _applyFilters();
-          _isLoading = false;
-        });
+
+      if (!mounted) return;
+
+      final danhSachBacSi = List<Map<String, dynamic>>.from(results[0] as List);
+      final danhSachKhoa = List<Map<String, dynamic>>.from(results[1] as List);
+
+      setState(() {
+        _danhSachBacSi = danhSachBacSi;
+        _danhSachKhoa = danhSachKhoa;
+        _applyFilters();
+      });
+
+      if (_danhSachBacSi.isEmpty && _danhSachKhoa.isEmpty) {
+        _showSnackBar(
+          'Không tải được dữ liệu bác sĩ hoặc khoa',
+          isError: true,
+        );
       }
     } catch (e) {
-      if (mounted) {
-        setState(() => _isLoading = false);
-        _showSnackBar('Lỗi tải dữ liệu', isError: true);
-      }
+      if (!mounted) return;
+
+      _showSnackBar('Lỗi tải dữ liệu: ${e.toString()}', isError: true);
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -124,10 +141,10 @@ class _QuanLyBacSiViewState extends State<QuanLyBacSiView> {
   Future<void> _themBacSi() async {
     if (!_validateForm()) return;
 
-    setState(() => _isLoading = true);
     final ngaySinhStr =
         '${_ngaySinh!.year}-${_ngaySinh!.month.toString().padLeft(2, '0')}-${_ngaySinh!.day.toString().padLeft(2, '0')}';
 
+    LoadingUtils.showLoading(message: 'Đang thêm bác sĩ...');
     final result = await _adminController.themBacSi(
       ho: _hoController.text.trim(),
       ten: _tenController.text.trim(),
@@ -140,9 +157,9 @@ class _QuanLyBacSiViewState extends State<QuanLyBacSiView> {
       sdt: _sdtController.text.trim(),
       matKhau: _matKhauController.text.trim(),
     );
+    LoadingUtils.hideLoading();
 
     if (mounted) {
-      setState(() => _isLoading = false);
       if (result['success'] == true) {
         _showSnackBar('Thêm bác sĩ thành công');
         Navigator.pop(context);
@@ -160,10 +177,10 @@ class _QuanLyBacSiViewState extends State<QuanLyBacSiView> {
   Future<void> _capNhatBacSi() async {
     if (_editingBacSiId == null || !_validateForm()) return;
 
-    setState(() => _isLoading = true);
     final ngaySinhStr =
         '${_ngaySinh!.year}-${_ngaySinh!.month.toString().padLeft(2, '0')}-${_ngaySinh!.day.toString().padLeft(2, '0')}';
 
+    LoadingUtils.showLoading(message: 'Đang cập nhật bác sĩ...');
     final result = await _adminController.capNhatBacSi(
       maBacSi: _editingBacSiId!,
       ho: _hoController.text.trim(),
@@ -179,9 +196,9 @@ class _QuanLyBacSiViewState extends State<QuanLyBacSiView> {
           ? null
           : _matKhauController.text.trim(),
     );
+    LoadingUtils.hideLoading();
 
     if (mounted) {
-      setState(() => _isLoading = false);
       if (result['success'] == true) {
         _showSnackBar('Cập nhật bác sĩ thành công');
         Navigator.pop(context);
@@ -193,7 +210,7 @@ class _QuanLyBacSiViewState extends State<QuanLyBacSiView> {
     }
   }
 
-  Future<void> _xoaBacSi(int maBacSi, int index) async {
+  Future<void> _xoaBacSi(int maBacSi) async {
     final confirmed =
         await showDialog<bool>(
           context: context,
@@ -217,8 +234,9 @@ class _QuanLyBacSiViewState extends State<QuanLyBacSiView> {
 
     if (!confirmed) return;
 
-    setState(() => _danhSachBacSi.removeAt(index));
+    LoadingUtils.showLoading(message: 'Đang xóa bác sĩ...');
     final result = await _adminController.xoaBacSi(maBacSi);
+    LoadingUtils.hideLoading();
 
     if (mounted) {
       if (result['success'] == true) {
@@ -226,7 +244,6 @@ class _QuanLyBacSiViewState extends State<QuanLyBacSiView> {
         await _taiDanhSachBacSi();
       } else {
         _showSnackBar(result['message'] ?? 'Xóa thất bại', isError: true);
-        await _taiDanhSachBacSi();
       }
     }
   }
@@ -351,9 +368,7 @@ class _QuanLyBacSiViewState extends State<QuanLyBacSiView> {
                       ),
                     ),
                     IconButton(
-                      onPressed: _isLoading
-                          ? null
-                          : () => Navigator.pop(context),
+                      onPressed: () => Navigator.pop(context),
                       icon: const Icon(Icons.close),
                     ),
                   ],
@@ -453,9 +468,7 @@ class _QuanLyBacSiViewState extends State<QuanLyBacSiView> {
                   width: double.infinity,
                   height: 50,
                   child: ElevatedButton.icon(
-                    onPressed: _isLoading
-                        ? null
-                        : (_isEditing ? _capNhatBacSi : _themBacSi),
+                    onPressed: (_isEditing ? _capNhatBacSi : _themBacSi),
                     icon: Icon(_isEditing ? Icons.save : Icons.add),
                     label: Text(
                       _isEditing ? 'Cập nhật' : 'Thêm bác sĩ',
@@ -589,7 +602,7 @@ class _QuanLyBacSiViewState extends State<QuanLyBacSiView> {
         ),
         const SizedBox(height: 6),
         DropdownButtonFormField<String>(
-          initialValue: value,
+          value: value,
           decoration: InputDecoration(
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -604,7 +617,7 @@ class _QuanLyBacSiViewState extends State<QuanLyBacSiView> {
               .map((item) => DropdownMenuItem(value: item, child: Text(item)))
               .toList(),
           onChanged: onChanged,
-          menuMaxHeight: 300, // Cho phép dropdown scroll nếu có nhiều items
+          menuMaxHeight: 300,
         ),
       ],
     );
@@ -624,129 +637,129 @@ class _QuanLyBacSiViewState extends State<QuanLyBacSiView> {
         elevation: 0,
         centerTitle: false,
       ),
-      body: _isLoading && _danhSachBacSi.isEmpty
-          ? Center(child: CircularProgressIndicator(color: _mauXanh))
-          : Column(
+      body: Column(
+        children: [
+          // Search & Filter
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
               children: [
-                // Search & Filter
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
+                TextField(
+                  onChanged: (value) {
+                    _searchQuery = value;
+                    _applyFilters();
+                    setState(() {});
+                  },
+                  decoration: InputDecoration(
+                    hintText: 'Tìm kiếm bác sĩ...',
+                    prefixIcon: Icon(Icons.search, color: _mauXanh),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: _mauXanh.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
                     children: [
-                      TextField(
-                        onChanged: (value) {
-                          _searchQuery = value;
+                      FilterChip(
+                        label: const Text('Tất cả'),
+                        selected: _filterChuyenKhoa == null,
+                        onSelected: (_) {
+                          _filterChuyenKhoa = null;
                           _applyFilters();
                           setState(() {});
                         },
-                        decoration: InputDecoration(
-                          hintText: 'Tìm kiếm bác sĩ...',
-                          prefixIcon: Icon(Icons.search, color: _mauXanh),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(
-                              color: _mauXanh.withValues(alpha: 0.3),
-                            ),
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
-                          ),
+                        backgroundColor: Colors.grey[200],
+                        selectedColor: _mauXanh,
+                        labelStyle: TextStyle(
+                          color: _filterChuyenKhoa == null
+                              ? _mauTrang
+                              : _mauChuDen,
                         ),
                       ),
-                      const SizedBox(height: 12),
-                      SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          children: [
-                            FilterChip(
-                              label: const Text('Tất cả'),
-                              selected: _filterChuyenKhoa == null,
-                              onSelected: (_) {
-                                _filterChuyenKhoa = null;
-                                _applyFilters();
-                                setState(() {});
-                              },
-                              backgroundColor: Colors.grey[200],
-                              selectedColor: _mauXanh,
-                              labelStyle: TextStyle(
-                                color: _filterChuyenKhoa == null
-                                    ? _mauTrang
-                                    : _mauChuDen,
-                              ),
+                      const SizedBox(width: 8),
+                      ..._danhSachChuyenKhoa.map(
+                        (khoa) => Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: FilterChip(
+                            label: Text(khoa),
+                            selected: _filterChuyenKhoa == khoa,
+                            onSelected: (_) {
+                              _filterChuyenKhoa = khoa;
+                              _applyFilters();
+                              setState(() {});
+                            },
+                            backgroundColor: Colors.grey[200],
+                            selectedColor: _mauXanh,
+                            labelStyle: TextStyle(
+                              color: _filterChuyenKhoa == khoa
+                                  ? _mauTrang
+                                  : _mauChuDen,
                             ),
-                            const SizedBox(width: 8),
-                            ..._danhSachChuyenKhoa.map(
-                              (khoa) => Padding(
-                                padding: const EdgeInsets.only(right: 8),
-                                child: FilterChip(
-                                  label: Text(khoa),
-                                  selected: _filterChuyenKhoa == khoa,
-                                  onSelected: (_) {
-                                    _filterChuyenKhoa = khoa;
-                                    _applyFilters();
-                                    setState(() {});
-                                  },
-                                  backgroundColor: Colors.grey[200],
-                                  selectedColor: _mauXanh,
-                                  labelStyle: TextStyle(
-                                    color: _filterChuyenKhoa == khoa
-                                        ? _mauTrang
-                                        : _mauChuDen,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ),
-                // List
-                Expanded(
-                  child: _danhSachBacSiFiltered.isEmpty
-                      ? Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.person_off,
-                                size: 64,
-                                color: _mauChuXam.withValues(alpha: 0.3),
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                'Không tìm thấy bác sĩ',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: _mauChuXam,
-                                ),
-                              ),
-                            ],
-                          ),
-                        )
-                      : RefreshIndicator(
-                          onRefresh: _taiDanhSachBacSi,
-                          color: _mauXanh,
-                          child: ListView.builder(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 8,
-                            ),
-                            itemCount: _danhSachBacSiFiltered.length,
-                            itemBuilder: (context, index) {
-                              final bacsi = _danhSachBacSiFiltered[index];
-                              final originalIndex = _danhSachBacSi.indexOf(
-                                bacsi,
-                              );
-                              return _buildBacSiCard(bacsi, originalIndex);
-                            },
-                          ),
-                        ),
-                ),
               ],
             ),
+          ),
+          // List
+          Expanded(
+            child: _isLoading
+                ? const LoadingView(
+                    message: 'Đang tải danh sách bác sĩ...',
+                    isOverlay: false,
+                  )
+                : _danhSachBacSiFiltered.isEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.person_off,
+                          size: 64,
+                          color: _mauChuXam.withValues(alpha: 0.3),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Không tìm thấy bác sĩ',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: _mauChuXam,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : RefreshIndicator(
+                    onRefresh: _taiDanhSachBacSi,
+                    color: _mauXanh,
+                    child: ListView.builder(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      itemCount: _danhSachBacSiFiltered.length,
+                      itemBuilder: (context, index) {
+                        final bacsi = _danhSachBacSiFiltered[index];
+                        return _buildBacSiCard(bacsi);
+                      },
+                    ),
+                  ),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           _clearForm();
@@ -759,7 +772,7 @@ class _QuanLyBacSiViewState extends State<QuanLyBacSiView> {
     );
   }
 
-  Widget _buildBacSiCard(Map<String, dynamic> bacsi, int index) {
+  Widget _buildBacSiCard(Map<String, dynamic> bacsi) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 2,
@@ -833,7 +846,7 @@ class _QuanLyBacSiViewState extends State<QuanLyBacSiView> {
                             Text('Xóa', style: TextStyle(color: Colors.red)),
                           ],
                         ),
-                        onTap: () => _xoaBacSi(bacsi['MaBacSi'], index),
+                        onTap: () => _xoaBacSi(bacsi['MaBacSi']),
                       ),
                     ],
                   ),

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../controllers/admin_controller.dart';
 import '../../utils/constants.dart';
+import '../../utils/loading_utils.dart';
+import '../../widgets/loading_view.dart';
 
 class KhoaView extends StatefulWidget {
   const KhoaView({super.key});
@@ -71,15 +73,14 @@ class _KhoaViewState extends State<KhoaView> {
   Future<void> _themKhoa() async {
     if (!_validateForm()) return;
 
-    setState(() => _isLoading = true);
-
+    LoadingUtils.showLoading(message: 'Đang thêm khoa...');
     final result = await _adminController.themKhoa(
       tenKhoa: _tenKhoaController.text.trim(),
       maChuyenKhoa: _maChuyenKhoaController.text.trim(),
     );
+    LoadingUtils.hideLoading();
 
     if (mounted) {
-      setState(() => _isLoading = false);
       if (result['success'] == true) {
         _showSnackBar('Thêm khoa thành công');
         Navigator.pop(context);
@@ -94,15 +95,14 @@ class _KhoaViewState extends State<KhoaView> {
   Future<void> _capNhatKhoa() async {
     if (!_validateForm()) return;
 
-    setState(() => _isLoading = true);
-
+    LoadingUtils.showLoading(message: 'Đang cập nhật khoa...');
     final result = await _adminController.capNhatKhoa(
       maKhoa: _editingKhoaId.toString(),
       tenKhoa: _tenKhoaController.text.trim(),
     );
+    LoadingUtils.hideLoading();
 
     if (mounted) {
-      setState(() => _isLoading = false);
       if (result['success'] == true) {
         _showSnackBar('Cập nhật khoa thành công');
         Navigator.pop(context);
@@ -117,7 +117,7 @@ class _KhoaViewState extends State<KhoaView> {
     }
   }
 
-  Future<void> _xoaKhoa(int maKhoa, int index) async {
+  Future<void> _xoaKhoa(int maKhoa) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -138,12 +138,11 @@ class _KhoaViewState extends State<KhoaView> {
 
     if (confirmed != true) return;
 
-    setState(() => _isLoading = true);
-
+    LoadingUtils.showLoading(message: 'Đang xóa khoa...');
     final result = await _adminController.xoaKhoa(maKhoa.toString());
+    LoadingUtils.hideLoading();
 
     if (mounted) {
-      setState(() => _isLoading = false);
       if (result['success'] == true) {
         _showSnackBar('Xóa khoa thành công');
         await _taiDanhSachKhoa();
@@ -352,7 +351,10 @@ class _KhoaViewState extends State<KhoaView> {
         centerTitle: false,
       ),
       body: _isLoading && _danhSachKhoa.isEmpty
-          ? Center(child: CircularProgressIndicator(color: AppColors.primary))
+          ? const LoadingView(
+              message: 'Đang tải danh sách khoa...',
+              isOverlay: false,
+            )
           : Column(
               children: [
                 // Search
@@ -583,7 +585,7 @@ class _KhoaViewState extends State<KhoaView> {
                               ),
                             ],
                           ),
-                          onTap: () => _xoaKhoa(khoa['MaKhoa'], index),
+                          onTap: () => _xoaKhoa(khoa['MaKhoa']),
                         ),
                       ],
                     ),

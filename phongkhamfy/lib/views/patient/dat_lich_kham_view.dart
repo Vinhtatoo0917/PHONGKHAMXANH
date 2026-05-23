@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:phongkhamfy/controllers/lich_kham_controller.dart';
+import 'package:phongkhamfy/widgets/loading_view.dart';
 
 extension _LichKhamMap on Map<String, dynamic> {
   int? get maLichLamViec => _toInt(this['MaLichLamViec']);
@@ -404,12 +405,13 @@ class _DatLichKhamViewState extends State<DatLichKhamView> {
     }
 
     if (_controller.isLoadingSchedules.value) {
-      return _separatedSliver(
-        itemCount: 3,
-        gap: 12,
-        itemBuilder: (_, __) => const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16),
-          child: _SkeletonBox(height: 126),
+      return const SliverToBoxAdapter(
+        child: SizedBox(
+          height: 300,
+          child: LoadingView(
+            message: 'Đang tìm suất khám...',
+            isOverlay: false,
+          ),
         ),
       );
     }
@@ -450,12 +452,13 @@ class _DatLichKhamViewState extends State<DatLichKhamView> {
 
   Widget _buildServiceList() {
     if (_controller.isLoadingServices.value) {
-      return _separatedSliver(
-        itemCount: 3,
-        gap: 10,
-        itemBuilder: (_, __) => const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16),
-          child: _SkeletonBox(height: 72),
+      return const SliverToBoxAdapter(
+        child: SizedBox(
+          height: 240,
+          child: LoadingView(
+            message: 'Đang tải danh sách dịch vụ...',
+            isOverlay: false,
+          ),
         ),
       );
     }

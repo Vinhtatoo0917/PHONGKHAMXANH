@@ -17,6 +17,7 @@ import '../../controllers/password_controller.dart';
 
 // Import màn hình xác nhận OTP
 import 'verify_otp_view.dart';
+import '../../widgets/loading_overlay.dart';
 
 // ═══════════════════════════════════════════════════════════════
 // CLASS: ManHinhQuenMatKhau
@@ -205,55 +206,58 @@ class _TrangThaiManHinhQuenMatKhau extends State<ManHinhQuenMatKhau> {
           ),
         ),
       ),
-      body: Stack(
-        children: [
-          // ─────────────────────────────────────────────────────────
-          // HIỆU ỨNG NỀN (Các vòng tròn trang trí)
-          // ─────────────────────────────────────────────────────────
-          const HieuUngNen(),
-
-          // ─────────────────────────────────────────────────────────
-          // NỘI DUNG CHÍNH
-          // ─────────────────────────────────────────────────────────
-          SafeArea(
-            child: Center(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxWidth: maxWidth,
-                  minHeight: size.height - 200, // Đảm bảo chiều cao tối thiểu
-                ),
-                child: SingleChildScrollView(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: paddingNgang,
-                    vertical: paddingDoc,
+      body: LoadingOverlay(
+        isLoading: _dangTaiDuLieu,
+        child: Stack(
+          children: [
+            // ─────────────────────────────────────────────────────────
+            // HIỆU ỨNG NỀN (Các vòng tròn trang trí)
+            // ─────────────────────────────────────────────────────────
+            const HieuUngNen(),
+  
+            // ─────────────────────────────────────────────────────────
+            // NỘI DUNG CHÍNH
+            // ─────────────────────────────────────────────────────────
+            SafeArea(
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: maxWidth,
+                    minHeight: size.height - 200, // Đảm bảo chiều cao tối thiểu
                   ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // ───────────────────────────────────────────────
-                      // LOGO VÀ TÊN PHÒNG KHÁM
-                      // ───────────────────────────────────────────────
-                      _xayDungLogo(laDienThoai),
-                      SizedBox(height: laDienThoai ? 24 : 36),
-
-                      // ───────────────────────────────────────────────
-                      // CARD QUÊN MẬT KHẨU
-                      // ───────────────────────────────────────────────
-                      _xayDungCardQuenMatKhau(laDienThoai),
-
-                      SizedBox(height: laDienThoai ? 16 : 24),
-
-                      // ───────────────────────────────────────────────
-                      // NÚT QUAY LẠI ĐĂNG NHẬP
-                      // ───────────────────────────────────────────────
-                      _xayDungNutQuayLaiDangNhap(laDienThoai),
-                    ],
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: paddingNgang,
+                      vertical: paddingDoc,
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // ───────────────────────────────────────────────
+                        // LOGO VÀ TÊN PHÒNG KHÁM
+                        // ───────────────────────────────────────────────
+                        _xayDungLogo(laDienThoai),
+                        SizedBox(height: laDienThoai ? 24 : 36),
+  
+                        // ───────────────────────────────────────────────
+                        // CARD QUÊN MẬT KHẨU
+                        // ───────────────────────────────────────────────
+                        _xayDungCardQuenMatKhau(laDienThoai),
+  
+                        SizedBox(height: laDienThoai ? 16 : 24),
+  
+                        // ───────────────────────────────────────────────
+                        // NÚT QUAY LẠI ĐĂNG NHẬP
+                        // ───────────────────────────────────────────────
+                        _xayDungNutQuayLaiDangNhap(laDienThoai),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

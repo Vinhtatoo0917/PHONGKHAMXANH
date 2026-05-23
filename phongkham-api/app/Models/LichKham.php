@@ -21,7 +21,8 @@ class LichKham extends Model
         'ThoiDiemCheckIn',
         'ThoiDiemCheckOut',
         'MaNhanVienCheckIn',
-        'MaLichLamViec'
+        'MaLichLamViec',
+        'MAOTP'
     ];
 
     protected $casts = [
@@ -52,5 +53,10 @@ class LichKham extends Model
     public function donThuoc()
     {
         return $this->hasOne(DonThuoc::class, 'MaLichKham', 'MaLichKham');
+    }
+
+    public function phieuChiDinh()
+    {
+        return $this->hasMany(PhieuChiDinh::class, 'MaLichKham', 'MaLichKham');
     }
 }

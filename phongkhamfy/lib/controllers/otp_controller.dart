@@ -1,7 +1,4 @@
-// ═══════════════════════════════════════════════════════════════
-// FILE: dich_vu_xac_nhan_otp.dart
-// MÔ TẢ: Service xử lý logic xác nhận OTP và cập nhật mật khẩu
-// ═══════════════════════════════════════════════════════════════
+import '../utils/loading_utils.dart';
 
 // ═══════════════════════════════════════════════════════════════
 // CLASS: ThongTinXacNhanOTP
@@ -158,35 +155,38 @@ class DichVuXacNhanOTP {
     }
 
     // ─────────────────────────────────────────────────────────────
-    // BƯỚC 2: GIẢ LẬP GỌI API XÁC NHẬN OTP (2 giây)
+    // BƯỚC 2: GỌI API XÁC NHẬN OTP
     // ─────────────────────────────────────────────────────────────
-    await Future.delayed(const Duration(seconds: 2));
+    LoadingUtils.showLoading(message: 'Đang xác nhận mã OTP...');
+    try {
+      // ───────────────────────────────────────────────────────────
+      // BƯỚC 3: KIỂM TRA MÃ OTP CÓ ĐÚNG KHÔNG (giả lập)
+      // ───────────────────────────────────────────────────────────
+      final otpDung = await _kiemTraOTPDung(thongTin.email, thongTin.maOTP);
+      if (!otpDung) {
+        return KetQuaXacNhanOTP(
+          thanhCong: false,
+          thongBao: 'Mã xác nhận không đúng hoặc đã hết hạn',
+          maLoi: 'OTP_SAI',
+        );
+      }
 
-    // ─────────────────────────────────────────────────────────────
-    // BƯỚC 3: KIỂM TRA MÃ OTP CÓ ĐÚNG KHÔNG (giả lập)
-    // ─────────────────────────────────────────────────────────────
-    final otpDung = await _kiemTraOTPDung(thongTin.email, thongTin.maOTP);
-    if (!otpDung) {
+      // ───────────────────────────────────────────────────────────
+      // BƯỚC 4: CẬP NHẬT MẬT KHẨU MỚI (giả lập)
+      // ───────────────────────────────────────────────────────────
+      // TODO: Trong thực tế sẽ gọi API cập nhật mật khẩu
+
+      // ───────────────────────────────────────────────────────────
+      // BƯỚC 5: TRẢ VỀ KẾT QUẢ THÀNH CÔNG
+      // ───────────────────────────────────────────────────────────
       return KetQuaXacNhanOTP(
-        thanhCong: false,
-        thongBao: 'Mã xác nhận không đúng hoặc đã hết hạn',
-        maLoi: 'OTP_SAI',
+        thanhCong: true,
+        thongBao:
+            'Cập nhật mật khẩu thành công! Bạn có thể đăng nhập với mật khẩu mới.',
       );
+    } finally {
+      LoadingUtils.hideLoading();
     }
-
-    // ─────────────────────────────────────────────────────────────
-    // BƯỚC 4: CẬP NHẬT MẬT KHẨU MỚI (giả lập)
-    // ─────────────────────────────────────────────────────────────
-    // TODO: Trong thực tế sẽ gọi API cập nhật mật khẩu
-
-    // ─────────────────────────────────────────────────────────────
-    // BƯỚC 5: TRẢ VỀ KẾT QUẢ THÀNH CÔNG
-    // ─────────────────────────────────────────────────────────────
-    return KetQuaXacNhanOTP(
-      thanhCong: true,
-      thongBao:
-          'Cập nhật mật khẩu thành công! Bạn có thể đăng nhập với mật khẩu mới.',
-    );
   }
 
   // ═══════════════════════════════════════════════════════════════

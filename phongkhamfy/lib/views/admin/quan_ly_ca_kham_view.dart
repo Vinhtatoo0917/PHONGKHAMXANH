@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../controllers/admin_controller.dart';
+import '../../utils/loading_utils.dart';
+import '../../widgets/loading_view.dart';
 
 class QuanLyCaKhamView extends StatefulWidget {
   const QuanLyCaKhamView({super.key});
@@ -84,7 +86,7 @@ class _QuanLyCaKhamViewState extends State<QuanLyCaKhamView> {
   Future<void> _themCaKham() async {
     if (!_validateForm()) return;
 
-    setState(() => _isLoading = true);
+    LoadingUtils.showLoading(message: 'Đang thêm ca khám...');
     final result = await _adminController.themCaKham(
       tenCa: _tenCaController.text.trim(),
       gioBatDau:
@@ -95,9 +97,9 @@ class _QuanLyCaKhamViewState extends State<QuanLyCaKhamView> {
       thoiLuongKham: int.parse(_thoiLuongController.text),
       trangThai: _trangThai,
     );
+    LoadingUtils.hideLoading();
 
     if (mounted) {
-      setState(() => _isLoading = false);
       if (result['success'] == true) {
         _showSnackBar('Thêm ca khám thành công');
         Navigator.pop(context);
@@ -115,7 +117,7 @@ class _QuanLyCaKhamViewState extends State<QuanLyCaKhamView> {
   Future<void> _capNhatCaKham() async {
     if (_editingCaId == null || !_validateForm()) return;
 
-    setState(() => _isLoading = true);
+    LoadingUtils.showLoading(message: 'Đang cập nhật ca khám...');
     final result = await _adminController.capNhatCaKham(
       maCa: _editingCaId!,
       tenCa: _tenCaController.text.trim(),
@@ -127,9 +129,9 @@ class _QuanLyCaKhamViewState extends State<QuanLyCaKhamView> {
       thoiLuongKham: int.parse(_thoiLuongController.text),
       trangThai: _trangThai,
     );
+    LoadingUtils.hideLoading();
 
     if (mounted) {
-      setState(() => _isLoading = false);
       if (result['success'] == true) {
         _showSnackBar('Cập nhật ca khám thành công');
         Navigator.pop(context);
@@ -141,7 +143,7 @@ class _QuanLyCaKhamViewState extends State<QuanLyCaKhamView> {
     }
   }
 
-  Future<void> _xoaCaKham(int maCa, int index) async {
+  Future<void> _xoaCaKham(int maCa) async {
     final confirmed =
         await showDialog<bool>(
           context: context,
@@ -165,17 +167,17 @@ class _QuanLyCaKhamViewState extends State<QuanLyCaKhamView> {
 
     if (!confirmed) return;
 
-    setState(() => _danhSachCaKham.removeAt(index));
+    LoadingUtils.showLoading(message: 'Đang xóa ca khám...');
     final result = await _adminController.xoaCaKham(maCa);
+    LoadingUtils.hideLoading();
 
     if (mounted) {
       if (result['success'] == true) {
         _showSnackBar('Xóa ca khám thành công');
-        await _taiDanhSachCaKham();
       } else {
         _showSnackBar(result['message'] ?? 'Xóa thất bại', isError: true);
-        await _taiDanhSachCaKham();
       }
+      await _taiDanhSachCaKham();
     }
   }
 
@@ -504,7 +506,10 @@ class _QuanLyCaKhamViewState extends State<QuanLyCaKhamView> {
         centerTitle: false,
       ),
       body: _isLoading && _danhSachCaKham.isEmpty
-          ? Center(child: CircularProgressIndicator(color: _mauXanh))
+          ? const LoadingView(
+              message: 'Đang tải danh sách ca khám...',
+              isOverlay: false,
+            )
           : Column(
               children: [
                 // Search & Filter
@@ -728,7 +733,7 @@ class _QuanLyCaKhamViewState extends State<QuanLyCaKhamView> {
                             Text('Xóa', style: TextStyle(color: Colors.red)),
                           ],
                         ),
-                        onTap: () => _xoaCaKham(ca['MaCa'], index),
+                        onTap: () => _xoaCaKham(ca['MaCa']),
                       ),
                     ],
                   ),

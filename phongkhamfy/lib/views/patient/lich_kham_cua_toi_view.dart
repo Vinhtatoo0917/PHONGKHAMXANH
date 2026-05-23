@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:phongkhamfy/controllers/lich_kham_controller.dart';
+import 'package:phongkhamfy/widgets/loading_view.dart';
 
 extension _AppointmentMap on Map<String, dynamic> {
   int? get maLichKham => _toInt(this['MaLichKham']);
@@ -261,13 +262,11 @@ class _LichKhamCuaToiViewState extends State<LichKhamCuaToiView> {
   }
 
   Widget _buildLoadingList() {
-    return SliverList(
-      delegate: SliverChildBuilderDelegate(
-        (context, index) => const Padding(
-          padding: EdgeInsets.fromLTRB(16, 12, 16, 0),
-          child: _SkeletonBox(height: 178),
-        ),
-        childCount: 4,
+    return const SliverFillRemaining(
+      hasScrollBody: false,
+      child: LoadingView(
+        message: 'Đang tải lịch khám của bạn...',
+        isOverlay: false,
       ),
     );
   }
@@ -707,13 +706,36 @@ class _DetailSheet extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: Text(
-                    'Lịch khám #${appointment.maLichKham ?? '--'}',
-                    style: const TextStyle(
-                      color: _LichKhamCuaToiViewState._text,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w900,
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'STT: #${appointment.soThuTu ?? '--'}',
+                        style: const TextStyle(
+                          color: _LichKhamCuaToiViewState._muted,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        dateText,
+                        style: const TextStyle(
+                          color: _LichKhamCuaToiViewState._text,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '$timeText • ${appointment.tenPhong ?? 'Phòng'}',
+                        style: const TextStyle(
+                          color: _LichKhamCuaToiViewState._primary,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 _StatusBadge(label: statusLabel, color: statusColor),
@@ -796,6 +818,140 @@ class _DetailSheet extends StatelessWidget {
                 ),
               ),
             const SizedBox(height: 10),
+            if ((appointment['PhieuChiDinh'] as List? ?? []).isNotEmpty) ...[
+              const Divider(height: 26),
+              const Text(
+                'Phiếu chỉ định xét nghiệm',
+                style: TextStyle(
+                  color: _LichKhamCuaToiViewState._text,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 10),
+              ...(appointment['PhieuChiDinh'] as List? ?? []).map((phieu) {
+                final chiTiet = (phieu['ChiTiet'] as List? ?? []).cast<Map<String, dynamic>>();
+                final tenBacSi = phieu['BacSiThucHien']?.toString() ?? 'Bác sĩ xét nghiệm';
+                final chuyenKhoa = phieu['ChuyenKhoaBacSiThucHien']?.toString() ?? '';
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF0F9FF),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: _LichKhamCuaToiViewState._primary.withValues(alpha: 0.2)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(Icons.science_rounded, size: 18, color: _LichKhamCuaToiViewState._primary),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Phiếu #${phieu['MaPhieu']}',
+                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                ),
+                                Text(
+                                  '$tenBacSi${chuyenKhoa.isNotEmpty ? " • $chuyenKhoa" : ""}',
+                                  style: const TextStyle(fontSize: 11, color: _LichKhamCuaToiViewState._muted),
+                                ),
+                                if ((phieu['TenPhongXetNghiem']?.toString() ?? '').isNotEmpty)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 2),
+                                    child: Row(
+                                      children: [
+                                        const Icon(Icons.meeting_room_rounded, size: 11, color: _LichKhamCuaToiViewState._secondary),
+                                        const SizedBox(width: 4),
+                                        Expanded(
+                                          child: Text(
+                                            'Phòng: ${phieu['TenPhongXetNghiem']}${(phieu['KhuPhongXetNghiem']?.toString() ?? '').isNotEmpty ? " (Khu ${phieu['KhuPhongXetNghiem']})" : ""}',
+                                            style: const TextStyle(fontSize: 10, color: _LichKhamCuaToiViewState._secondary, fontWeight: FontWeight.w600),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: _LichKhamCuaToiViewState._primary.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              phieu['TrangThai'] == 'pending' ? 'Chờ xử lý' : phieu['TrangThai'] == 'processing' ? 'Đang xử lý' : 'Hoàn tất',
+                              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: _LichKhamCuaToiViewState._primary),
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (chiTiet.isNotEmpty) ...[
+                        const SizedBox(height: 8),
+                        const Divider(height: 8),
+                        const SizedBox(height: 4),
+                        ...chiTiet.take(3).map((ct) {
+                          final tenDV = ct['TenDichVu']?.toString() ?? 'Dịch vụ';
+                          final trangThai = ct['TrangThai']?.toString() ?? '';
+                          final ketQua = ct['KetQua']?.toString() ?? '';
+                          final chiSo = ct['ChiSo']?.toString() ?? '';
+                          final hasResult = ketQua.isNotEmpty || chiSo.isNotEmpty;
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 3),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(
+                                      trangThai == 'completed' ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
+                                      size: 10,
+                                      color: trangThai == 'completed' ? _LichKhamCuaToiViewState._secondary : _LichKhamCuaToiViewState._muted,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Expanded(child: Text(tenDV, style: const TextStyle(fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis)),
+                                  ],
+                                ),
+                                if (hasResult) ...[
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 16, top: 2),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        if (chiSo.isNotEmpty)
+                                          Text('Chỉ số: $chiSo', style: const TextStyle(fontSize: 10, color: _LichKhamCuaToiViewState._secondary, fontWeight: FontWeight.w600)),
+                                        if (ketQua.isNotEmpty)
+                                          Text('Kết quả: $ketQua', style: const TextStyle(fontSize: 10, color: _LichKhamCuaToiViewState._secondary, fontWeight: FontWeight.w600)),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          );
+                        }),
+                        if (chiTiet.length > 3)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4),
+                            child: Text(
+                              '+${chiTiet.length - 3} khác',
+                              style: const TextStyle(fontSize: 11, color: _LichKhamCuaToiViewState._muted, fontStyle: FontStyle.italic),
+                            ),
+                          ),
+                      ],
+                    ],
+                  ),
+                );
+              }),
+              const SizedBox(height: 10),
+            ],
             Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
@@ -928,7 +1084,7 @@ class _DetailSheet extends StatelessWidget {
                   child: ListView.separated(
                     shrinkWrap: true,
                     itemCount: chiTiet.length,
-                    separatorBuilder: (_, __) => const Divider(height: 24),
+                    separatorBuilder: (_, _) => const Divider(height: 24),
                     itemBuilder: (context, index) {
                       final item = chiTiet[index];
                       return Column(

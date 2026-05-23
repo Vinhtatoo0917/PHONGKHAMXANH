@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:phongkhamfy/controllers/thuoc_controller.dart';
+import 'package:phongkhamfy/utils/loading_utils.dart';
+import 'package:phongkhamfy/widgets/loading_view.dart';
 import 'dart:ui';
 
 class ManageThuocView extends StatefulWidget {
@@ -11,7 +13,7 @@ class ManageThuocView extends StatefulWidget {
 }
 
 class _ManageThuocViewState extends State<ManageThuocView> {
-  final controller = Get.put(ThuocController());
+  final controller = Get.put(ThuocController(), permanent: true);
   final TextEditingController _searchController = TextEditingController();
   final RxString _searchQuery = ''.obs;
 
@@ -115,14 +117,20 @@ class _ManageThuocViewState extends State<ManageThuocView> {
 
   Widget _buildMedicineList() {
     return Obx(() {
-      if (controller.isLoading.value) {
-        return const SliverFillRemaining(child: Center(child: CircularProgressIndicator()));
+      if (controller.isLoading.value && controller.medicines.isEmpty) {
+        return const SliverFillRemaining(
+          child: LoadingView(
+            message: 'Đang tải danh sách thuốc...',
+            isOverlay: false,
+          ),
+        );
       }
 
       final items = controller.medicines.where((m) {
         final query = _searchQuery.value.toLowerCase();
-        return m['TenThuoc'].toString().toLowerCase().contains(query) ||
-               (m['MoTa'] ?? '').toString().toLowerCase().contains(query);
+        return (m['TenThuoc'] ?? '').toString().toLowerCase().contains(query) ||
+               (m['MoTa'] ?? '').toString().toLowerCase().contains(query) ||
+               (m['MaThuoc'] ?? '').toString().toLowerCase().contains(query);
       }).toList();
 
       if (items.isEmpty) {
@@ -379,7 +387,7 @@ class _ManageThuocViewState extends State<ManageThuocView> {
               Text('Trạng thái kinh doanh', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.grey[600])),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
-                value: trangThai,
+                initialValue: trangThai,
                 items: ['Kinh doanh', 'Ngừng kinh doanh', 'Hết hàng']
                     .map((s) => DropdownMenuItem(value: s, child: Text(s, style: const TextStyle(fontSize: 14)))).toList(),
                 onChanged: (v) => trangThai = v ?? 'Kinh doanh',
@@ -410,28 +418,23 @@ class _ManageThuocViewState extends State<ManageThuocView> {
                       'TrangThai': trangThai,
                     };
 
-                    _showLoadingDialog('Đang xử lý...');
-                    
-                    bool success;
-                    final startTime = DateTime.now();
-                    
+                    LoadingUtils.showLoading(
+                      message: thuoc == null
+                          ? 'Đang thêm thuốc...'
+                          : 'Đang cập nhật thuốc...',
+                    );
+                    final bool success;
                     if (thuoc == null) {
                       success = await controller.addMedicine(data);
                     } else {
-                      success = await controller.updateMedicine(thuoc['MaThuoc'], data);
+                      success =
+                          await controller.updateMedicine(thuoc['MaThuoc'], data);
                     }
+                    LoadingUtils.hideLoading();
 
-                    // Đảm bảo load ít nhất 2s
-                    final elapsed = DateTime.now().difference(startTime).inMilliseconds;
-                    if (elapsed < 2000) {
-                      await Future.delayed(Duration(milliseconds: 2000 - elapsed));
-                    }
-
-                    if (mounted) {
-                      Navigator.pop(context); // Đóng loading dialog
-                      if (success) {
-                        Navigator.pop(context); // Đóng form
-                      }
+                    if (success) {
+                      // BottomSheet được mở bằng Get.bottomSheet => đóng bằng Get.back()
+                      Get.back();
                     }
                   },
                   style: FilledButton.styleFrom(
@@ -507,21 +510,14 @@ class _ManageThuocViewState extends State<ManageThuocView> {
               margin: const EdgeInsets.only(left: 12),
               child: FilledButton(
                 onPressed: () async {
-                  _showLoadingDialog('Đang xóa thuốc...');
-                  final startTime = DateTime.now();
-                  
-                  final success = await controller.deleteMedicine(thuoc['MaThuoc']);
-                  
-                  final elapsed = DateTime.now().difference(startTime).inMilliseconds;
-                  if (elapsed < 2000) {
-                    await Future.delayed(Duration(milliseconds: 2000 - elapsed));
-                  }
+                  LoadingUtils.showLoading(message: 'Đang xóa thuốc...');
+                  final success =
+                      await controller.deleteMedicine(thuoc['MaThuoc']);
+                  LoadingUtils.hideLoading();
 
-                  if (mounted) {
-                    Navigator.pop(context); // Đóng loading dialog
-                    if (success) {
-                      Navigator.pop(context); // Đóng confirm dialog
-                    }
+                  if (success) {
+                    // Dialog được mở bằng Get.dialog => đóng bằng Get.back()
+                    Get.back();
                   }
                 },
                 style: FilledButton.styleFrom(
@@ -538,34 +534,4 @@ class _ManageThuocViewState extends State<ManageThuocView> {
     );
   }
 
-  void _showLoadingDialog(String message) {
-    Get.dialog(
-      barrierDismissible: false,
-      Center(
-        child: Container(
-          padding: const EdgeInsets.all(32),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(24),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CircularProgressIndicator(color: _primary),
-              const SizedBox(height: 24),
-              Text(
-                message,
-                style: TextStyle(
-                  color: _slate,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                  decoration: TextDecoration.none,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 }

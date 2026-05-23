@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs -I {} basename {})",
+      "Bash(flutter analyze *)",
+      "Bash(php -l c:/Users/ADMIN/Documents/PTDU/Doan/phongkham-api/routes/web.php)",
+      "Bash(flutter pub *)",
+      "Read(//Users/**)",
+      "Bash(find . -name \"LichKhamController.php\" -type f)",
+      "Bash(cd \"/c/Users/ADMIN/Documents/PTDU/Doan\" && ls -la)",
+      "Read(//c/c/Users/ADMIN/Documents/PTDU/**)",
+      "Bash(flutter build *)"
+    ]
+  }
+}

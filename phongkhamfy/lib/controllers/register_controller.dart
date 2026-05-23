@@ -6,6 +6,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../config/api_config.dart';
+import '../utils/loading_utils.dart';
 
 // ═══════════════════════════════════════════════════════════════
 // MODEL: KetQuaDangKy
@@ -29,10 +30,12 @@ class DichVuDangKy {
   String? kiemTraSoDienThoai(String sdt) {
     sdt = sdt.trim();
     if (sdt.isEmpty) return 'Vui lòng nhập số điện thoại';
-    if (!RegExp(r'^[0-9]+$').hasMatch(sdt))
+    if (!RegExp(r'^[0-9]+$').hasMatch(sdt)) {
       return 'Số điện thoại chỉ được chứa chữ số';
-    if (sdt.length < 9 || sdt.length > 11)
+    }
+    if (sdt.length < 9 || sdt.length > 11) {
       return 'Số điện thoại phải có 9-11 chữ số';
+    }
     return null;
   }
 
@@ -103,6 +106,7 @@ class DichVuDangKy {
       'MatKhau': matKhau,
     };
 
+    LoadingUtils.showLoading(message: 'Đang tạo tài khoản mới...');
     try {
       // GỌI API
       final url = Uri.parse(ApiConfig.getFullUrl(ApiConfig.register));
@@ -174,6 +178,8 @@ class DichVuDangKy {
         thanhCong: false,
         thongBaoLoi: 'Không thể kết nối đến server. Lỗi: $e',
       );
+    } finally {
+      LoadingUtils.hideLoading();
     }
   }
 }

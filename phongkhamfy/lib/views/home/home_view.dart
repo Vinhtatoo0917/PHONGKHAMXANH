@@ -6,6 +6,7 @@ import 'package:phongkhamfy/views/patient/lich_kham_cua_toi_view.dart';
 import 'package:phongkhamfy/widgets/dialog_dang_xuat.dart';
 import 'package:phongkhamfy/widgets/loading_dang_xuat.dart';
 import 'package:phongkhamfy/views/patient/edit_profile_view.dart';
+import 'package:phongkhamfy/widgets/loading_overlay.dart';
 
 class HomeView extends StatefulWidget {
   final String tenNguoiDung;
@@ -20,6 +21,7 @@ class HomeView extends StatefulWidget {
 class _HomeViewState extends State<HomeView> {
   int _selectedBottomIndex = 0;
   int _currentNewsIndex = 0;
+  final bool _isLoading = false;
   final _dichVuXacThuc = DichVuXacThuc();
 
   static const Color _mauChinh = Color(0xFF1E88E5);
@@ -81,7 +83,10 @@ class _HomeViewState extends State<HomeView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: _mauNen,
-      body: _buildBody(),
+      body: LoadingOverlay(
+        isLoading: _isLoading,
+        child: _buildBody(),
+      ),
       bottomNavigationBar: _buildBottomNavigationBar(),
     );
   }

@@ -9,6 +9,7 @@ import 'package:get/get.dart';
 import 'views/auth/login_view.dart';
 import 'views/home/home_view.dart';
 import 'views/admin/admin_home_view.dart';
+import 'views/doctor/doctor_home_view.dart';
 import 'controllers/auth_controller.dart';
 
 void main() {
@@ -83,7 +84,6 @@ class _TrangThaiManHinhKhoiDong extends State<ManHinhKhoiDong> {
       // So sánh không phân biệt hoa thường
       if (vaiTro.toString().toLowerCase() == 'admin') {
         print('✅ [DEBUG MAIN] Đang chuyển đến màn hình Admin');
-        // Vào màn hình Admin
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -93,9 +93,21 @@ class _TrangThaiManHinhKhoiDong extends State<ManHinhKhoiDong> {
             ),
           ),
         );
+      } else if (vaiTro.toString().toLowerCase() == 'bacsi') {
+        print('✅ [DEBUG MAIN] Đang chuyển đến màn hình Bác sĩ');
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => DoctorHomeView(
+              tenNguoiDung:
+                  userData['ten'] ?? userData['name'] ?? userData['email'] ?? 'Bác sĩ',
+              email: userData['email'] ?? userData['sdt'] ?? '',
+            ),
+          ),
+        );
       } else {
         print(
-          '❌ [DEBUG MAIN] Vai trò không phải admin, chuyển đến màn hình bệnh nhân',
+          '❌ [DEBUG MAIN] Vai trò mặc định, chuyển đến màn hình bệnh nhân',
         );
         // Vào màn hình Home bệnh nhân
         Navigator.pushReplacement(
@@ -103,7 +115,7 @@ class _TrangThaiManHinhKhoiDong extends State<ManHinhKhoiDong> {
           MaterialPageRoute(
             builder: (context) => HomeView(
               tenNguoiDung:
-                  userData['email'] ?? userData['sdt'] ?? 'Người dùng',
+                  userData['ten'] ?? userData['name'] ?? userData['email'] ?? 'Người dùng',
               email: userData['email'] ?? userData['sdt'] ?? '',
             ),
           ),

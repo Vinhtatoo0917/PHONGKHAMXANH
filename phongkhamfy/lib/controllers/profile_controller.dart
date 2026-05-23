@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:phongkhamfy/config/api_config.dart';
 import 'package:phongkhamfy/services/session_manager.dart';
+import 'package:phongkhamfy/utils/loading_utils.dart';
 
 class ProfileController extends GetxController {
   final Dio _dio = Dio();
@@ -37,7 +38,6 @@ class ProfileController extends GetxController {
 
       if (response.statusCode == 200 && response.data['success']) {
         profile.value = Map<String, dynamic>.from(response.data['data']);
-        // Sync session manager if needed
         return;
       }
       throw Exception(response.data['message'] ?? 'Lỗi khi lấy thông tin');
@@ -53,6 +53,7 @@ class ProfileController extends GetxController {
   }
 
   Future<bool> updateProfile(Map<String, dynamic> data) async {
+    LoadingUtils.showLoading(message: 'Đang lưu cập nhật...');
     try {
       isUpdating.value = true;
       final response = await _dio.post(
@@ -87,6 +88,26 @@ class ProfileController extends GetxController {
       return false;
     } finally {
       isUpdating.value = false;
+      LoadingUtils.hideLoading();
+    }
+  }
+
+  /// Lấy hoá đơn của bệnh nhân
+  Future<Map<String, dynamic>?> getHoaDon(int maLichKham) async {
+    try {
+      final response = await _dio.get(
+        '$_baseUrl/lich-kham/$maLichKham/hoa-don',
+        options: await _jsonOptions(),
+      );
+
+      if (response.statusCode == 200 && response.data['success']) {
+        return Map<String, dynamic>.from(response.data['data']);
+      }
+      return null;
+    } catch (e) {
+      print('Lỗi lấy hoá đơn: $e');
+      return null;
     }
   }
 }
+

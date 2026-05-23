@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:phongkhamfy/controllers/profile_controller.dart';
+import 'package:phongkhamfy/widgets/loading_view.dart';
 
 class EditProfileView extends StatefulWidget {
   const EditProfileView({super.key});
@@ -176,7 +177,10 @@ class _EditProfileViewState extends State<EditProfileView> {
       backgroundColor: const Color(0xFFF8FAFC),
       body: Obx(() {
         if (controller.isLoading.value) {
-          return const Center(child: CircularProgressIndicator());
+          return const LoadingView(
+            message: 'Đang tải hồ sơ...',
+            isOverlay: false,
+          );
         }
 
         return Stack(
@@ -313,30 +317,10 @@ class _EditProfileViewState extends State<EditProfileView> {
                 ),
               ],
             ),
-            if (controller.isUpdating.value) _buildLoadingOverlay(),
+            if (controller.isUpdating.value) const LoadingView(message: 'Đang lưu thông tin...'),
           ],
         );
       }),
-    );
-  }
-
-  Widget _buildLoadingOverlay() {
-    return Container(
-      color: Colors.black.withValues(alpha: 0.3),
-      child: Center(
-        child: Container(
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CircularProgressIndicator(color: _primary),
-              const SizedBox(height: 16),
-              const Text('Đang lưu thông tin...', style: TextStyle(fontWeight: FontWeight.w800)),
-            ],
-          ),
-        ),
-      ),
     );
   }
 
@@ -391,7 +375,7 @@ class _EditProfileViewState extends State<EditProfileView> {
 
   Widget _dropdownField(String label, IconData icon, List<String> options) {
     return DropdownButtonFormField<String>(
-      value: _gioiTinh,
+      initialValue: _gioiTinh,
       items: options.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
       decoration: _inputDecoration(label, icon),
       style: const TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.w700),

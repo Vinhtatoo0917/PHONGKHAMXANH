@@ -284,6 +284,49 @@ class PhongKhamController extends Controller
     }
 
     /**
+     * Thêm khu mới
+     * POST /admin/phong-kham/khu/tao-moi
+     */
+    public function createKhu(Request $request)
+    {
+        $checkAdmin = $this->checkAdmin($request);
+        if ($checkAdmin) return $checkAdmin;
+
+        $request->validate([
+            'Khu' => 'required|string|max:100'
+        ]);
+
+        $khu = $request->Khu;
+
+        // Kiểm tra khu đã tồn tại chưa
+        $khuTonTai = DB::table('phongkham')
+            ->where('Khu', $khu)
+            ->exists();
+
+        if ($khuTonTai) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Khu này đã tồn tại'
+            ], 422);
+        }
+
+        // Tạo phòng placeholder để lưu Khu
+        $MaPhong = DB::table('phongkham')->insertGetId([
+            'TenPhong' => "[Placeholder] $khu",
+            'Khu' => $khu
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Thêm khu thành công',
+            'data' => [
+                'Khu' => $khu,
+                'MaPhong' => $MaPhong
+            ]
+        ], 201);
+    }
+
+    /**
      * Lấy danh sách các khu
      * GET /admin/phong-kham/khu/danh-sach
      */

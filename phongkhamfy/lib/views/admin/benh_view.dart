@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../controllers/admin_controller.dart';
 import '../../utils/constants.dart';
+import '../../utils/loading_utils.dart';
+import '../../widgets/loading_view.dart';
 
 class BenhView extends StatefulWidget {
   const BenhView({super.key});
@@ -76,16 +78,15 @@ class _BenhViewState extends State<BenhView> {
   Future<void> _themBenh() async {
     if (!_validateForm()) return;
 
-    setState(() => _isLoading = true);
-
+    LoadingUtils.showLoading(message: 'Đang thêm bệnh...');
     final result = await _adminController.themBenh(
       tenBenh: _tenBenhController.text.trim(),
       maBenhLy: _maBenhLyController.text.trim(),
       moTa: _moTaController.text.trim(),
     );
+    LoadingUtils.hideLoading();
 
     if (mounted) {
-      setState(() => _isLoading = false);
       if (result['success'] == true) {
         _showSnackBar('Thêm bệnh thành công');
         Navigator.pop(context);
@@ -100,16 +101,15 @@ class _BenhViewState extends State<BenhView> {
   Future<void> _capNhatBenh() async {
     if (!_validateForm()) return;
 
-    setState(() => _isLoading = true);
-
+    LoadingUtils.showLoading(message: 'Đang cập nhật bệnh...');
     final result = await _adminController.capNhatBenh(
       maBenh: _editingBenhId.toString(),
       tenBenh: _tenBenhController.text.trim(),
       moTa: _moTaController.text.trim(),
     );
+    LoadingUtils.hideLoading();
 
     if (mounted) {
-      setState(() => _isLoading = false);
       if (result['success'] == true) {
         _showSnackBar('Cập nhật bệnh thành công');
         Navigator.pop(context);
@@ -124,7 +124,7 @@ class _BenhViewState extends State<BenhView> {
     }
   }
 
-  Future<void> _xoaBenh(int maBenh, int index) async {
+  Future<void> _xoaBenh(int maBenh) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -145,12 +145,11 @@ class _BenhViewState extends State<BenhView> {
 
     if (confirmed != true) return;
 
-    setState(() => _isLoading = true);
-
+    LoadingUtils.showLoading(message: 'Đang xóa bệnh...');
     final result = await _adminController.xoaBenh(maBenh.toString());
+    LoadingUtils.hideLoading();
 
     if (mounted) {
-      setState(() => _isLoading = false);
       if (result['success'] == true) {
         _showSnackBar('Xóa bệnh thành công');
         await _taiDanhSachBenh();
@@ -372,7 +371,10 @@ class _BenhViewState extends State<BenhView> {
         centerTitle: false,
       ),
       body: _isLoading && _danhSachBenh.isEmpty
-          ? Center(child: CircularProgressIndicator(color: AppColors.primary))
+          ? const LoadingView(
+              message: 'Đang tải danh sách bệnh...',
+              isOverlay: false,
+            )
           : Column(
               children: [
                 // Search
@@ -547,7 +549,7 @@ class _BenhViewState extends State<BenhView> {
                             ),
                           ],
                         ),
-                        onTap: () => _xoaBenh(benh['MaBenh'], index),
+                        onTap: () => _xoaBenh(benh['MaBenh']),
                       ),
                     ],
                   ),

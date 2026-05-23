@@ -29,7 +29,7 @@ class AuthController extends Controller
 
         // Kiểm tra mật khẩu (hỗ trợ cả plain text và hash)
         $passwordMatch = false;
-        
+
         // Kiểm tra xem mật khẩu có được hash không
         if (strlen($taikhoan->MatKhau) === 60 && str_starts_with($taikhoan->MatKhau, '$2y$')) {
             // Mật khẩu đã hash, dùng Hash::check
@@ -66,6 +66,15 @@ class AuthController extends Controller
             ->where('MaTaiKhoan', $taikhoan->MaTaiKhoan)
             ->value('MaBenhNhan');
 
+        // Nếu là bác sĩ thì join bảng bacsi để lấy chuyên khoa (vd: "Khoa Xét nghiệm")
+        $bacSiInfo = null;
+        if (strtolower((string) $taikhoan->VaiTro) === 'bacsi') {
+            $bacSiInfo = DB::table('bacsi')
+                ->where('MaTaiKhoan', $taikhoan->MaTaiKhoan)
+                ->select('MaBacSi', 'ChuyenKhoa', 'ho', 'ten')
+                ->first();
+        }
+
         return response()->json([
             'success' => true,
             'message' => 'Đăng nhập thành công',
@@ -77,6 +86,9 @@ class AuthController extends Controller
                     'email' => $taikhoan->email,
                     'sdt' => $taikhoan->sdt,
                     'VaiTro' => $taikhoan->VaiTro,
+                    // Bổ sung cho bác sĩ để Flutter nhận diện đúng tab "Công việc xét nghiệm của tôi"
+                    'MaBacSi' => $bacSiInfo->MaBacSi ?? null,
+                    'ChuyenKhoa' => $bacSiInfo->ChuyenKhoa ?? null,
                 ]
             ]
         ], 200);
@@ -211,19 +223,31 @@ class AuthController extends Controller
             ], 404);
         }
 
+        $maBenhNhan = DB::table('benhnhan')
+            ->where('MaTaiKhoan', $taikhoan->MaTaiKhoan)
+            ->value('MaBenhNhan');
+
+        // Nếu là bác sĩ thì join bảng bacsi để lấy chuyên khoa (vd: "Khoa Xét nghiệm")
+        $bacSiInfo = null;
+        if (strtolower((string) $taikhoan->VaiTro) === 'bacsi') {
+            $bacSiInfo = DB::table('bacsi')
+                ->where('MaTaiKhoan', $taikhoan->MaTaiKhoan)
+                ->select('MaBacSi', 'ChuyenKhoa', 'ho', 'ten')
+                ->first();
+        }
+
         return response()->json([
             'success' => true,
             'data' => [
                 'MaTaiKhoan' => $taikhoan->MaTaiKhoan,
-                'MaBenhNhan' => DB::table('benhnhan')
-                    ->where('MaTaiKhoan', $taikhoan->MaTaiKhoan)
-                    ->value('MaBenhNhan'),
+                'MaBenhNhan' => $maBenhNhan,
                 'email' => $taikhoan->email,
                 'sdt' => $taikhoan->sdt,
                 'VaiTro' => $taikhoan->VaiTro,
                 'trangthaihoatdong' => $taikhoan->trangthaihoatdong,
+                'MaBacSi' => $bacSiInfo->MaBacSi ?? null,
+                'ChuyenKhoa' => $bacSiInfo->ChuyenKhoa ?? null,
             ]
         ], 200);
     }
-
 }

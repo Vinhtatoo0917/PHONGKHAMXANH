@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:phongkhamfy/controllers/lich_kham_controller.dart';
+import 'package:phongkhamfy/widgets/loading_view.dart';
 
 class QuanLyLichKhamView extends StatefulWidget {
   const QuanLyLichKhamView({super.key});
@@ -422,9 +423,13 @@ class _QuanLyLichKhamViewState extends State<QuanLyLichKhamView> {
     return Obx(() {
       if (controller.isLoadingAllAppointments.value) {
         return _panel(
-          child: const Padding(
-            padding: EdgeInsets.symmetric(vertical: 34),
-            child: Center(child: CircularProgressIndicator()),
+          padding: EdgeInsets.zero,
+          child: SizedBox(
+            height: 240,
+            child: const LoadingView(
+              message: 'Đang tải lịch khám...',
+              isOverlay: false,
+            ),
           ),
         );
       }

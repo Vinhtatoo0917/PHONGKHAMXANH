@@ -10,6 +10,7 @@ use App\Models\LichLamViec;
 use Illuminate\Http\Request;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class LichKhamController extends Controller
 {
@@ -105,8 +106,10 @@ class LichKhamController extends Controller
             'lichLamViec.caKham',
             'lichLamViec.phongKham',
             'chiTietLichKham.dichVu',
-            'ketLuanKham',
-            'donThuoc.chiTiet.thuoc'
+            'ketLuanKham.benh',
+            'donThuoc.chiTiet.thuoc',
+            'phieuChiDinh.bacSi.lichLamViec.phongKham',
+            'phieuChiDinh.chiTiet.dichVu.khoa'
         ]);
 
         $benhNhan = $lich->benhNhan;
@@ -178,6 +181,29 @@ class LichKhamController extends Controller
                     'LieuDung' => $ct->LieuDung,
                 ]),
             ] : null,
+            'PhieuChiDinh' => $lich->phieuChiDinh->map(fn ($phieu) => [
+                'MaPhieu' => $phieu->MaPhieu,
+                'TrangThai' => $phieu->TrangThai,
+                'NgayChiDinh' => $phieu->NgayChiDinh,
+                'BacSiYeuCau' => $bacSi ? trim($bacSi->ho . ' ' . $bacSi->ten) : null,
+                'ChuyenKhoaYeuCau' => $bacSi?->ChuyenKhoa,
+                'BacSiThucHien' => $phieu->bacSi ? trim($phieu->bacSi->ho . ' ' . $phieu->bacSi->ten) : null,
+                'ChuyenKhoaBacSiThucHien' => $phieu->bacSi?->ChuyenKhoa,
+                'TenPhongXetNghiem' => $phieu->bacSi?->lichLamViec?->first()?->phongKham?->TenPhong,
+                'KhuPhongXetNghiem' => $phieu->bacSi?->lichLamViec?->first()?->phongKham?->Khu,
+                'GhiChu' => $phieu->GhiChu,
+                'ChiTiet' => $phieu->chiTiet->map(fn ($ct) => [
+                    'MaChiTietPhieu' => $ct->MaChiTietPhieu,
+                    'TenDichVu' => $ct->dichVu?->TenDichVu,
+                    'MaDichVu' => $ct->dichVu?->MaDichVu,
+                    'TenKhoa' => $ct->dichVu?->khoa?->TenKhoa,
+                    'Gia' => (float) ($ct->dichVu?->Gia ?? 0),
+                    'TrangThai' => $ct->TrangThai,
+                    'KetQua' => $ct->KetQua,
+                    'ChiSo' => $ct->ChiSo,
+                    'NgayCoKetQua' => $ct->NgayCoKetQua,
+                ])->values(),
+            ])->values(),
         ];
     }
 
@@ -579,4 +605,260 @@ class LichKhamController extends Controller
         }
     }
 
+    /**
+     * Lấy hoá đơn của bệnh nhân
+     * GET /lich-kham/{maLichKham}/hoa-don
+     */
+    public function getHoaDon(Request $request, $maLichKham)
+    {
+        try {
+            $maBenhNhan = $this->currentPatientId($request);
+            if (!$maBenhNhan) {
+                return response()->json(['success' => false, 'message' => 'Bệnh nhân không được xác định'], 401);
+            }
+
+            // Kiểm tra lịch khám thuộc về bệnh nhân
+            $lichKham = DB::table('lichkham')
+                ->where('MaLichKham', $maLichKham)
+                ->where('MaBenhNhan', $maBenhNhan)
+                ->first();
+
+            if (!$lichKham) {
+                return response()->json(['success' => false, 'message' => 'Lịch khám không tồn tại'], 404);
+            }
+
+            // Lấy hoá đơn
+            $hoaDon = DB::table('hoadon as hd')
+                ->leftJoin('benhnhan as bn', 'hd.MaBenhNhan', '=', 'bn.MaBenhNhan')
+                ->leftJoin('lichkham as lk', 'hd.MaLichKham', '=', 'lk.MaLichKham')
+                ->leftJoin('lichlamviec as llv', 'lk.MaLichLamViec', '=', 'llv.MaLichLamViec')
+                ->leftJoin('bacsi as bs', 'llv.MaBacSi', '=', 'bs.MaBacSi')
+                ->where('hd.MaLichKham', $maLichKham)
+                ->select(
+                    'hd.MaHoaDon',
+                    'hd.MaBenhNhan',
+                    DB::raw("CONCAT(bn.ho, ' ', bn.ten) as TenBenhNhan"),
+                    'bn.cccd',
+                    'bn.diachi',
+                    'bn.BHYT',
+                    DB::raw("CONCAT(bs.ho, ' ', bs.ten) as TenBacSi"),
+                    'bs.ChuyenKhoa',
+                    'hd.LoaiHoaDon',
+                    'hd.TongTien',
+                    'hd.GiamBHYT',
+                    'hd.SoTienPhaiTra',
+                    'hd.TrangThai',
+                    'hd.NgayTao'
+                )
+                ->first();
+
+            if (!$hoaDon) {
+                return response()->json(['success' => false, 'message' => 'Hoá đơn không tồn tại'], 404);
+            }
+
+            // Lấy chi tiết hoá đơn
+            $chiTiet = DB::table('ct_hoadon')
+                ->where('MaHoaDon', $hoaDon->MaHoaDon)
+                ->select('TenHienThi', 'SoLuong', 'DonGia', 'ThanhTien')
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'hoaDon' => $hoaDon,
+                    'chiTiet' => $chiTiet
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Lấy danh sách lịch khám hôm nay cho nhân viên check-in
+     * GET /admin/lich-kham-hom-nay
+     */
+    public function getLichKhamHomNay(Request $request)
+    {
+        try {
+            $token = $request->bearerToken();
+            if (!$token) {
+                return response()->json(['success' => false, 'message' => 'Token không hợp lệ'], 401);
+            }
+
+            $account = DB::table('taikhoan')->where('AccessToken', $token)->first();
+            if (!$account || !in_array($account->VaiTro, ['admin', 'nhanvien', 'receptionist', 'checkin'], true)) {
+                return response()->json(['success' => false, 'message' => 'Bạn không có quyền'], 403);
+            }
+
+            $today = now()->toDateString();
+            $search = $request->query('search', '');
+            $filter = $request->query('filter', 'all'); // all, not_checked_in, checked_in
+
+            $query = DB::table('lichkham as lk')
+                ->join('benhnhan as bn', 'lk.MaBenhNhan', '=', 'bn.MaBenhNhan')
+                ->join('lichlamviec as llv', 'lk.MaLichLamViec', '=', 'llv.MaLichLamViec')
+                ->join('bacsi as bs', 'llv.MaBacSi', '=', 'bs.MaBacSi')
+                ->join('cakham as ck', 'llv.MaCa', '=', 'ck.MaCa')
+                ->leftJoin('taikhoan as tk', 'bn.MaTaiKhoan', '=', 'tk.MaTaiKhoan')
+                ->where('llv.Ngay', $today)
+                ->where('lk.TrangThai', 'confirmed')
+                ->select(
+                    'lk.MaLichKham',
+                    'lk.SoThuTu',
+                    DB::raw("CONCAT(bn.ho, ' ', bn.ten) as TenBenhNhan"),
+                    'bn.cccd',
+                    'bn.diachi',
+                    'tk.sdt',
+                    DB::raw("CONCAT(bs.ho, ' ', bs.ten) as TenBacSi"),
+                    'bs.ChuyenKhoa',
+                    'ck.TenCa',
+                    'ck.GioBatDau',
+                    'ck.GioKetThuc',
+                    'lk.ThoiDiemCheckIn',
+                    'lk.ThoiDiemCheckOut',
+                    'lk.TrangThai'
+                );
+
+            // Áp dụng filter
+            if ($filter === 'not_checked_in') {
+                $query->whereNull('lk.ThoiDiemCheckIn');
+            } elseif ($filter === 'checked_in') {
+                $query->whereNotNull('lk.ThoiDiemCheckIn');
+            }
+
+            // Áp dụng tìm kiếm
+            if (!empty($search)) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('bn.ho', 'like', "%{$search}%")
+                      ->orWhere('bn.ten', 'like', "%{$search}%")
+                      ->orWhere('bn.cccd', 'like', "%{$search}%")
+                      ->orWhere('bs.ho', 'like', "%{$search}%")
+                      ->orWhere('bs.ten', 'like', "%{$search}%")
+                      ->orWhere('lk.SoThuTu', $search);
+                });
+            }
+
+            $lichKham = $query
+                ->orderBy('lk.ThoiDiemCheckIn', 'desc')
+                ->orderBy('lk.SoThuTu', 'asc')
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => $lichKham,
+                'total' => count($lichKham),
+                'today' => $today
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Check-in bệnh nhân
+     * POST /admin/lich-kham/{maLichKham}/check-in
+     */
+    public function checkIn(Request $request, $maLichKham)
+    {
+        try {
+            $token = $request->bearerToken();
+            if (!$token) {
+                return response()->json(['success' => false, 'message' => 'Token không hợp lệ'], 401);
+            }
+
+            $account = DB::table('taikhoan')->where('AccessToken', $token)->first();
+            if (!$account || !in_array($account->VaiTro, ['admin', 'nhanvien', 'receptionist', 'checkin'], true)) {
+                return response()->json(['success' => false, 'message' => 'Bạn không có quyền'], 403);
+            }
+
+            $lichKham = DB::table('lichkham')->where('MaLichKham', $maLichKham)->first();
+            if (!$lichKham) {
+                return response()->json(['success' => false, 'message' => 'Không tìm thấy lịch khám'], 404);
+            }
+
+            if ($lichKham->ThoiDiemCheckIn) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Bệnh nhân đã check-in rồi',
+                    'ThoiDiemCheckIn' => $lichKham->ThoiDiemCheckIn
+                ], 422);
+            }
+
+            // Update check-in time
+            DB::table('lichkham')
+                ->where('MaLichKham', $maLichKham)
+                ->update([
+                    'ThoiDiemCheckIn' => now(),
+                    'MaNhanVienCheckIn' => 1,
+                ]);
+
+            $updated = DB::table('lichkham')->where('MaLichKham', $maLichKham)->first();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Check-in thành công',
+                'data' => [
+                    'MaLichKham' => $updated->MaLichKham,
+                    'ThoiDiemCheckIn' => $updated->ThoiDiemCheckIn,
+                    'TrangThai' => $updated->TrangThai
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Check-out bệnh nhân
+     * PATCH /admin/lich-kham/{maLichKham}/check-out
+     */
+    public function checkOut(Request $request, $maLichKham)
+    {
+        try {
+            $token = $request->bearerToken();
+            if (!$token) {
+                return response()->json(['success' => false, 'message' => 'Token không hợp lệ'], 401);
+            }
+
+            $account = DB::table('taikhoan')->where('AccessToken', $token)->first();
+            if (!$account || !in_array($account->VaiTro, ['admin', 'nhanvien', 'receptionist', 'checkin'], true)) {
+                return response()->json(['success' => false, 'message' => 'Bạn không có quyền'], 403);
+            }
+
+            $lichKham = DB::table('lichkham')->where('MaLichKham', $maLichKham)->first();
+            if (!$lichKham) {
+                return response()->json(['success' => false, 'message' => 'Không tìm thấy lịch khám'], 404);
+            }
+
+            if (!$lichKham->ThoiDiemCheckIn) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Bệnh nhân chưa check-in'
+                ], 422);
+            }
+
+            // Update check-out time
+            DB::table('lichkham')
+                ->where('MaLichKham', $maLichKham)
+                ->update([
+                    'ThoiDiemCheckOut' => now(),
+                ]);
+
+            $updated = DB::table('lichkham')->where('MaLichKham', $maLichKham)->first();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Check-out thành công',
+                'data' => [
+                    'MaLichKham' => $updated->MaLichKham,
+                    'ThoiDiemCheckIn' => $updated->ThoiDiemCheckIn,
+                    'ThoiDiemCheckOut' => $updated->ThoiDiemCheckOut,
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
 }
+

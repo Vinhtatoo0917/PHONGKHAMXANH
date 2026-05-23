@@ -14,6 +14,7 @@ import 'forgot_password_view.dart';
 import '../home/home_view.dart';
 import '../admin/admin_home_view.dart';
 import '../doctor/doctor_home_view.dart';
+import '../../widgets/loading_overlay.dart';
 
 // ═══════════════════════════════════════════════════════════════
 // WIDGET CHÍNH: Màn hình đăng nhập
@@ -197,7 +198,7 @@ class _TrangThaiManHinhDangNhap extends State<ManHinhDangNhap> {
       );
     } else {
       print(
-        '❌ [DEBUG] Vai trò không phải admin/bacsi, chuyển đến màn hình bệnh nhân',
+        '❌ [DEBUG] Vai trò không phải admin/bacsi/checkin, chuyển đến màn hình bệnh nhân',
       );
       // Chuyển đến màn hình bệnh nhận
       Navigator.pushReplacement(
@@ -303,44 +304,47 @@ class _TrangThaiManHinhDangNhap extends State<ManHinhDangNhap> {
 
     return Scaffold(
       backgroundColor: _mauNen,
-      body: Stack(
-        children: [
-          // Hiệu ứng nền
-          const HieuUngNen(),
-
-          // Nội dung chính
-          SafeArea(
-            child: Center(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.all(laDienThoai ? 16 : 32),
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 500),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Logo
-                      const LogoPhongKham(),
-                      const SizedBox(height: 32),
-
-                      // Card đăng nhập
-                      _xayDungCardDangNhap(laDienThoai),
-
-                      const SizedBox(height: 16),
-
-                      // Nút xem thông tin tài khoản
-                      _xayDungNutXemThongTin(),
-
-                      const SizedBox(height: 8),
-
-                      // Footer
-                      _xayDungFooter(),
-                    ],
+      body: LoadingOverlay(
+        isLoading: _dangXuLy,
+        child: Stack(
+          children: [
+            // Hiệu ứng nền
+            const HieuUngNen(),
+  
+            // Nội dung chính
+            SafeArea(
+              child: Center(
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.all(laDienThoai ? 16 : 32),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 500),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // Logo
+                        const LogoPhongKham(),
+                        const SizedBox(height: 32),
+  
+                        // Card đăng nhập
+                        _xayDungCardDangNhap(laDienThoai),
+  
+                        const SizedBox(height: 16),
+  
+                        // Nút xem thông tin tài khoản
+                        _xayDungNutXemThongTin(),
+  
+                        const SizedBox(height: 8),
+  
+                        // Footer
+                        _xayDungFooter(),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

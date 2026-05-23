@@ -32,6 +32,7 @@ class AdminHomeView extends StatefulWidget {
 
 class _AdminHomeViewState extends State<AdminHomeView> {
   final _dichVuXacThuc = DichVuXacThuc();
+  final bool _isLoading = false;
 
   // Màu sắc
   final _mauXanh = const Color(0xFF3DAA70);
@@ -100,12 +101,12 @@ class _AdminHomeViewState extends State<AdminHomeView> {
         ],
       ),
       body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header với thông tin admin
-            Container(
-              width: double.infinity,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header với thông tin admin
+              Container(
+                width: double.infinity,
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 color: _mauXanh,

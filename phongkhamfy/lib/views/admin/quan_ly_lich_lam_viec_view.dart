@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../controllers/admin_controller.dart';
+import '../../utils/loading_utils.dart';
+import '../../widgets/loading_view.dart';
 
 class QuanLyLichLamViecView extends StatefulWidget {
   const QuanLyLichLamViecView({super.key});
@@ -19,9 +21,11 @@ class _QuanLyLichLamViecViewState extends State<QuanLyLichLamViecView> {
   List<Map<String, dynamic>> _danhSachCaKham = [];
   List<Map<String, dynamic>> _danhSachPhongKham = [];
 
-  bool _isLoading = false;
   String _searchQuery = '';
   DateTime _filterNgay = DateTime.now();
+
+  // Loading state cho lần load đầu tiên (khi mở view)
+  bool _isLoading = true;
 
   // Form state
   DateTime _ngayChon = DateTime.now();
@@ -45,31 +49,65 @@ class _QuanLyLichLamViecViewState extends State<QuanLyLichLamViecView> {
   }
 
   Future<void> _loadData() async {
-    setState(() => _isLoading = true);
+    if (mounted) {
+      setState(() => _isLoading = true);
+    }
+
     try {
-      final results = await Future.wait([
-        _adminController.layDanhSachLichLamViec(),
-        _adminController.layDanhSachBacSi(),
-        _adminController.layDanhSachCaKham(),
-        _adminController.layDanhSachPhongKham(),
+      final results = await Future.wait<dynamic>([
+        _adminController.layDanhSachLichLamViec().catchError((e) {
+          debugPrint('❌ [QL_LICH_LAM_VIEC] Lỗi tải lịch làm việc: $e');
+          return <Map<String, dynamic>>[];
+        }),
+        _adminController.layDanhSachBacSi().catchError((e) {
+          debugPrint('❌ [QL_LICH_LAM_VIEC] Lỗi tải bác sĩ: $e');
+          return <Map<String, dynamic>>[];
+        }),
+        _adminController.layDanhSachCaKham().catchError((e) {
+          debugPrint('❌ [QL_LICH_LAM_VIEC] Lỗi tải ca khám: $e');
+          return <Map<String, dynamic>>[];
+        }),
+        _adminController.layDanhSachPhongKham().catchError((e) {
+          debugPrint('❌ [QL_LICH_LAM_VIEC] Lỗi tải phòng khám: $e');
+          return <Map<String, dynamic>>[];
+        }),
       ]);
 
-      if (mounted) {
-        setState(() {
-          _danhSachLichLamViec = (results[0] as List)
-              .cast<Map<String, dynamic>>();
-          _danhSachBacSi = (results[1] as List).cast<Map<String, dynamic>>();
-          _danhSachCaKham = (results[2] as List).cast<Map<String, dynamic>>();
-          _danhSachPhongKham = (results[3] as List)
-              .cast<Map<String, dynamic>>();
-          _applyFilters();
-          _isLoading = false;
-        });
+      if (!mounted) return;
+
+      final danhSachLichLamViec = List<Map<String, dynamic>>.from(
+        results[0] as List,
+      );
+      final danhSachBacSi = List<Map<String, dynamic>>.from(results[1] as List);
+      final danhSachCaKham = List<Map<String, dynamic>>.from(results[2] as List);
+      final danhSachPhongKham = List<Map<String, dynamic>>.from(
+        results[3] as List,
+      );
+
+      setState(() {
+        _danhSachLichLamViec = danhSachLichLamViec;
+        _danhSachBacSi = danhSachBacSi;
+        _danhSachCaKham = danhSachCaKham;
+        _danhSachPhongKham = danhSachPhongKham;
+        _applyFilters();
+      });
+
+      if (_danhSachLichLamViec.isEmpty &&
+          _danhSachBacSi.isEmpty &&
+          _danhSachCaKham.isEmpty &&
+          _danhSachPhongKham.isEmpty) {
+        _showSnackBar(
+          'Không tải được dữ liệu lịch làm việc',
+          isError: true,
+        );
       }
     } catch (e) {
+      if (!mounted) return;
+
+      _showSnackBar('Lỗi tải dữ liệu: ${e.toString()}', isError: true);
+    } finally {
       if (mounted) {
         setState(() => _isLoading = false);
-        _showSnackBar('Lỗi tải dữ liệu', isError: true);
       }
     }
   }
@@ -93,16 +131,16 @@ class _QuanLyLichLamViecViewState extends State<QuanLyLichLamViecView> {
       return;
     }
 
-    setState(() => _isLoading = true);
+    LoadingUtils.showLoading(message: 'Đang tạo lịch làm việc...');
     final result = await _adminController.themLichLamViec(
       maBacSi: _bacSiDuocChon!,
       ngay: DateFormat('yyyy-MM-dd').format(_ngayChon),
       maCa: _caDuocChon!,
       maPhong: _phongDuocChon!,
     );
+    LoadingUtils.hideLoading();
 
     if (mounted) {
-      setState(() => _isLoading = false);
       if (result['success']) {
         _showSnackBar('Thêm lịch làm việc thành công');
         Navigator.pop(context);
@@ -117,7 +155,7 @@ class _QuanLyLichLamViecViewState extends State<QuanLyLichLamViecView> {
     }
   }
 
-  Future<void> _xoaLichLamViec(int maLich, int index) async {
+  Future<void> _xoaLichLamViec(int maLich) async {
     final confirmed =
         await showDialog<bool>(
           context: context,
@@ -141,8 +179,9 @@ class _QuanLyLichLamViecViewState extends State<QuanLyLichLamViecView> {
 
     if (!confirmed) return;
 
-    setState(() => _danhSachLichLamViec.removeAt(index));
+    LoadingUtils.showLoading(message: 'Đang xóa lịch làm việc...');
     final result = await _adminController.xoaLichLamViec(maLich);
+    LoadingUtils.hideLoading();
 
     if (mounted) {
       if (result['success']) {
@@ -150,7 +189,6 @@ class _QuanLyLichLamViecViewState extends State<QuanLyLichLamViecView> {
         await _loadData();
       } else {
         _showSnackBar(result['message'] ?? 'Xóa thất bại', isError: true);
-        await _loadData();
       }
     }
   }
@@ -164,7 +202,7 @@ class _QuanLyLichLamViecViewState extends State<QuanLyLichLamViecView> {
       return;
     }
 
-    setState(() => _isLoading = true);
+    LoadingUtils.showLoading(message: 'Đang cập nhật lịch làm việc...');
     final result = await _adminController.capNhatLichLamViec(
       maLichLamViec: _editingLichId!,
       maBacSi: _bacSiDuocChon,
@@ -172,9 +210,9 @@ class _QuanLyLichLamViecViewState extends State<QuanLyLichLamViecView> {
       maCa: _caDuocChon,
       maPhong: _phongDuocChon,
     );
+    LoadingUtils.hideLoading();
 
     if (mounted) {
-      setState(() => _isLoading = false);
       if (result['success']) {
         _showSnackBar('Cập nhật lịch làm việc thành công');
         Navigator.pop(context);
@@ -249,9 +287,7 @@ class _QuanLyLichLamViecViewState extends State<QuanLyLichLamViecView> {
                         ),
                       ),
                       IconButton(
-                        onPressed: _isLoading
-                            ? null
-                            : () => Navigator.pop(context),
+                        onPressed: () => Navigator.pop(context),
                         icon: const Icon(Icons.close),
                       ),
                     ],
@@ -296,9 +332,7 @@ class _QuanLyLichLamViecViewState extends State<QuanLyLichLamViecView> {
                     width: double.infinity,
                     height: 50,
                     child: ElevatedButton.icon(
-                      onPressed: _isLoading
-                          ? null
-                          : (_isEditing
+                      onPressed: (_isEditing
                                 ? _capNhatLichLamViec
                                 : _themLichLamViec),
                       icon: Icon(_isEditing ? Icons.save : Icons.add),
@@ -427,7 +461,7 @@ class _QuanLyLichLamViecViewState extends State<QuanLyLichLamViecView> {
               )
               .toList(),
           onChanged: onChanged,
-          menuMaxHeight: 300, // Cho phép dropdown scroll nếu có nhiều items
+          menuMaxHeight: 300,
         ),
       ],
     );
@@ -447,131 +481,132 @@ class _QuanLyLichLamViecViewState extends State<QuanLyLichLamViecView> {
         elevation: 0,
         centerTitle: false,
       ),
-      body: _isLoading && _danhSachLichLamViec.isEmpty
-          ? Center(child: CircularProgressIndicator(color: _mauXanh))
-          : Column(
+      body: Column(
+        children: [
+          // Search & Filter
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
               children: [
-                // Search & Filter
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    children: [
-                      TextField(
-                        onChanged: (value) {
-                          _searchQuery = value;
-                          _applyFilters();
-                          setState(() {});
-                        },
-                        decoration: InputDecoration(
-                          hintText: 'Tìm kiếm bác sĩ...',
-                          prefixIcon: Icon(Icons.search, color: _mauXanh),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(
-                              color: _mauXanh.withValues(alpha: 0.3),
-                            ),
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
-                          ),
-                        ),
+                TextField(
+                  onChanged: (value) {
+                    _searchQuery = value;
+                    _applyFilters();
+                    setState(() {});
+                  },
+                  decoration: InputDecoration(
+                    hintText: 'Tìm kiếm bác sĩ...',
+                    prefixIcon: Icon(Icons.search, color: _mauXanh),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: _mauXanh.withValues(alpha: 0.3),
                       ),
-                      const SizedBox(height: 12),
-                      GestureDetector(
-                        onTap: () async {
-                          final picked = await showDatePicker(
-                            context: context,
-                            initialDate: _filterNgay,
-                            firstDate: DateTime(2020),
-                            lastDate: DateTime.now().add(
-                              const Duration(days: 365),
-                            ),
-                          );
-                          if (picked != null) {
-                            _filterNgay = picked;
-                            _applyFilters();
-                            setState(() {});
-                          }
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
-                          ),
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: _mauXanh.withValues(alpha: 0.3),
-                            ),
-                            borderRadius: BorderRadius.circular(12),
-                            color: _mauXanh.withValues(alpha: 0.05),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.calendar_today,
-                                color: _mauXanh,
-                                size: 20,
-                              ),
-                              const SizedBox(width: 12),
-                              Text(
-                                'Lọc theo ngày: ${DateFormat('dd/MM/yyyy').format(_filterNgay)}',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: _mauChuDen,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                   ),
                 ),
-                // List
-                Expanded(
-                  child: _danhSachLichLamViecFiltered.isEmpty
-                      ? Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.calendar_today,
-                                size: 64,
-                                color: _mauChuXam.withValues(alpha: 0.3),
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                'Không tìm thấy lịch làm việc',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: _mauChuXam,
-                                ),
-                              ),
-                            ],
-                          ),
-                        )
-                      : RefreshIndicator(
-                          onRefresh: _loadData,
+                const SizedBox(height: 12),
+                GestureDetector(
+                  onTap: () async {
+                    final picked = await showDatePicker(
+                      context: context,
+                      initialDate: _filterNgay,
+                      firstDate: DateTime(2020),
+                      lastDate: DateTime.now().add(
+                        const Duration(days: 365),
+                      ),
+                    );
+                    if (picked != null) {
+                      _filterNgay = picked;
+                      _applyFilters();
+                      setState(() {});
+                    }
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: _mauXanh.withValues(alpha: 0.3),
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                      color: _mauXanh.withValues(alpha: 0.05),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.calendar_today,
                           color: _mauXanh,
-                          child: ListView.builder(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 8,
-                            ),
-                            itemCount: _danhSachLichLamViecFiltered.length,
-                            itemBuilder: (context, index) {
-                              final lich = _danhSachLichLamViecFiltered[index];
-                              final originalIndex = _danhSachLichLamViec
-                                  .indexOf(lich);
-                              return _buildLichLamViecCard(lich, originalIndex);
-                            },
+                          size: 20,
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          'Lọc theo ngày: ${DateFormat('dd/MM/yyyy').format(_filterNgay)}',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: _mauChuDen,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
+                      ],
+                    ),
+                  ),
                 ),
               ],
             ),
+          ),
+          // List
+          Expanded(
+            child: _isLoading
+                ? const LoadingView(
+                    message: 'Đang tải lịch làm việc...',
+                    isOverlay: false,
+                  )
+                : _danhSachLichLamViecFiltered.isEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.calendar_today,
+                          size: 64,
+                          color: _mauChuXam.withValues(alpha: 0.3),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Không tìm thấy lịch làm việc',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: _mauChuXam,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : RefreshIndicator(
+                    onRefresh: _loadData,
+                    color: _mauXanh,
+                    child: ListView.builder(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      itemCount: _danhSachLichLamViecFiltered.length,
+                      itemBuilder: (context, index) {
+                        final lich = _danhSachLichLamViecFiltered[index];
+                        return _buildLichLamViecCard(lich);
+                      },
+                    ),
+                  ),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           _clearForm();
@@ -584,7 +619,7 @@ class _QuanLyLichLamViecViewState extends State<QuanLyLichLamViecView> {
     );
   }
 
-  Widget _buildLichLamViecCard(Map<String, dynamic> lich, int index) {
+  Widget _buildLichLamViecCard(Map<String, dynamic> lich) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 2,
@@ -662,7 +697,7 @@ class _QuanLyLichLamViecViewState extends State<QuanLyLichLamViecView> {
                           ],
                         ),
                         onTap: () =>
-                            _xoaLichLamViec(lich['MaLichLamViec'], index),
+                            _xoaLichLamViec(lich['MaLichLamViec']),
                       ),
                     ],
                   ),

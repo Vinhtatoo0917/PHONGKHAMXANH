@@ -54,7 +54,6 @@ class ProfileController extends Controller
 
     public function update(Request $request)
     {
-        sleep(2); // Dừng lại 2 giây theo yêu cầu của USER
         $account = $this->currentAccount($request);
         if (!$account) {
             return response()->json(['success' => false, 'message' => 'Token khong hop le'], 401);

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:phongkhamfy/controllers/lich_kham_controller.dart';
+import 'package:phongkhamfy/utils/loading_utils.dart';
+import 'package:phongkhamfy/widgets/loading_view.dart';
 
 class LichKhamBacSiView extends StatefulWidget {
   const LichKhamBacSiView({super.key});
@@ -24,7 +26,13 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
   void initState() {
     super.initState();
     selectedDate = DateTime.now();
-    _loadSchedule();
+
+    // Đợi build xong frame đầu tiên rồi mới gọi API để:
+    // - tránh các issue kiểu gọi dialog/overlay trong lúc build
+    // - đảm bảo Obx đã được mount để nhận update và render dữ liệu ngay lần đầu
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadSchedule();
+    });
   }
 
   void _loadSchedule() {
@@ -56,8 +64,9 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
           _buildHorizontalCalendar(),
           Expanded(
             child: Obx(() {
-              if (controller.isLoadingDoctorSchedule.value) {
-                return const Center(child: CircularProgressIndicator());
+              if (controller.isLoadingDoctorSchedule.value &&
+                  controller.doctorSchedules.isEmpty) {
+                return const LoadingView(message: 'Đang tải lịch khám...');
               }
 
               if (controller.doctorSchedules.isEmpty) {
@@ -174,7 +183,7 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
             ],
           ),
           const SizedBox(height: 16),
-          ...patients.map((p) => _buildPatientCard(p)),
+          ...(_sortPatientsBySTT(patients.cast<Map<String, dynamic>>())).map((p) => _buildPatientCard(p)),
         ],
       ),
     );
@@ -407,51 +416,211 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
                     const SizedBox(height: 32),
                     const Text('Hành động', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900)),
                     const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: _buildAcceptanceButton(patient),
+                    ),
+                    const SizedBox(height: 16),
                     Row(
                       children: [
                         Expanded(
-                          child: _actionButton(
-                            patient['TrangThai'] == 'completed' 
-                              ? Icons.edit_note_rounded 
+                          child: _buildActionButtonWithLock(
+                            patient['TrangThai'] == 'completed'
+                              ? Icons.edit_note_rounded
                               : Icons.assignment_turned_in_rounded,
-                            patient['TrangThai'] == 'completed' 
-                              ? 'Chỉnh sửa kết luận' 
+                            patient['TrangThai'] == 'completed'
+                              ? 'Chỉnh sửa kết luận'
                               : 'Kết luận khám',
-                            patient['TrangThai'] == 'completed' 
-                              ? _warning 
+                            patient['TrangThai'] == 'completed'
+                              ? _warning
                               : _success,
                             () => _showConclusionForm(patient),
+                            patient,
                           ),
                         ),
                         const SizedBox(width: 12),
-                        if (patient['TrangThai'] != 'completed' || (patient['DichVu'] as List? ?? []).isNotEmpty)
+                        // Nút Tạo phiếu chỉ định mới
+                        if (patient['TrangThai'] != 'completed')
                           Expanded(
-                            child: _actionButton(
-                              patient['TrangThai'] == 'completed' ? Icons.description_rounded : Icons.note_add_rounded,
-                              patient['TrangThai'] == 'completed' ? 'Xem phiếu chỉ định' : 'Tạo phiếu chỉ định',
+                            child: _buildActionButtonWithLock(
+                              Icons.note_add_rounded,
+                              'Tạo phiếu chỉ định',
                               _accent,
-                              () {
-                                if (patient['TrangThai'] == 'completed') {
-                                  _showIndicationsDialog(patient);
-                                } else {
-                                  _showIndicationForm(patient);
-                                }
-                              },
+                              () => _showIndicationForm(patient),
+                              patient,
                             ),
                           ),
                       ],
                     ),
+                    const SizedBox(height: 12),
+                    // Nút Xem lịch sử phiếu chỉ định nếu có
+                    if ((patient['PhieuChiDinh'] as List? ?? []).isNotEmpty)
+                      SizedBox(
+                        width: double.infinity,
+                        child: _actionButton(
+                          Icons.description_rounded,
+                          'Xem lịch sử phiếu chỉ định (${(patient['PhieuChiDinh'] as List).length})',
+                          const Color(0xFF34495E),
+                          () => _showIndicationsDialog(patient),
+                        ),
+                      ),
                     const SizedBox(height: 32),
                     const Text('Chi tiết cuộc hẹn', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900)),
                     const SizedBox(height: 16),
                     _detailItem('Trạng thái', _getStatusLabel(patient['TrangThai'])),
-                    _detailItem('Check-in', patient['ThoiDiemCheckIn'] ?? 'N/A'),
                     const SizedBox(height: 100),
                   ],
                 ),
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAcceptanceButton(Map<String, dynamic> patient) {
+    final maLichKham = patient['MaLichKham'] as int;
+    final thoiDiemCheckIn = patient['ThoiDiemCheckIn'];
+
+    if (thoiDiemCheckIn != null) {
+      return Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: _success.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: _success.withValues(alpha: 0.3)),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.check_circle_rounded, color: _success, size: 24),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Text(
+                'Đã tiếp nhận bệnh nhân',
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                  color: Color(0xFF2C3E50),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return ElevatedButton.icon(
+      onPressed: () {
+        showDialog(
+          context: context,
+          builder: (dialogContext) => AlertDialog(
+            title: const Text('Tiếp nhận bệnh nhân'),
+            content: Text('Bạn có chắc chắn muốn tiếp nhận ${patient['TenBenhNhan']}?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                child: const Text('Hủy'),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  Navigator.pop(dialogContext); // Close dialog
+                  final result = await controller.acceptPatient(maLichKham);
+                  if (result && mounted) {
+                    Navigator.pop(context); // Close sheet
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _success,
+                ),
+                child: const Text(
+                  'Tiếp nhận',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+      icon: const Icon(Icons.person_add_rounded),
+      label: const Text('Tiếp nhận bệnh nhân'),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: _success,
+        foregroundColor: Colors.white,
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionButtonWithLock(
+    IconData icon,
+    String label,
+    Color color,
+    VoidCallback onTap,
+    Map<String, dynamic> patient,
+  ) {
+    final isEnabled = patient['ThoiDiemCheckIn'] != null;
+
+    return Tooltip(
+      message: isEnabled
+          ? ''
+          : 'Cần tiếp nhận bệnh nhân trước',
+      child: Opacity(
+        opacity: isEnabled ? 1.0 : 0.5,
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: isEnabled ? onTap : null,
+            borderRadius: BorderRadius.circular(16),
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 20),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: color.withValues(alpha: isEnabled ? 0.3 : 0.15),
+                ),
+              ),
+              child: Column(
+                children: [
+                  Stack(
+                    children: [
+                      Icon(icon, color: color, size: 32),
+                      if (!isEnabled)
+                        Positioned.fill(
+                          child: Center(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.grey.withValues(alpha: 0.7),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.lock_rounded,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    label,
+                    style: TextStyle(
+                      color: color,
+                      fontWeight: FontWeight.w900,
+                      fontSize: 13,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
       ),
     );
@@ -487,50 +656,139 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
   }
 
   void _showIndicationsDialog(Map<String, dynamic> patient) {
-    final services = patient['DichVu'] as List? ?? [];
+    final listPhieu = patient['PhieuChiDinh'] as List? ?? [];
     Get.dialog(
       Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         child: Container(
+          constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.8),
           padding: const EdgeInsets.all(24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('Phiếu chỉ định dịch vụ', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Color(0xFF2C3E50))),
-              const SizedBox(height: 20),
-              if (services.isEmpty)
-                const Text('Không có dịch vụ nào được chỉ định.')
-              else
-                ...services.map((s) => Container(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: _accent.withValues(alpha: 0.05),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: _accent.withValues(alpha: 0.1)),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.check_circle_rounded, color: Colors.blue, size: 20),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          s['TenDichVu'] ?? 'Dịch vụ',
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                        ),
-                      ),
-                    ],
-                  ),
-                )),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton(
-                  onPressed: () => Get.back(),
-                  style: FilledButton.styleFrom(backgroundColor: _accent, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-                  child: const Text('Đóng'),
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Lịch sử chỉ định', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Color(0xFF2C3E50))),
+                  IconButton(onPressed: () => Get.back(), icon: const Icon(Icons.close_rounded))
+                ],
               ),
+              const SizedBox(height: 20),
+              if (listPhieu.isEmpty)
+                const Expanded(child: Center(child: Text('Chưa có phiếu chỉ định nào.')))
+              else
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: listPhieu.length,
+                    itemBuilder: (context, index) {
+                      final phieu = listPhieu[index];
+                      final chiTiet = phieu['ChiTiet'] as List? ?? [];
+                      return Card(
+                        margin: const EdgeInsets.only(bottom: 16),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        elevation: 0,
+                        color: Colors.grey[50],
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text('Mã phiếu: #${phieu['MaPhieu']}', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
+                                  Text(
+                                    DateFormat('dd/MM HH:mm').format(DateTime.parse(phieu['NgayChiDinh'])),
+                                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                                  ),
+                                ],
+                              ),
+                              if (phieu['GhiChu'] != null && phieu['GhiChu'].toString().isNotEmpty)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 8),
+                                  child: Text('Ghi chú: ${phieu['GhiChu']}', style: const TextStyle(fontSize: 13, fontStyle: FontStyle.italic)),
+                                ),
+                              const Divider(height: 24),
+                              ...chiTiet.map((ct) {
+                                final isCompleted = ct['TrangThai'] == 'completed';
+                                return Container(
+                                  margin: const EdgeInsets.only(bottom: 12),
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: isCompleted ? Colors.green[100]! : Colors.blue[100]!),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Icon(isCompleted ? Icons.check_circle_rounded : Icons.pending_actions_rounded,
+                                               color: isCompleted ? Colors.green : Colors.blue, size: 18),
+                                          const SizedBox(width: 8),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Text(ct['TenDichVu'] ?? 'Dịch vụ', style: const TextStyle(fontWeight: FontWeight.bold)),
+                                                if ((ct['TenKhoa']?.toString() ?? '').isNotEmpty || (ct['Gia'] != null))
+                                                  Padding(
+                                                    padding: const EdgeInsets.only(top: 2),
+                                                    child: Text(
+                                                      [
+                                                        if ((ct['TenKhoa']?.toString() ?? '').isNotEmpty) ct['TenKhoa'],
+                                                        if (ct['Gia'] != null) NumberFormat.currency(locale: 'vi_VN', symbol: 'đ', decimalDigits: 0).format(double.tryParse(ct['Gia']?.toString() ?? '0') ?? 0)
+                                                      ].join(' • '),
+                                                      style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+                                                    ),
+                                                  ),
+                                              ],
+                                            ),
+                                          ),
+                                          Text(
+                                            isCompleted ? 'Đã có kết quả' : 'Đang chờ',
+                                            style: TextStyle(fontSize: 11, color: isCompleted ? Colors.green : Colors.blue, fontWeight: FontWeight.bold),
+                                          ),
+                                        ],
+                                      ),
+                                      if (isCompleted) ...[
+                                        const Divider(height: 16),
+                                        if (ct['ChiSo'] != null && ct['ChiSo'].toString().isNotEmpty)
+                                          _resultDetail('Chỉ số:', ct['ChiSo'].toString()),
+                                        if (ct['KetQua'] != null && ct['KetQua'].toString().isNotEmpty)
+                                          _resultDetail('Kết quả:', ct['KetQua'].toString()),
+                                        if (ct['NgayCoKetQua'] != null && ct['NgayCoKetQua'].toString().isNotEmpty)
+                                          _resultDetail('Ngày có kết quả:', DateFormat('dd/MM/yyyy HH:mm').format(DateTime.parse(ct['NgayCoKetQua'].toString()))),
+                                        if (ct['FileKetQua'] != null && ct['FileKetQua'].toString().isNotEmpty)
+                                          Padding(
+                                            padding: const EdgeInsets.only(top: 8),
+                                            child: TextButton.icon(
+                                              onPressed: () {
+                                                Get.snackbar('Thông báo', 'Đang mở tệp đính kèm...');
+                                              },
+                                              icon: const Icon(Icons.file_present_rounded, size: 18),
+                                              label: const Text('Xem tệp kết quả', style: TextStyle(fontSize: 13)),
+                                              style: TextButton.styleFrom(
+                                                foregroundColor: Colors.orange[800],
+                                                padding: EdgeInsets.zero,
+                                                minimumSize: Size.zero,
+                                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                              ),
+                                            ),
+                                          ),
+                                      ],
+                                    ],
+                                  ),
+                                );
+                              }),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
             ],
           ),
         ),
@@ -538,19 +796,39 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
     );
   }
 
+  Widget _resultDetail(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: RichText(
+        text: TextSpan(
+          style: const TextStyle(fontSize: 13, color: Colors.black87),
+          children: [
+            TextSpan(text: '$label ', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
+            TextSpan(text: value),
+          ],
+        ),
+      ),
+    );
+  }
+
   void _showIndicationForm(Map<String, dynamic> patient) async {
-    final selectedServices = <int>[].obs;
+    final selectedServiceId = Rxn<int>();
     final noteController = TextEditingController();
     int? selectedDoctorId;
 
-    await controller.getTestingDoctors();
-    await controller.getAllServicesForDoctor();
+    LoadingUtils.showLoading(message: 'Đang tải dữ liệu chỉ định...');
+    try {
+      await controller.getTestingDoctors(patient['MaLichKham']);
+      await controller.getAllServicesForDoctor();
+    } finally {
+      LoadingUtils.hideLoading();
+    }
 
     if (!mounted) return;
 
     Get.bottomSheet(
       isScrollControlled: true,
-      Container(
+      Builder(builder: (sheetCtx) => Container(
         height: MediaQuery.of(context).size.height * 0.85,
         decoration: const BoxDecoration(
           color: Colors.white,
@@ -563,7 +841,7 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text('Tạo phiếu chỉ định', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900)),
-                IconButton(onPressed: () => Get.back(), icon: const Icon(Icons.close_rounded)),
+                IconButton(onPressed: () => Navigator.of(sheetCtx).pop(), icon: const Icon(Icons.close_rounded)),
               ],
             ),
             const SizedBox(height: 20),
@@ -582,7 +860,7 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
                         return const Text('Không tìm thấy bác sĩ xét nghiệm nào.', style: TextStyle(color: Colors.red));
                       }
                       return DropdownButtonFormField<int>(
-                        value: selectedDoctorId,
+                        initialValue: selectedDoctorId,
                         decoration: InputDecoration(
                           filled: true,
                           fillColor: Colors.grey[100],
@@ -612,34 +890,25 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
                       ),
                     ),
                     const SizedBox(height: 24),
-                    const Text('Chọn dịch vụ chỉ định', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
+                    const Text('Chọn dịch vụ chỉ định (Chọn 1)', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
                     const SizedBox(height: 12),
                     Obx(() {
                       if (controller.isLoadingServices.value) {
                         return const Center(child: CircularProgressIndicator());
                       }
-                      return ListView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: controller.availableServices.length,
-                        itemBuilder: (context, index) {
-                          final service = controller.availableServices[index];
+                      return Column(
+                        children: controller.availableServices.map((service) {
                           final id = service['MaDichVu'];
-                          return Obx(() => CheckboxListTile(
-                            value: selectedServices.contains(id),
-                            title: Text(service['TenDichVu']),
+                          return Obx(() => RadioListTile<int>(
+                            value: id,
+                            groupValue: selectedServiceId.value,
+                            title: Text(service['TenDichVu'], style: const TextStyle(fontWeight: FontWeight.bold)),
                             subtitle: Text('Giá: ${NumberFormat.currency(locale: 'vi_VN', symbol: 'đ', decimalDigits: 0).format(double.tryParse(service['Gia']?.toString() ?? '0') ?? 0)}'),
-                            onChanged: (val) {
-                              if (val == true) {
-                                selectedServices.add(id);
-                              } else {
-                                selectedServices.remove(id);
-                              }
-                            },
+                            onChanged: (val) => selectedServiceId.value = val,
                             contentPadding: EdgeInsets.zero,
-                            controlAffinity: ListTileControlAffinity.leading,
+                            activeColor: _accent,
                           ));
-                        },
+                        }).toList(),
                       );
                     }),
                   ],
@@ -658,8 +927,8 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
                       Get.snackbar('Thông báo', 'Vui lòng chọn bác sĩ thực hiện');
                       return;
                     }
-                    if (selectedServices.isEmpty) {
-                      Get.snackbar('Thông báo', 'Vui lòng chọn ít nhất một dịch vụ');
+                    if (selectedServiceId.value == null) {
+                      Get.snackbar('Thông báo', 'Vui lòng chọn một dịch vụ');
                       return;
                     }
 
@@ -667,11 +936,12 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
                       maLichKham: patient['MaLichKham'],
                       maBacSiThucHien: selectedDoctorId!,
                       ghiChu: noteController.text,
-                      maDichVuIds: selectedServices.toList(),
+                      maDichVuIds: [selectedServiceId.value!],
                     );
 
+                    if (!sheetCtx.mounted) return;
                     if (success) {
-                      Get.back(); // close sheet
+                      Navigator.of(sheetCtx).pop(); // close sheet
                       _loadSchedule();
                     }
                   },
@@ -686,7 +956,7 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
             )),
           ],
         ),
-      ),
+      )),
     );
   }
 
@@ -755,7 +1025,7 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
               const Text('Loại bệnh', style: TextStyle(fontWeight: FontWeight.w800)),
               const SizedBox(height: 8),
               Obx(() => DropdownButtonFormField<String>(
-                value: selectedBenh,
+                initialValue: selectedBenh,
                 decoration: _inputDecoration('Chọn loại bệnh', Icons.coronavirus_rounded),
                 items: controller.diseases.map((b) => DropdownMenuItem(
                   value: b['MaBenh'].toString(),
@@ -1063,6 +1333,7 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
   Color _getStatusColor(String? status) {
     switch (status) {
       case 'completed': return _success;
+      case 'examining': return _accent;
       case 'confirmed': return _accent;
       case 'pending': return _warning;
       case 'cancelled': return Colors.red;
@@ -1073,11 +1344,22 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
   String _getStatusLabel(String? status) {
     switch (status) {
       case 'completed': return 'Đã khám xong';
+      case 'examining': return 'Đang khám';
       case 'confirmed': return 'Đang chờ khám';
       case 'pending': return 'Chưa đến';
       case 'cancelled': return 'Đã hủy';
       default: return 'Không xác định';
     }
+  }
+
+  List<Map<String, dynamic>> _sortPatientsBySTT(List<Map<String, dynamic>> patients) {
+    final sorted = List<Map<String, dynamic>>.from(patients);
+    sorted.sort((a, b) {
+      final soThuTuA = int.tryParse(a['SoThuTu']?.toString() ?? '0') ?? 0;
+      final soThuTuB = int.tryParse(b['SoThuTu']?.toString() ?? '0') ?? 0;
+      return soThuTuA.compareTo(soThuTuB);
+    });
+    return sorted;
   }
 
   void _handleStatusUpdate(int maLichKham, String status) async {

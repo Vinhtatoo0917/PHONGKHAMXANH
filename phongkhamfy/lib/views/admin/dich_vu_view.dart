@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../controllers/admin_controller.dart';
+import '../../utils/loading_utils.dart';
+import '../../widgets/loading_view.dart';
 
 class DichVuView extends StatefulWidget {
   const DichVuView({super.key});
@@ -94,8 +96,7 @@ class _DichVuViewState extends State<DichVuView> {
   Future<void> _themDichVu() async {
     if (!_validateForm()) return;
 
-    setState(() => _isLoading = true);
-
+    LoadingUtils.showLoading(message: 'Đang thêm dịch vụ...');
     try {
       final gia = double.parse(_giaController.text.trim());
 
@@ -105,9 +106,9 @@ class _DichVuViewState extends State<DichVuView> {
         maDichVuYte: _maDichVuYteController.text.trim(),
         maKhoa: _selectedKhoa != null ? int.tryParse(_selectedKhoa!) : null,
       );
+      LoadingUtils.hideLoading();
 
       if (mounted) {
-        setState(() => _isLoading = false);
         if (result['success'] == true) {
           _showSnackBar('Thêm dịch vụ thành công');
           Navigator.pop(context);
@@ -121,8 +122,8 @@ class _DichVuViewState extends State<DichVuView> {
         }
       }
     } catch (e) {
+      LoadingUtils.hideLoading();
       if (mounted) {
-        setState(() => _isLoading = false);
         _showSnackBar('Giá không hợp lệ', isError: true);
       }
     }
@@ -131,8 +132,7 @@ class _DichVuViewState extends State<DichVuView> {
   Future<void> _capNhatDichVu() async {
     if (!_validateForm()) return;
 
-    setState(() => _isLoading = true);
-
+    LoadingUtils.showLoading(message: 'Đang cập nhật dịch vụ...');
     try {
       final gia = double.parse(_giaController.text.trim());
 
@@ -142,9 +142,9 @@ class _DichVuViewState extends State<DichVuView> {
         gia: gia,
         maKhoa: _selectedKhoa,
       );
+      LoadingUtils.hideLoading();
 
       if (mounted) {
-        setState(() => _isLoading = false);
         if (result['success'] == true) {
           _showSnackBar('Cập nhật dịch vụ thành công');
           Navigator.pop(context);
@@ -158,14 +158,14 @@ class _DichVuViewState extends State<DichVuView> {
         }
       }
     } catch (e) {
+      LoadingUtils.hideLoading();
       if (mounted) {
-        setState(() => _isLoading = false);
         _showSnackBar('Giá không hợp lệ', isError: true);
       }
     }
   }
 
-  Future<void> _xoaDichVu(int maDichVu, int index) async {
+  Future<void> _xoaDichVu(int maDichVu) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -186,12 +186,11 @@ class _DichVuViewState extends State<DichVuView> {
 
     if (confirmed != true) return;
 
-    setState(() => _isLoading = true);
-
+    LoadingUtils.showLoading(message: 'Đang xóa dịch vụ...');
     final result = await _adminController.xoaDichVu(maDichVu.toString());
+    LoadingUtils.hideLoading();
 
     if (mounted) {
-      setState(() => _isLoading = false);
       if (result['success'] == true) {
         _showSnackBar('Xóa dịch vụ thành công');
         await _taiDanhSachDichVu();
@@ -478,7 +477,10 @@ class _DichVuViewState extends State<DichVuView> {
         centerTitle: false,
       ),
       body: _isLoading && _danhSachDichVu.isEmpty
-          ? Center(child: CircularProgressIndicator(color: _mauXanh))
+          ? const LoadingView(
+              message: 'Đang tải danh sách dịch vụ...',
+              isOverlay: false,
+            )
           : Column(
               children: [
                 // Search & Filter
@@ -685,7 +687,7 @@ class _DichVuViewState extends State<DichVuView> {
                             Text('Xóa', style: TextStyle(color: Colors.red)),
                           ],
                         ),
-                        onTap: () => _xoaDichVu(dichVu['MaDichVu'], index),
+                        onTap: () => _xoaDichVu(dichVu['MaDichVu']),
                       ),
                     ],
                   ),

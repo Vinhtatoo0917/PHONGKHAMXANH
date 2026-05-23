@@ -95,11 +95,28 @@ class BacSi {
 class AdminController {
   final _sessionManager = SessionManager();
 
+  /// Reuse HTTP client để giữ kết nối (keep-alive) => giảm thời gian load
+  /// so với việc tạo kết nối mới mỗi request.
+  static final http.Client _client = http.Client();
+
+  /// Cache token trong vòng đời app để tránh đọc storage lặp lại quá nhiều
+  /// (đặc biệt màn admin gọi nhiều API liên tục).
+  String? _cachedToken;
+
+  /// Timeout cho API admin để tránh “treo” lâu gây cảm giác load chậm.
+  static const Duration _timeout = Duration(seconds: 12);
+
   // ─────────────────────────────────────────────────────────────
   // LẤY TOKEN
   // ─────────────────────────────────────────────────────────────
   Future<String?> _getToken() async {
-    return await _sessionManager.getToken();
+    _cachedToken ??= await _sessionManager.getToken();
+    return _cachedToken;
+  }
+
+  /// Khi logout/đổi user nên gọi để tránh dùng token cũ
+  void clearCachedToken() {
+    _cachedToken = null;
   }
 
   // ─────────────────────────────────────────────────────────────
@@ -142,16 +159,22 @@ class AdminController {
 
       print('🔵 [ADMIN] Lấy danh sách bác sĩ: $url');
 
-      final response = await http.get(Uri.parse(url), headers: headers);
+      final response = await _client
+          .get(Uri.parse(url), headers: headers)
+          .timeout(_timeout);
 
       print('🔵 [ADMIN] Status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data['success'] == true) {
-          final List<dynamic> bacSiList = data['data'];
+          final List<dynamic> bacSiList = data['data'] ?? [];
           return bacSiList.cast<Map<String, dynamic>>();
+        } else {
+          print('❌ [ADMIN] API trả về success=false: ${data['message']}');
         }
+      } else {
+        print('❌ [ADMIN] Status code: ${response.statusCode}, Body: ${response.body}');
       }
 
       return [];
@@ -170,7 +193,9 @@ class AdminController {
 
       print('🔵 [ADMIN] Lấy chi tiết bác sĩ: $url');
 
-      final response = await http.get(Uri.parse(url), headers: headers);
+      final response = await _client
+          .get(Uri.parse(url), headers: headers)
+          .timeout(_timeout);
 
       print('🔵 [ADMIN] Status: ${response.statusCode}');
 
@@ -226,11 +251,13 @@ class AdminController {
       print('🔵 [ADMIN] Thêm bác sĩ: $url');
       print('🔵 [ADMIN] Body: ${jsonEncode(body)}');
 
-      final response = await http.post(
-        Uri.parse(url),
-        headers: headers,
-        body: jsonEncode(body),
-      );
+      final response = await _client
+          .post(
+            Uri.parse(url),
+            headers: headers,
+            body: jsonEncode(body),
+          )
+          .timeout(_timeout);
 
       print('🔵 [ADMIN] Status: ${response.statusCode}');
       print('🔵 [ADMIN] Response: ${response.body}');
@@ -417,7 +444,9 @@ class AdminController {
 
       print('🔵 [ADMIN] Lấy danh sách phòng khám: $url');
 
-      final response = await http.get(Uri.parse(url), headers: headers);
+      final response = await _client
+          .get(Uri.parse(url), headers: headers)
+          .timeout(_timeout);
 
       print('🔵 [ADMIN] Status: ${response.statusCode}');
 
@@ -457,6 +486,76 @@ class AdminController {
     'Phòng Khám Chuyên Sâu',
     'Phòng Khám Tư Vấn',
   ];
+
+  /// Lấy hoá đơn của bác sĩ
+  /// GET /bacsi/hoa-don/{maLichKham}
+  Future<Map<String, dynamic>> layHoaDonBacSi(int maLichKham) async {
+    try {
+      final headers = await _getHeaders();
+      final url = '${ApiConfig.baseUrl}/bacsi/hoa-don/$maLichKham';
+
+      print('🔵 [DOCTOR] Lấy hoá đơn: $url');
+
+      final response = await _client
+          .get(Uri.parse(url), headers: headers)
+          .timeout(_timeout);
+
+      print('🔵 [DOCTOR] Status: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) {
+          return {'success': true, 'data': data['data']};
+        }
+      }
+
+      return {'success': false, 'message': 'Không thể lấy hoá đơn'};
+    } catch (e) {
+      print('❌ [DOCTOR] Lỗi lấy hoá đơn: $e');
+      return {'success': false, 'message': 'Không thể kết nối đến server'};
+    }
+  }
+
+  /// Thêm khu mới
+  /// POST /admin/phong-kham/khu/tao-moi
+  Future<Map<String, dynamic>> themKhuMoi(String tenKhu) async {
+    try {
+      final headers = await _getHeaders();
+      final url = '${ApiConfig.baseUrl}/admin/phong-kham/khu/tao-moi';
+
+      final body = {'Khu': tenKhu};
+
+      print('🔵 [ADMIN] Thêm khu mới: $url');
+      print('🔵 [ADMIN] Body: ${jsonEncode(body)}');
+
+      final response = await http.post(
+        Uri.parse(url),
+        headers: headers,
+        body: jsonEncode(body),
+      );
+
+      print('🔵 [ADMIN] Status: ${response.statusCode}');
+      print('🔵 [ADMIN] Response: ${response.body}');
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        return {
+          'success': true,
+          'message': data['message'] ?? 'Thêm khu thành công',
+          'data': data['data'],
+        };
+      } else {
+        return {
+          'success': false,
+          'message': data['message'] ?? 'Thêm khu thất bại',
+        };
+      }
+    } catch (e) {
+      print('❌ [ADMIN] Lỗi thêm khu: $e');
+      return {'success': false, 'message': 'Không thể kết nối đến server'};
+    }
+  }
 
   /// Lấy danh sách các khu
   /// GET /admin/phong-kham/khu/danh-sach
@@ -1098,7 +1197,11 @@ class AdminController {
         if (data['success'] == true) {
           final List<dynamic> lichList = data['data'] ?? [];
           return lichList.cast<Map<String, dynamic>>();
+        } else {
+          print('❌ [ADMIN] API trả về success=false: ${data['message']}');
         }
+      } else {
+        print('❌ [ADMIN] Status code: ${response.statusCode}, Body: ${response.body}');
       }
 
       return [];
@@ -1296,7 +1399,11 @@ class AdminController {
         if (data['success'] == true) {
           final List<dynamic> lichList = data['data'] ?? [];
           return lichList.cast<Map<String, dynamic>>();
+        } else {
+          print('❌ [ADMIN] API trả về success=false: ${data['message']}');
         }
+      } else {
+        print('❌ [ADMIN] Status code: ${response.statusCode}, Body: ${response.body}');
       }
 
       return [];
@@ -1324,7 +1431,11 @@ class AdminController {
         if (data['success'] == true) {
           final List<dynamic> lichList = data['data'] ?? [];
           return lichList.cast<Map<String, dynamic>>();
+        } else {
+          print('❌ [ADMIN] API trả về success=false: ${data['message']}');
         }
+      } else {
+        print('❌ [ADMIN] Status code: ${response.statusCode}, Body: ${response.body}');
       }
 
       return [];
@@ -1356,7 +1467,11 @@ class AdminController {
         if (data['success'] == true) {
           final List<dynamic> lichList = data['data'] ?? [];
           return lichList.cast<Map<String, dynamic>>();
+        } else {
+          print('❌ [ADMIN] API trả về success=false: ${data['message']}');
         }
+      } else {
+        print('❌ [ADMIN] Status code: ${response.statusCode}, Body: ${response.body}');
       }
 
       return [];
@@ -1990,4 +2105,5 @@ class AdminController {
       return [];
     }
   }
+
 }

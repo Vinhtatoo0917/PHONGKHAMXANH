@@ -85,12 +85,7 @@ class DichVuQuenMatKhau {
     }
 
     // ─────────────────────────────────────────────────────────────
-    // BƯỚC 2: GIẢ LẬP GỌI API (2 giây)
-    // ─────────────────────────────────────────────────────────────
-    await Future.delayed(const Duration(seconds: 2));
-
-    // ─────────────────────────────────────────────────────────────
-    // BƯỚC 3: KIỂM TRA EMAIL CÓ TỒN TẠI TRONG HỆ THỐNG KHÔNG
+    // BƯỚC 2: KIỂM TRA EMAIL CÓ TỒN TẠI TRONG HỆ THỐNG KHÔNG
     // ─────────────────────────────────────────────────────────────
     final emailTonTai = await _kiemTraEmailTonTaiTrongHeThong(email.trim());
     if (!emailTonTai) {
@@ -102,12 +97,12 @@ class DichVuQuenMatKhau {
     }
 
     // ─────────────────────────────────────────────────────────────
-    // BƯỚC 4: GỬI MÃ XÁC NHẬN (giả lập)
+    // BƯỚC 3: GỬI MÃ XÁC NHẬN
     // ─────────────────────────────────────────────────────────────
     // TODO: Trong thực tế sẽ gọi API gửi email
 
     // ─────────────────────────────────────────────────────────────
-    // BƯỚC 5: TRẢ VỀ KẾT QUẢ THÀNH CÔNG
+    // BƯỚC 4: TRẢ VỀ KẾT QUẢ THÀNH CÔNG
     // ─────────────────────────────────────────────────────────────
     return KetQuaQuenMatKhau(
       thanhCong: true,
