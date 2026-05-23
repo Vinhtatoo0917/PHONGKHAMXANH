@@ -53,7 +53,7 @@ class LichKhamController extends Controller
             $query = LichLamViec::where('MaBacSi', $maBacSi)
                 ->with(['caKham', 'phongKham', 'lichKham' => function($q) {
                     $q->whereIn('TrangThai', ['confirmed', 'examining', 'completed', 'no-show']);
-                }, 'lichKham.benhNhan', 'lichKham.chiTietLichKham.dichVu', 'lichKham.ketLuanKham', 'lichKham.donThuoc.chiTiet.thuoc', 'lichKham.phieuChiDinh.bacSi', 'lichKham.phieuChiDinh.chiTiet.dichVu.khoa']);
+                }, 'lichKham.benhNhan', 'lichKham.chiTietLichKham.dichVu', 'lichKham.ketLuanKham.benh', 'lichKham.donThuoc.chiTiet.thuoc', 'lichKham.phieuChiDinh.bacSi', 'lichKham.phieuChiDinh.chiTiet.dichVu.khoa']);
 
             if (!empty($validated['ngay_bat_dau'])) {
                 $query->where('Ngay', '>=', $validated['ngay_bat_dau']);
