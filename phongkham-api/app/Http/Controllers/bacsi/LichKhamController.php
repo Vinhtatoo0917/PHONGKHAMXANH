@@ -790,4 +790,64 @@ class LichKhamController extends Controller
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
+
+    /**
+     * Lấy tất cả hóa đơn hôm nay (cho cashier dashboard)
+     */
+    public function getAllInvoicesToday(Request $request)
+    {
+        try {
+            $today = Carbon::today();
+
+            $invoices = DB::table('hoadon as hd')
+                ->leftJoin('benhnhan as bn', 'hd.MaBenhNhan', '=', 'bn.MaBenhNhan')
+                ->whereDate('hd.NgayTao', $today)
+                ->select(
+                    'hd.MaHoaDon',
+                    'hd.MaBenhNhan',
+                    DB::raw("CONCAT(bn.ho, ' ', bn.ten) as TenBenhNhan"),
+                    'hd.TongTien',
+                    'hd.GiamBHYT',
+                    'hd.SoTienPhaiTra',
+                    'hd.TrangThai',
+                    'hd.NgayTao'
+                )
+                ->orderBy('hd.NgayTao', 'desc')
+                ->get();
+
+            $totalPending = 0;
+            $totalPaid = 0;
+            $totalAmount = 0;
+
+            foreach ($invoices as $invoice) {
+                $amount = is_string($invoice->SoTienPhaiTra)
+                    ? floatval($invoice->SoTienPhaiTra)
+                    : $invoice->SoTienPhaiTra;
+                $totalAmount += $amount;
+
+                if ($invoice->TrangThai === 'paid') {
+                    $totalPaid++;
+                } else if ($invoice->TrangThai === 'pending') {
+                    $totalPending++;
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'invoices' => $invoices,
+                    'statistics' => [
+                        'total_pending' => $totalPending,
+                        'total_paid' => $totalPaid,
+                        'total_amount' => $totalAmount,
+                    ]
+                ]
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
 }

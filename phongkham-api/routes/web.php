@@ -136,6 +136,7 @@ Route::prefix('bacsi')->group(function () {
 
     // ==================== HOÁ ĐƠN ====================
     Route::get('/hoa-don/{maLichKham}', [BacSiLichKhamController::class, 'getHoaDon']);
+    Route::get('/invoices-today', [BacSiLichKhamController::class, 'getAllInvoicesToday']);
 
     // ==================== PHIẾU CHỈ ĐỊNH ====================
     Route::get('/testing-doctors/{maLichKham}', [BacSiLichKhamController::class, 'getTestingDoctors']);

@@ -6,6 +6,8 @@ import 'package:phongkhamfy/services/session_manager.dart';
 import 'package:phongkhamfy/views/auth/login_view.dart';
 import 'package:phongkhamfy/widgets/dialog_dang_xuat.dart';
 import 'package:phongkhamfy/widgets/loading_dang_xuat.dart';
+import 'package:dio/dio.dart';
+import 'package:phongkhamfy/config/api_config.dart';
 
 class CashierHomeView extends StatefulWidget {
   const CashierHomeView({super.key});
@@ -18,6 +20,7 @@ class _CashierHomeViewState extends State<CashierHomeView> {
   int _selectedIndex = 0;
   final _authService = DichVuXacThuc();
   final _sessionManager = SessionManager();
+  final _dio = Dio();
 
   static const _primary = Color(0xFF0D47A1);
   static const _accent = Color(0xFF1976D2);
@@ -28,34 +31,16 @@ class _CashierHomeViewState extends State<CashierHomeView> {
   static const _muted = Color(0xFF667085);
 
   String _userName = 'Thu ngân';
-
-  final List<Map<String, dynamic>> mockInvoices = [
-    {
-      'MaHoaDon': 1,
-      'TrangThai': 'pending',
-      'SoTienPhaiTra': 150000.0,
-    },
-    {
-      'MaHoaDon': 2,
-      'TrangThai': 'paid',
-      'SoTienPhaiTra': 200000.0,
-    },
-    {
-      'MaHoaDon': 3,
-      'TrangThai': 'pending',
-      'SoTienPhaiTra': 300000.0,
-    },
-    {
-      'MaHoaDon': 4,
-      'TrangThai': 'paid',
-      'SoTienPhaiTra': 250000.0,
-    },
-  ];
+  int _totalPending = 0;
+  int _totalPaid = 0;
+  double _totalAmount = 0.0;
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
     _loadUserInfo();
+    _loadInvoiceStatistics();
   }
 
   Future<void> _loadUserInfo() async {
@@ -64,6 +49,51 @@ class _CashierHomeViewState extends State<CashierHomeView> {
       setState(() {
         _userName = userInfo?['ten'] ?? userInfo?['name'] ?? 'Thu ngân';
       });
+    }
+  }
+
+  Future<void> _loadInvoiceStatistics() async {
+    try {
+      setState(() => _isLoading = true);
+
+      final token = await _sessionManager.getToken();
+      if (!mounted || token == null) return;
+
+      final response = await _dio.get(
+        '${ApiConfig.baseUrl}/bacsi/invoices-today',
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        if (data is Map && data['success'] == true) {
+          final stats = data['data']['statistics'] ?? {};
+          if (mounted) {
+            setState(() {
+              _totalPending = stats['total_pending'] ?? 0;
+              _totalPaid = stats['total_paid'] ?? 0;
+              _totalAmount = (stats['total_amount'] ?? 0.0).toDouble();
+              _isLoading = false;
+            });
+          }
+          return;
+        }
+      }
+      throw Exception('Lỗi khi lấy thống kê');
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _totalPending = 0;
+          _totalPaid = 0;
+          _totalAmount = 0.0;
+        });
+      }
     }
   }
 
@@ -348,17 +378,12 @@ class _CashierHomeViewState extends State<CashierHomeView> {
   }
 
   Widget _buildTodayStats() {
-    final pending = mockInvoices.where((inv) => inv['TrangThai'] == 'pending').length;
-    final paid = mockInvoices.where((inv) => inv['TrangThai'] == 'paid').length;
-    final totalAmount =
-        mockInvoices.fold<double>(0, (sum, inv) => sum + (inv['SoTienPhaiTra'] as double));
-
     return Row(
       children: [
         Expanded(
           child: _buildStatCard(
             'Chờ thanh toán',
-            pending.toString(),
+            _totalPending.toString(),
             Icons.pending_actions_rounded,
             _warning,
           ),
@@ -367,7 +392,7 @@ class _CashierHomeViewState extends State<CashierHomeView> {
         Expanded(
           child: _buildStatCard(
             'Đã thanh toán',
-            paid.toString(),
+            _totalPaid.toString(),
             Icons.check_circle_rounded,
             _success,
           ),
@@ -376,7 +401,7 @@ class _CashierHomeViewState extends State<CashierHomeView> {
         Expanded(
           child: _buildStatCard(
             'Tổng tiền',
-            '${(totalAmount / 1000000).toStringAsFixed(1)}M',
+            '${(_totalAmount / 1000000).toStringAsFixed(1)}M',
             Icons.trending_up_rounded,
             _primary,
           ),
