@@ -24,6 +24,7 @@ return Application::configure(basePath: dirname(__DIR__))
             '/admin/*',
             '/profile/*',
             '/bacsi/*',
+            '/cashier/*',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

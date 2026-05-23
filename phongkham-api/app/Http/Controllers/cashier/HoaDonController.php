@@ -73,8 +73,6 @@ class HoaDonController extends Controller
                 ->where('MaHoaDon', $maHoaDon)
                 ->update([
                     'TrangThai' => 'paid',
-                    'NgayThanhToan' => Carbon::now(),
-                    'PhuongThucThanhToan' => $validated['payment_method'],
                 ]);
 
             return response()->json([
