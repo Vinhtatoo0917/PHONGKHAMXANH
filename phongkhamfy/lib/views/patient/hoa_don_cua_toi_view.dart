@@ -164,7 +164,11 @@ class _HoaDonCuaToiViewState extends State<HoaDonCuaToiView> {
   Widget _buildStatistics() {
     final totalInvoices = _invoices.length;
     final paidInvoices = _invoices.where((inv) => inv['TrangThai'] == 'paid').length;
-    final totalAmount = _invoices.fold<double>(0, (sum, inv) => sum + (inv['SoTienPhaiTra'] as num).toDouble());
+    final totalAmount = _invoices.fold<double>(0, (sum, inv) {
+      final amount = inv['SoTienPhaiTra'];
+      final value = amount is String ? double.parse(amount) : (amount as num).toDouble();
+      return sum + value;
+    });
 
     return Row(
       children: [
@@ -529,13 +533,19 @@ class _HoaDonCuaToiViewState extends State<HoaDonCuaToiView> {
                               ),
                             ),
                             const SizedBox(height: 4),
-                            Text(
-                              _moneyFormat.format(invoice['SoTienPhaiTra']),
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w900,
-                                color: _primary,
-                              ),
+                            Builder(
+                              builder: (context) {
+                                final amount = invoice['SoTienPhaiTra'];
+                                final value = amount is String ? double.parse(amount) : (amount as num).toDouble();
+                                return Text(
+                                  _moneyFormat.format(value),
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w900,
+                                    color: _primary,
+                                  ),
+                                );
+                              },
                             ),
                           ],
                         ),
@@ -587,6 +597,15 @@ class _HoaDonCuaToiViewState extends State<HoaDonCuaToiView> {
   Widget _buildInvoiceDetailSheet(Map<String, dynamic> invoice) {
     final isPaid = invoice['TrangThai'] == 'paid';
     final statusColor = isPaid ? _success : _warning;
+
+    final tongTien = invoice['TongTien'];
+    final tongTienValue = tongTien is String ? double.parse(tongTien) : (tongTien as num).toDouble();
+
+    final giamBHYT = invoice['GiamBHYT'];
+    final giamBHYTValue = giamBHYT is String ? double.parse(giamBHYT) : (giamBHYT as num).toDouble();
+
+    final soTienPhaiTra = invoice['SoTienPhaiTra'];
+    final soTienPhaiTraValue = soTienPhaiTra is String ? double.parse(soTienPhaiTra) : (soTienPhaiTra as num).toDouble();
 
     return ClipRRect(
       borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
@@ -660,11 +679,15 @@ class _HoaDonCuaToiViewState extends State<HoaDonCuaToiView> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                ...(invoice['ChiTiet'] as List).map((item) => _buildCostItem(
-                  item['TenHienThi'] ?? 'Dịch vụ',
-                  item['ThanhTien'] ?? 0.0,
-                  Icons.receipt_rounded,
-                )),
+                ...(invoice['ChiTiet'] as List).map((item) {
+                  final thanhTien = item['ThanhTien'];
+                  final value = thanhTien is String ? double.parse(thanhTien) : (thanhTien as num).toDouble();
+                  return _buildCostItem(
+                    item['TenHienThi'] ?? 'Dịch vụ',
+                    value,
+                    Icons.receipt_rounded,
+                  );
+                }),
                 const SizedBox(height: 16),
                 Divider(
                   color: _primary.withValues(alpha: 0.1),
@@ -673,14 +696,14 @@ class _HoaDonCuaToiViewState extends State<HoaDonCuaToiView> {
                 const SizedBox(height: 16),
                 _buildDetailRow(
                   'Tổng tiền',
-                  _moneyFormat.format(invoice['TongTien']),
+                  _moneyFormat.format(tongTienValue),
                   isBold: true,
                 ),
-                if ((invoice['GiamBHYT'] as double) > 0) ...[
+                if (giamBHYTValue > 0) ...[
                   const SizedBox(height: 8),
                   _buildDetailRow(
                     'Giảm BHYT',
-                    '-${_moneyFormat.format(invoice['GiamBHYT'])}',
+                    '-${_moneyFormat.format(giamBHYTValue)}',
                     valueColor: _success,
                   ),
                 ],
@@ -713,7 +736,7 @@ class _HoaDonCuaToiViewState extends State<HoaDonCuaToiView> {
                         ),
                       ),
                       Text(
-                        _moneyFormat.format(invoice['SoTienPhaiTra']),
+                        _moneyFormat.format(soTienPhaiTraValue),
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w900,
