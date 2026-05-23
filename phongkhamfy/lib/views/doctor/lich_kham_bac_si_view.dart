@@ -1035,32 +1035,36 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
 
     Get.bottomSheet(
       isScrollControlled: true,
-      Container(
-        height: MediaQuery.of(context).size.height * 0.85,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Colors.white.withValues(alpha: 0.95),
-              Colors.blue.withValues(alpha: 0.05),
-            ],
-          ),
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(40)),
-          border: Border.all(
-            color: Colors.white.withValues(alpha: 0.5),
-            width: 1.5,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
-              blurRadius: 30,
-              offset: const Offset(0, -10),
+      ClipRRect(
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(40)),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(
+            height: MediaQuery.of(context).size.height * 0.85,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Colors.white.withValues(alpha: 0.98),
+                  Colors.white.withValues(alpha: 0.95),
+                ],
+              ),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(40)),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.8),
+                width: 1.5,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.15),
+                  blurRadius: 30,
+                  offset: const Offset(0, -10),
+                ),
+              ],
             ),
-          ],
-        ),
-        padding: const EdgeInsets.all(24),
-        child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -1256,6 +1260,8 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
             ],
           ),
         ),
+      ),
+      ),
       ),
     );
   }
