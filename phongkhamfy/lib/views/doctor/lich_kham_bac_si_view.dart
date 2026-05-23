@@ -416,41 +416,73 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
                     const SizedBox(height: 32),
                     const Text('Hành động', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900)),
                     const SizedBox(height: 16),
-                    SizedBox(
-                      width: double.infinity,
-                      child: _buildAcceptanceButton(patient),
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: patient['TrangThai'] == 'completed'
-                            ? _buildCompletedStatus()
-                            : _buildActionButtonWithLock(
-                              Icons.assignment_turned_in_rounded,
-                              'Kết luận khám',
-                              _success,
-                              () => _showConclusionForm(patient),
-                              patient,
-                            ),
-                        ),
-                        const SizedBox(width: 12),
-                        // Nút Tạo phiếu chỉ định mới (chỉ hiển thị khi chưa hoàn tất)
-                        if (patient['TrangThai'] != 'completed')
-                          Expanded(
-                            child: _buildActionButtonWithLock(
-                              Icons.note_add_rounded,
-                              'Tạo phiếu chỉ định',
-                              _accent,
-                              () => _showIndicationForm(patient),
-                              patient,
+                    if (patient['TrangThai'] != 'completed')
+                      Column(
+                        children: [
+                          SizedBox(
+                            width: double.infinity,
+                            child: _buildAcceptanceButton(patient),
+                          ),
+                          const SizedBox(height: 16),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _buildActionButtonWithLock(
+                                  Icons.assignment_turned_in_rounded,
+                                  'Kết luận khám',
+                                  _success,
+                                  () => _showConclusionForm(patient),
+                                  patient,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: _buildActionButtonWithLock(
+                                  Icons.note_add_rounded,
+                                  'Tạo phiếu chỉ định',
+                                  _accent,
+                                  () => _showIndicationForm(patient),
+                                  patient,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      )
+                    else
+                      Column(
+                        children: [
+                          SizedBox(
+                            width: double.infinity,
+                            child: _buildCompletedStatus(),
+                          ),
+                          const SizedBox(height: 16),
+                          SizedBox(
+                            width: double.infinity,
+                            child: _actionButton(
+                              Icons.description_rounded,
+                              'Xem chi tiết kết luận',
+                              const Color(0xFF34495E),
+                              () => _showConclusionDetails(patient),
                             ),
                           ),
-                      ],
-                    ),
+                          if ((patient['PhieuChiDinh'] as List? ?? []).isNotEmpty) ...[
+                            const SizedBox(height: 12),
+                            SizedBox(
+                              width: double.infinity,
+                              child: _actionButton(
+                                Icons.description_rounded,
+                                'Xem phiếu chỉ định (${(patient['PhieuChiDinh'] as List).length})',
+                                const Color(0xFF34495E),
+                                () => _showIndicationsDialog(patient),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
                     const SizedBox(height: 12),
-                    // Nút Xem lịch sử phiếu chỉ định nếu có
-                    if ((patient['PhieuChiDinh'] as List? ?? []).isNotEmpty)
+                    // Nút Xem lịch sử phiếu chỉ định nếu có (khi chưa hoàn tất)
+                    if (patient['TrangThai'] != 'completed' && (patient['PhieuChiDinh'] as List? ?? []).isNotEmpty)
                       SizedBox(
                         width: double.infinity,
                         child: _actionButton(
@@ -992,6 +1024,120 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
           Text(label, style: const TextStyle(color: Colors.grey, fontWeight: FontWeight.w600)),
           Text(value, style: const TextStyle(fontWeight: FontWeight.w800)),
         ],
+      ),
+    );
+  }
+
+  void _showConclusionDetails(Map<String, dynamic> patient) {
+    final ketLuan = patient['KetLuan'] as Map<String, dynamic>? ?? {};
+    final donThuoc = patient['DonThuoc'] as Map<String, dynamic>? ?? {};
+
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        child: Container(
+          constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.8),
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Chi tiết kết luận khám', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Color(0xFF2C3E50))),
+                  IconButton(onPressed: () => Get.back(), icon: const Icon(Icons.close_rounded))
+                ],
+              ),
+              const SizedBox(height: 20),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (ketLuan.isNotEmpty) ...[
+                        const Text('Loại bệnh', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14, color: Color(0xFF2C3E50))),
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[100],
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            ketLuan['Benh']?['TenBenh'] ?? 'N/A',
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        const Text('Chẩn đoán', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14, color: Color(0xFF2C3E50))),
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[100],
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(ketLuan['ChanDoan'] ?? 'N/A'),
+                        ),
+                        const SizedBox(height: 16),
+                        const Text('Tình trạng', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14, color: Color(0xFF2C3E50))),
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[100],
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(ketLuan['TinhTrang'] ?? 'N/A'),
+                        ),
+                        const SizedBox(height: 16),
+                        const Text('Hướng điều trị', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14, color: Color(0xFF2C3E50))),
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[100],
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(ketLuan['HuongDieuTri'] ?? 'N/A'),
+                        ),
+                      ] else
+                        const Center(child: Text('Chưa có kết luận khám')),
+                      if (donThuoc.isNotEmpty && ketLuan.isNotEmpty) ...[
+                        const SizedBox(height: 24),
+                        const Text('Đơn thuốc', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14, color: Color(0xFF2C3E50))),
+                        const SizedBox(height: 12),
+                        ...(donThuoc['ChiTiet'] as List? ?? []).map((ct) => Container(
+                          margin: const EdgeInsets.only(bottom: 8),
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[50],
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.grey[300]!),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                ct['TenThuoc'] ?? 'N/A',
+                                style: const TextStyle(fontWeight: FontWeight.w700),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Liều dùng: ${ct['LieuDung'] ?? 'N/A'} | Số lượng: ${ct['SoLuong'] ?? 'N/A'}',
+                                style: const TextStyle(fontSize: 12, color: Colors.grey),
+                              ),
+                            ],
+                          ),
+                        )),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
