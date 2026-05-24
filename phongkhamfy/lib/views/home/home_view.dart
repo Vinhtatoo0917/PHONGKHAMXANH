@@ -4,6 +4,7 @@ import 'package:phongkhamfy/views/auth/login_view.dart';
 import 'package:phongkhamfy/views/patient/dat_lich_kham_view.dart';
 import 'package:phongkhamfy/views/patient/lich_kham_cua_toi_view.dart';
 import 'package:phongkhamfy/views/patient/hoa_don_cua_toi_view.dart';
+import 'package:phongkhamfy/views/patient/change_password_view.dart';
 import 'package:phongkhamfy/widgets/dialog_dang_xuat.dart';
 import 'package:phongkhamfy/widgets/loading_dang_xuat.dart';
 import 'package:phongkhamfy/views/patient/edit_profile_view.dart';
@@ -66,9 +67,8 @@ class _HomeViewState extends State<HomeView> {
   Widget _buildBody() {
     switch (_selectedBottomIndex) {
       case 0: return _buildHomeTab();
-      case 1: return _buildNotificationTab();
-      case 2: return _buildFeaturesTab();
-      case 3: return _buildProfileTab();
+      case 1: return _buildFeaturesTab();
+      case 2: return _buildProfileTab();
       default: return _buildHomeTab();
     }
   }
@@ -85,10 +85,6 @@ class _HomeViewState extends State<HomeView> {
               greeting: 'Xin chào,',
               name: widget.tenNguoiDung,
               subtitle: 'Chúc bạn một ngày sức khỏe tốt',
-              trailing: IconButton(
-                icon: const Icon(Icons.notifications_outlined, color: Colors.white),
-                onPressed: () => setState(() => _selectedBottomIndex = 1),
-              ),
             ),
             const SizedBox(height: 16),
             _buildBannerCarousel(),
@@ -282,15 +278,6 @@ class _HomeViewState extends State<HomeView> {
     );
   }
 
-  // ─── NOTIFICATION TAB ──────────────────────────────────────────
-  Widget _buildNotificationTab() {
-    return const EmptyState(
-      icon: Icons.notifications_outlined,
-      title: 'Chưa có thông báo',
-      subtitle: 'Các thông báo mới sẽ xuất hiện tại đây',
-    );
-  }
-
   // ─── FEATURES TAB ──────────────────────────────────────────────
   Widget _buildFeaturesTab() {
     return SafeArea(
@@ -364,7 +351,7 @@ class _HomeViewState extends State<HomeView> {
                   leading: _menuIcon(Icons.lock_outline_rounded, AppColors.primary),
                   title: 'Đổi mật khẩu',
                   subtitle: 'Bảo mật tài khoản của bạn',
-                  onTap: () {},
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ChangePasswordView())),
                   showSeparator: false,
                 ),
               ],
@@ -461,7 +448,6 @@ class _HomeViewState extends State<HomeView> {
         onTap: (index) => setState(() => _selectedBottomIndex = index),
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: 'Trang chủ'),
-          BottomNavigationBarItem(icon: Icon(Icons.notifications_rounded), label: 'Thông báo'),
           BottomNavigationBarItem(icon: Icon(Icons.apps_rounded), label: 'Chức năng'),
           BottomNavigationBarItem(icon: Icon(Icons.person_rounded), label: 'Cá nhân'),
         ],
