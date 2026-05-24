@@ -316,14 +316,8 @@ class _AdminHomeViewState extends State<AdminHomeView> {
       builder: (context, snapshot) {
         final stats = snapshot.data ?? {};
         final lichKham = stats['lichKham'] ?? 0;
-        final lichLamViec = stats['lichLamViec'] ?? 0;
-        final bacSi = stats['bacSi'] ?? 0;
-        final phongKham = stats['phongKham'] ?? 0;
-        final caKham = stats['caKham'] ?? 0;
-        final khoa = stats['khoa'] ?? 0;
-        final benh = stats['benh'] ?? 0;
-        final dichVu = stats['dichVu'] ?? 0;
-        final thuoc = stats['thuoc'] ?? 0;
+        final revenue = stats['revenue'] ?? 0;
+        final bacSiTruc = stats['bacSiTruc'] ?? 0;
 
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -332,24 +326,33 @@ class _AdminHomeViewState extends State<AdminHomeView> {
             children: [
               Text('HÔM NAY', style: AppText.caption.copyWith(
                 color: AppColors.subLabel, fontWeight: FontWeight.w600, letterSpacing: 0.8)),
-              const SizedBox(height: 10),
+              const SizedBox(height: 12),
               GridView.count(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 crossAxisCount: 3,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                childAspectRatio: 1.1,
+                crossAxisSpacing: 14,
+                mainAxisSpacing: 14,
+                childAspectRatio: 0.95,
                 children: [
-                  _statCard('Lịch khám', lichKham, Icons.event_available_rounded, AppColors.primary),
-                  _statCard('Lịch làm việc', lichLamViec, Icons.calendar_month_rounded, AppColors.accent),
-                  _statCard('Bác sĩ', bacSi, Icons.people_rounded, const Color(0xFF43A047)),
-                  _statCard('Phòng khám', phongKham, Icons.meeting_room_rounded, const Color(0xFF7B1FA2)),
-                  _statCard('Ca khám', caKham, Icons.access_time_rounded, const Color(0xFF00897B)),
-                  _statCard('Khoa', khoa, Icons.school_rounded, const Color(0xFF3949AB)),
-                  _statCard('Bệnh', benh, Icons.local_hospital_rounded, const Color(0xFFE91E63)),
-                  _statCard('Dịch vụ', dichVu, Icons.medical_services_rounded, const Color(0xFF00ACC1)),
-                  _statCard('Thuốc', thuoc, Icons.medication_rounded, const Color(0xFFF4511E)),
+                  _buildLargeStatCard(
+                    'Lịch khám',
+                    lichKham.toString(),
+                    Icons.event_available_rounded,
+                    AppColors.primary,
+                  ),
+                  _buildLargeStatCard(
+                    'Tiền thêm vào',
+                    _formatCurrency(revenue),
+                    Icons.attach_money_rounded,
+                    const Color(0xFF4CAF50),
+                  ),
+                  _buildLargeStatCard(
+                    'Bác sĩ trực',
+                    bacSiTruc.toString(),
+                    Icons.people_rounded,
+                    const Color(0xFF43A047),
+                  ),
                 ],
               ),
             ],
@@ -359,24 +362,59 @@ class _AdminHomeViewState extends State<AdminHomeView> {
     );
   }
 
-  Widget _statCard(String label, int count, IconData icon, Color color) {
+  Widget _buildLargeStatCard(String label, String value, IconData icon, Color color) {
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         color: AppColors.surface,
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 4)],
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 8)],
       ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, color: color, size: 28),
-          const SizedBox(height: 6),
-          Text(count.toString(), style: AppText.title3.copyWith(color: color, fontWeight: FontWeight.w700)),
-          const SizedBox(height: 4),
-          Text(label, style: AppText.caption.copyWith(color: AppColors.subLabel), textAlign: TextAlign.center),
-        ],
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                color: color.withValues(alpha: 0.15),
+              ),
+              child: Icon(icon, color: color, size: 26),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              value,
+              style: AppText.title3.copyWith(
+                color: color,
+                fontWeight: FontWeight.w700,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 6),
+            Text(
+              label,
+              style: AppText.caption.copyWith(color: AppColors.subLabel),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
+  }
+
+  String _formatCurrency(dynamic amount) {
+    if (amount is int) return amount.toString();
+    if (amount is double) {
+      if (amount >= 1000000) {
+        return '${(amount / 1000000).toStringAsFixed(1)}M';
+      } else if (amount >= 1000) {
+        return '${(amount / 1000).toStringAsFixed(1)}K';
+      }
+      return amount.toStringAsFixed(0);
+    }
+    return '0';
   }
 
   Widget _buildNextDayWarning() {
