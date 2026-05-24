@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:phongkhamfy/theme/app_theme.dart';
 import 'package:phongkhamfy/controllers/lich_kham_controller.dart';
 import 'package:phongkhamfy/widgets/loading_view.dart';
 
@@ -17,11 +18,6 @@ class _QuanLyLichKhamViewState extends State<QuanLyLichKhamView> {
   final _dateParam = DateFormat('yyyy-MM-dd');
   final _dateView = DateFormat('dd/MM/yyyy');
 
-  final _primary = const Color(0xFF0F9F7A);
-  final _ink = const Color(0xFF12312A);
-  final _muted = const Color(0xFF64748B);
-  final _surface = Colors.white;
-  final _background = const Color(0xFFF5FBF8);
 
   String? selectedStatus;
   late DateTime selectedStartDate;
@@ -65,15 +61,9 @@ class _QuanLyLichKhamViewState extends State<QuanLyLichKhamView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _background,
-      appBar: AppBar(
-        title: const Text(
-          'Quản lý lịch khám',
-          style: TextStyle(fontWeight: FontWeight.w800),
-        ),
-        backgroundColor: _surface,
-        foregroundColor: _ink,
-        elevation: 0,
+      backgroundColor: AppColors.bg,
+      appBar: iosAppBar(
+        title: 'Quản lý lịch khám',
         actions: [
           IconButton(
             tooltip: 'Làm mới',
@@ -83,7 +73,7 @@ class _QuanLyLichKhamViewState extends State<QuanLyLichKhamView> {
         ],
       ),
       body: RefreshIndicator(
-        color: _primary,
+        color: AppColors.primary,
         onRefresh: _loadAppointments,
         child: CustomScrollView(
           slivers: [
@@ -115,7 +105,7 @@ class _QuanLyLichKhamViewState extends State<QuanLyLichKhamView> {
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
       decoration: BoxDecoration(
-        color: _surface,
+        color: AppColors.surface,
         borderRadius: const BorderRadius.only(
           bottomLeft: Radius.circular(24),
           bottomRight: Radius.circular(24),
@@ -134,10 +124,10 @@ class _QuanLyLichKhamViewState extends State<QuanLyLichKhamView> {
             width: 54,
             height: 54,
             decoration: BoxDecoration(
-              color: _primary.withValues(alpha: 0.1),
+              color: AppColors.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(16),
             ),
-            child: Icon(Icons.event_available, color: _primary, size: 30),
+            child: Icon(Icons.event_available, color: AppColors.primary, size: 30),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -147,7 +137,7 @@ class _QuanLyLichKhamViewState extends State<QuanLyLichKhamView> {
                 Text(
                   'Duyệt lịch khám trong ngày',
                   style: TextStyle(
-                    color: _ink,
+                    color: AppColors.label,
                     fontSize: 21,
                     fontWeight: FontWeight.w900,
                   ),
@@ -155,7 +145,7 @@ class _QuanLyLichKhamViewState extends State<QuanLyLichKhamView> {
                 const SizedBox(height: 4),
                 Text(
                   'Xem chi tiết bệnh nhân, xác nhận hoặc không phê duyệt lịch khám.',
-                  style: TextStyle(color: _muted, fontSize: 13, height: 1.35),
+                  style: TextStyle(color: AppColors.subLabel, fontSize: 13, height: 1.35),
                 ),
               ],
             ),
@@ -172,12 +162,12 @@ class _QuanLyLichKhamViewState extends State<QuanLyLichKhamView> {
         children: [
           Row(
             children: [
-              Icon(Icons.tune, color: _primary, size: 20),
+              Icon(Icons.tune, color: AppColors.primary, size: 20),
               const SizedBox(width: 8),
               Text(
                 'Bộ lọc lịch khám',
                 style: TextStyle(
-                  color: _ink,
+                  color: AppColors.label,
                   fontWeight: FontWeight.w800,
                   fontSize: 16,
                 ),
@@ -230,7 +220,7 @@ class _QuanLyLichKhamViewState extends State<QuanLyLichKhamView> {
             child: FilledButton.icon(
               onPressed: _loadAppointments,
               style: FilledButton.styleFrom(
-                backgroundColor: _primary,
+                backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 13),
                 shape: RoundedRectangleBorder(
@@ -261,7 +251,7 @@ class _QuanLyLichKhamViewState extends State<QuanLyLichKhamView> {
         decoration: _inputDecoration(label, Icons.calendar_today_outlined),
         child: Text(
           _dateView.format(value),
-          style: TextStyle(color: _ink, fontWeight: FontWeight.w800),
+          style: TextStyle(color: AppColors.label, fontWeight: FontWeight.w800),
         ),
       ),
     );
@@ -307,25 +297,25 @@ class _QuanLyLichKhamViewState extends State<QuanLyLichKhamView> {
             'Tổng lịch',
             '${appointments.length}',
             Icons.event_note,
-            const Color(0xFF2563EB),
+            AppColors.accent,
           ),
           _statCard(
             'Chờ duyệt',
             '$pending',
             Icons.pending_actions,
-            const Color(0xFFF59E0B),
+            AppColors.warning,
           ),
           _statCard(
             'Đã xác nhận',
             '$confirmed',
             Icons.verified_outlined,
-            _primary,
+            AppColors.primary,
           ),
           _statCard(
             'Không duyệt',
             '$rejected',
             Icons.block_outlined,
-            const Color(0xFFDC2626),
+            AppColors.danger,
           ),
         ];
 
@@ -353,7 +343,7 @@ class _QuanLyLichKhamViewState extends State<QuanLyLichKhamView> {
       width: 160,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: _surface,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: color.withValues(alpha: 0.14)),
         boxShadow: [
@@ -383,12 +373,12 @@ class _QuanLyLichKhamViewState extends State<QuanLyLichKhamView> {
                 Text(
                   value,
                   style: TextStyle(
-                    color: _ink,
+                    color: AppColors.label,
                     fontSize: 18,
                     fontWeight: FontWeight.w900,
                   ),
                 ),
-                Text(title, style: TextStyle(color: _muted, fontSize: 12)),
+                Text(title, style: TextStyle(color: AppColors.subLabel, fontSize: 12)),
               ],
             ),
           ),
@@ -403,7 +393,7 @@ class _QuanLyLichKhamViewState extends State<QuanLyLichKhamView> {
         Text(
           'Danh sách lịch khám',
           style: TextStyle(
-            color: _ink,
+            color: AppColors.label,
             fontSize: 18,
             fontWeight: FontWeight.w900,
           ),
@@ -412,7 +402,7 @@ class _QuanLyLichKhamViewState extends State<QuanLyLichKhamView> {
         Obx(
           () => Text(
             'Trang ${controller.currentPage.value}/${controller.totalPages.value}',
-            style: TextStyle(color: _muted, fontWeight: FontWeight.w700),
+            style: TextStyle(color: AppColors.subLabel, fontWeight: FontWeight.w700),
           ),
         ),
       ],
@@ -481,7 +471,7 @@ class _QuanLyLichKhamViewState extends State<QuanLyLichKhamView> {
                       Text(
                         'Lịch khám #${appointment['MaLichKham'] ?? '--'}',
                         style: TextStyle(
-                          color: _ink,
+                          color: AppColors.label,
                           fontSize: 16,
                           fontWeight: FontWeight.w900,
                         ),
@@ -496,7 +486,7 @@ class _QuanLyLichKhamViewState extends State<QuanLyLichKhamView> {
                             _paymentStatusLabel(
                               appointment['TrangThaiThanhToan']?.toString(),
                             ),
-                            const Color(0xFF2563EB),
+                            AppColors.accent,
                           ),
                         ],
                       ),
@@ -563,7 +553,7 @@ class _QuanLyLichKhamViewState extends State<QuanLyLichKhamView> {
                     child: FilledButton.icon(
                       onPressed: () => _updateStatus(appointment, 'confirmed'),
                       style: FilledButton.styleFrom(
-                        backgroundColor: _primary,
+                        backgroundColor: AppColors.primary,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -578,8 +568,8 @@ class _QuanLyLichKhamViewState extends State<QuanLyLichKhamView> {
                     child: OutlinedButton.icon(
                       onPressed: () => _showRejectDialog(appointment),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: const Color(0xFFDC2626),
-                        side: const BorderSide(color: Color(0xFFDC2626)),
+                        foregroundColor: AppColors.danger,
+                        side: const BorderSide(color: AppColors.danger),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -606,23 +596,23 @@ class _QuanLyLichKhamViewState extends State<QuanLyLichKhamView> {
             width: 34,
             height: 34,
             decoration: BoxDecoration(
-              color: _primary.withValues(alpha: 0.08),
+              color: AppColors.primary.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(icon, color: _primary, size: 18),
+            child: Icon(icon, color: AppColors.primary, size: 18),
           ),
           const SizedBox(width: 9),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label, style: TextStyle(color: _muted, fontSize: 11)),
+                Text(label, style: TextStyle(color: AppColors.subLabel, fontSize: 11)),
                 const SizedBox(height: 2),
                 Text(
                   value,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(color: _ink, fontWeight: FontWeight.w800),
+                  style: TextStyle(color: AppColors.label, fontWeight: FontWeight.w800),
                 ),
               ],
             ),
@@ -638,12 +628,12 @@ class _QuanLyLichKhamViewState extends State<QuanLyLichKhamView> {
         padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 18),
         child: Column(
           children: [
-            Icon(Icons.event_busy_outlined, color: _primary, size: 50),
+            Icon(Icons.event_busy_outlined, color: AppColors.primary, size: 50),
             const SizedBox(height: 10),
             Text(
               'Không có lịch khám nào',
               style: TextStyle(
-                color: _ink,
+                color: AppColors.label,
                 fontSize: 16,
                 fontWeight: FontWeight.w900,
               ),
@@ -652,7 +642,7 @@ class _QuanLyLichKhamViewState extends State<QuanLyLichKhamView> {
             Text(
               'Thử đổi khoảng ngày hoặc trạng thái để xem thêm lịch.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: _muted),
+              style: TextStyle(color: AppColors.subLabel),
             ),
           ],
         ),
@@ -696,7 +686,7 @@ class _QuanLyLichKhamViewState extends State<QuanLyLichKhamView> {
       width: double.infinity,
       padding: padding ?? const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: _surface,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: Colors.black.withValues(alpha: 0.04)),
         boxShadow: [
@@ -732,9 +722,9 @@ class _QuanLyLichKhamViewState extends State<QuanLyLichKhamView> {
   InputDecoration _inputDecoration(String label, IconData icon) {
     return InputDecoration(
       labelText: label,
-      prefixIcon: Icon(icon, color: _primary, size: 20),
+      prefixIcon: Icon(icon, color: AppColors.primary, size: 20),
       filled: true,
-      fillColor: const Color(0xFFF8FCFA),
+      fillColor: AppColors.fill,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(color: Colors.black.withValues(alpha: 0.08)),
@@ -745,7 +735,7 @@ class _QuanLyLichKhamViewState extends State<QuanLyLichKhamView> {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: _primary, width: 1.4),
+        borderSide: BorderSide(color: AppColors.primary, width: 1.4),
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
     );
@@ -796,14 +786,14 @@ class _QuanLyLichKhamViewState extends State<QuanLyLichKhamView> {
                             Text(
                               'Chi tiết lịch #${appointment['MaLichKham'] ?? '--'}',
                               style: TextStyle(
-                                color: _ink,
+                                color: AppColors.label,
                                 fontSize: 18,
                                 fontWeight: FontWeight.w900,
                               ),
                             ),
                             Text(
                               _statusLabel(status),
-                              style: TextStyle(color: _muted),
+                              style: TextStyle(color: AppColors.subLabel),
                             ),
                           ],
                         ),
@@ -870,7 +860,7 @@ class _QuanLyLichKhamViewState extends State<QuanLyLichKhamView> {
                             icon: const Icon(Icons.check_circle_outline),
                             label: const Text('Xác nhận lịch'),
                             style: FilledButton.styleFrom(
-                              backgroundColor: _primary,
+                              backgroundColor: AppColors.primary,
                             ),
                           ),
                         ),
@@ -903,7 +893,7 @@ class _QuanLyLichKhamViewState extends State<QuanLyLichKhamView> {
       margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FCFA),
+        color: AppColors.fill,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.black.withValues(alpha: 0.05)),
       ),
@@ -912,7 +902,7 @@ class _QuanLyLichKhamViewState extends State<QuanLyLichKhamView> {
         children: [
           Text(
             title,
-            style: TextStyle(color: _ink, fontWeight: FontWeight.w900),
+            style: TextStyle(color: AppColors.label, fontWeight: FontWeight.w900),
           ),
           const SizedBox(height: 10),
           ...rows,
@@ -929,13 +919,13 @@ class _QuanLyLichKhamViewState extends State<QuanLyLichKhamView> {
         children: [
           SizedBox(
             width: 130,
-            child: Text(label, style: TextStyle(color: _muted, fontSize: 13)),
+            child: Text(label, style: TextStyle(color: AppColors.subLabel, fontSize: 13)),
           ),
           Expanded(
             child: Text(
               value,
               textAlign: TextAlign.right,
-              style: TextStyle(color: _ink, fontWeight: FontWeight.w800),
+              style: TextStyle(color: AppColors.label, fontWeight: FontWeight.w800),
             ),
           ),
         ],
@@ -1006,7 +996,7 @@ class _QuanLyLichKhamViewState extends State<QuanLyLichKhamView> {
                 FilledButton(
                   onPressed: () => Navigator.pop(context, true),
                   style: FilledButton.styleFrom(
-                    backgroundColor: const Color(0xFFDC2626),
+                    backgroundColor: AppColors.danger,
                   ),
                   child: const Text('Không duyệt'),
                 ),
@@ -1049,10 +1039,10 @@ class _QuanLyLichKhamViewState extends State<QuanLyLichKhamView> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: ColorScheme.light(
-              primary: _primary,
+              primary: AppColors.primary,
               onPrimary: Colors.white,
               surface: Colors.white,
-              onSurface: _ink,
+              onSurface: AppColors.label,
             ),
           ),
           child: child!,
@@ -1141,19 +1131,19 @@ class _QuanLyLichKhamViewState extends State<QuanLyLichKhamView> {
   Color _statusColor(String? status) {
     switch (status) {
       case 'pending':
-        return const Color(0xFFF59E0B);
+        return AppColors.warning;
       case 'confirmed':
-        return const Color(0xFF2563EB);
+        return AppColors.accent;
       case 'rejected':
-        return const Color(0xFFDC2626);
+        return AppColors.danger;
       case 'completed':
-        return _primary;
+        return AppColors.primary;
       case 'cancelled':
-        return const Color(0xFFEF4444);
+        return AppColors.danger;
       case 'no-show':
-        return const Color(0xFF64748B);
+        return AppColors.subLabel;
       default:
-        return _muted;
+        return AppColors.subLabel;
     }
   }
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:phongkhamfy/theme/app_theme.dart' show iosAppBar;
 import '../../controllers/admin_controller.dart';
 import '../../utils/constants.dart';
 import '../../utils/loading_utils.dart';
@@ -360,16 +361,7 @@ class _BenhViewState extends State<BenhView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text(
-          'Quản Lý Bệnh',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
-        ),
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.textWhite,
-        elevation: 0,
-        centerTitle: false,
-      ),
+      appBar: iosAppBar(title: 'Quản Lý Bệnh'),
       body: _isLoading && _danhSachBenh.isEmpty
           ? const LoadingView(
               message: 'Đang tải danh sách bệnh...',
@@ -448,7 +440,7 @@ class _BenhViewState extends State<BenhView> {
           _clearForm();
           _showFormDialog();
         },
-        backgroundColor: AppColors.primary,
+        backgroundColor: AppColors.info,
         icon: const Icon(Icons.add),
         label: const Text('Thêm bệnh'),
       ),
@@ -465,14 +457,7 @@ class _BenhViewState extends State<BenhView> {
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(AppSizes.radiusLG),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              AppColors.surface,
-              AppColors.primary.withValues(alpha: 0.05),
-            ],
-          ),
+          color: AppColors.surface,
         ),
         child: Padding(
           padding: const EdgeInsets.all(AppSizes.paddingMD),

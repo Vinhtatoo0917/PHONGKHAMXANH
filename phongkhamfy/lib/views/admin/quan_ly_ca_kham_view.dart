@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:phongkhamfy/theme/app_theme.dart';
 import '../../controllers/admin_controller.dart';
 import '../../utils/loading_utils.dart';
 import '../../widgets/loading_view.dart';
@@ -32,12 +33,6 @@ class _QuanLyCaKhamViewState extends State<QuanLyCaKhamView> {
   bool _isEditing = false;
   int? _editingCaId;
 
-  // Colors
-  final _mauXanh = const Color(0xFF3DAA70);
-  final _mauNen = const Color(0xFFF0FAF5);
-  final _mauTrang = Colors.white;
-  final _mauChuDen = const Color(0xFF1A3D2E);
-  final _mauChuXam = const Color(0xFF5A8A70);
 
   @override
   void initState() {
@@ -244,7 +239,7 @@ class _QuanLyCaKhamViewState extends State<QuanLyCaKhamView> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: isError ? Colors.red : _mauXanh,
+        backgroundColor: isError ? Colors.red : AppColors.primary,
         duration: const Duration(seconds: 2),
       ),
     );
@@ -275,7 +270,7 @@ class _QuanLyCaKhamViewState extends State<QuanLyCaKhamView> {
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: _mauChuDen,
+                          color: AppColors.label,
                         ),
                       ),
                       IconButton(
@@ -336,7 +331,7 @@ class _QuanLyCaKhamViewState extends State<QuanLyCaKhamView> {
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
-                      color: _mauChuDen,
+                      color: AppColors.label,
                     ),
                   ),
                   const SizedBox(height: 6),
@@ -349,7 +344,7 @@ class _QuanLyCaKhamViewState extends State<QuanLyCaKhamView> {
                               value: 'active',
                               groupValue: _trangThai,
                               onChanged: (v) => setState(() => _trangThai = v!),
-                              activeColor: _mauXanh,
+                              activeColor: AppColors.primary,
                             ),
                             const Text('Hoạt động'),
                           ],
@@ -362,7 +357,7 @@ class _QuanLyCaKhamViewState extends State<QuanLyCaKhamView> {
                               value: 'inactive',
                               groupValue: _trangThai,
                               onChanged: (v) => setState(() => _trangThai = v!),
-                              activeColor: _mauXanh,
+                              activeColor: AppColors.primary,
                             ),
                             const Text('Không hoạt động'),
                           ],
@@ -387,8 +382,8 @@ class _QuanLyCaKhamViewState extends State<QuanLyCaKhamView> {
                         ),
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: _mauXanh,
-                        foregroundColor: _mauTrang,
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -418,7 +413,7 @@ class _QuanLyCaKhamViewState extends State<QuanLyCaKhamView> {
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: _mauChuDen,
+            color: AppColors.label,
           ),
         ),
         const SizedBox(height: 6),
@@ -426,10 +421,10 @@ class _QuanLyCaKhamViewState extends State<QuanLyCaKhamView> {
           controller: controller,
           keyboardType: keyboardType,
           decoration: InputDecoration(
-            prefixIcon: Icon(icon, color: _mauXanh, size: 20),
+            prefixIcon: Icon(icon, color: AppColors.primary, size: 20),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: _mauXanh.withValues(alpha: 0.3)),
+              borderSide: BorderSide(color: AppColors.primary.withValues(alpha: 0.3)),
             ),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
@@ -454,7 +449,7 @@ class _QuanLyCaKhamViewState extends State<QuanLyCaKhamView> {
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: _mauChuDen,
+            color: AppColors.label,
           ),
         ),
         const SizedBox(height: 6),
@@ -469,18 +464,18 @@ class _QuanLyCaKhamViewState extends State<QuanLyCaKhamView> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              border: Border.all(color: _mauXanh.withValues(alpha: 0.3)),
+              border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
               children: [
-                Icon(Icons.access_time, color: _mauXanh, size: 20),
+                Icon(Icons.access_time, color: AppColors.primary, size: 20),
                 const SizedBox(width: 12),
                 Text(
                   value != null ? value.format(context) : 'Chọn giờ',
                   style: TextStyle(
                     fontSize: 14,
-                    color: value != null ? _mauChuDen : Colors.grey[600],
+                    color: value != null ? AppColors.label : Colors.grey[600],
                   ),
                 ),
               ],
@@ -494,17 +489,8 @@ class _QuanLyCaKhamViewState extends State<QuanLyCaKhamView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _mauNen,
-      appBar: AppBar(
-        title: const Text(
-          'Quản Lý Ca Khám',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
-        ),
-        backgroundColor: _mauXanh,
-        foregroundColor: _mauTrang,
-        elevation: 0,
-        centerTitle: false,
-      ),
+      backgroundColor: AppColors.bg,
+      appBar: iosAppBar(title: 'Quản Lý Ca Khám'),
       body: _isLoading && _danhSachCaKham.isEmpty
           ? const LoadingView(
               message: 'Đang tải danh sách ca khám...',
@@ -525,11 +511,11 @@ class _QuanLyCaKhamViewState extends State<QuanLyCaKhamView> {
                         },
                         decoration: InputDecoration(
                           hintText: 'Tìm kiếm ca khám...',
-                          prefixIcon: Icon(Icons.search, color: _mauXanh),
+                          prefixIcon: Icon(Icons.search, color: AppColors.primary),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide(
-                              color: _mauXanh.withValues(alpha: 0.3),
+                              color: AppColors.primary.withValues(alpha: 0.3),
                             ),
                           ),
                           contentPadding: const EdgeInsets.symmetric(
@@ -552,11 +538,11 @@ class _QuanLyCaKhamViewState extends State<QuanLyCaKhamView> {
                                 setState(() {});
                               },
                               backgroundColor: Colors.grey[200],
-                              selectedColor: _mauXanh,
+                              selectedColor: AppColors.primary,
                               labelStyle: TextStyle(
                                 color: _filterTrangThai == null
-                                    ? _mauTrang
-                                    : _mauChuDen,
+                                    ? Colors.white
+                                    : AppColors.label,
                               ),
                             ),
                             const SizedBox(width: 8),
@@ -572,8 +558,8 @@ class _QuanLyCaKhamViewState extends State<QuanLyCaKhamView> {
                               selectedColor: Colors.green,
                               labelStyle: TextStyle(
                                 color: _filterTrangThai == 'active'
-                                    ? _mauTrang
-                                    : _mauChuDen,
+                                    ? Colors.white
+                                    : AppColors.label,
                               ),
                             ),
                             const SizedBox(width: 8),
@@ -589,8 +575,8 @@ class _QuanLyCaKhamViewState extends State<QuanLyCaKhamView> {
                               selectedColor: Colors.red,
                               labelStyle: TextStyle(
                                 color: _filterTrangThai == 'inactive'
-                                    ? _mauTrang
-                                    : _mauChuDen,
+                                    ? Colors.white
+                                    : AppColors.label,
                               ),
                             ),
                           ],
@@ -609,14 +595,14 @@ class _QuanLyCaKhamViewState extends State<QuanLyCaKhamView> {
                               Icon(
                                 Icons.schedule,
                                 size: 64,
-                                color: _mauChuXam.withValues(alpha: 0.3),
+                                color: AppColors.subLabel.withValues(alpha: 0.3),
                               ),
                               const SizedBox(height: 16),
                               Text(
                                 'Không tìm thấy ca khám',
                                 style: TextStyle(
                                   fontSize: 16,
-                                  color: _mauChuXam,
+                                  color: AppColors.subLabel,
                                 ),
                               ),
                             ],
@@ -624,7 +610,7 @@ class _QuanLyCaKhamViewState extends State<QuanLyCaKhamView> {
                         )
                       : RefreshIndicator(
                           onRefresh: _taiDanhSachCaKham,
-                          color: _mauXanh,
+                          color: AppColors.primary,
                           child: ListView.builder(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 16,
@@ -646,7 +632,7 @@ class _QuanLyCaKhamViewState extends State<QuanLyCaKhamView> {
           _clearForm();
           _showFormDialog();
         },
-        backgroundColor: _mauXanh,
+        backgroundColor: AppColors.info,
         icon: const Icon(Icons.add),
         label: const Text('Thêm ca khám'),
       ),
@@ -662,11 +648,7 @@ class _QuanLyCaKhamViewState extends State<QuanLyCaKhamView> {
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [_mauTrang, _mauNen],
-          ),
+          color: AppColors.surface,
         ),
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -699,7 +681,7 @@ class _QuanLyCaKhamViewState extends State<QuanLyCaKhamView> {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: _mauChuDen,
+                            color: AppColors.label,
                           ),
                         ),
                         Text(
@@ -772,19 +754,19 @@ class _QuanLyCaKhamViewState extends State<QuanLyCaKhamView> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: _mauXanh.withValues(alpha: 0.1),
+        color: AppColors.primary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: _mauXanh),
+          Icon(icon, size: 14, color: AppColors.primary),
           const SizedBox(width: 6),
           Text(
             value,
             style: TextStyle(
               fontSize: 12,
-              color: _mauChuDen,
+              color: AppColors.label,
               fontWeight: FontWeight.w500,
             ),
             maxLines: 1,

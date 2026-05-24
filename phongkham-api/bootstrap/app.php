@@ -13,18 +13,21 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         // Thêm CORS middleware ở đầu tiên
         $middleware->prepend(\App\Http\Middleware\Cors::class);
-        
+
         // Tắt CSRF cho các route API
         $middleware->validateCsrfTokens(except: [
             '/login',
             '/register',
             '/logout',
             '/me',
+            '/forgot-password',
+            '/reset-password',
             '/lich-kham/*',
             '/admin/*',
             '/profile/*',
             '/bacsi/*',
             '/cashier/*',
+            '/vnpay/*',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

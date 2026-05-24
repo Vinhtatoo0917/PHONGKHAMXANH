@@ -12,9 +12,9 @@ class AppColors {
   AppColors._();
 
   // Màu chính
-  static const Color primary = Color(0xFF3DAA70);
-  static const Color primaryLight = Color(0xFF6DC896);
-  static const Color primaryDark = Color(0xFF2D8A5A);
+  static const Color primary = Color(0xFF0D47A1);
+  static const Color primaryLight = Color(0xFF1976D2);
+  static const Color primaryDark = Color(0xFF0A2D6B);
 
   // Màu nền
   static const Color background = Color(0xFFF5F5F5);

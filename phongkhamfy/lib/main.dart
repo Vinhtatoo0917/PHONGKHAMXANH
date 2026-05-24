@@ -32,7 +32,7 @@ class UngDungPhongKham extends StatelessWidget {
       supportedLocales: const [Locale('vi', 'VN'), Locale('en', 'US')],
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF4CAF82),
+          seedColor: const Color(0xFF0D47A1),
           brightness: Brightness.light,
         ),
         useMaterial3: true,
@@ -133,7 +133,7 @@ class _TrangThaiManHinhKhoiDong extends State<ManHinhKhoiDong> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF0FAF5),
+      backgroundColor: const Color(0xFFF0F4F8),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -141,7 +141,7 @@ class _TrangThaiManHinhKhoiDong extends State<ManHinhKhoiDong> {
             Icon(
               Icons.local_hospital,
               size: 80,
-              color: const Color(0xFF3DAA70),
+              color: const Color(0xFF0D47A1),
             ),
             const SizedBox(height: 24),
             const Text(
@@ -149,12 +149,12 @@ class _TrangThaiManHinhKhoiDong extends State<ManHinhKhoiDong> {
               style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF1A3D2E),
+                color: Color(0xFF172033),
               ),
             ),
             const SizedBox(height: 16),
             const CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF3DAA70)),
+              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF0D47A1)),
             ),
           ],
         ),

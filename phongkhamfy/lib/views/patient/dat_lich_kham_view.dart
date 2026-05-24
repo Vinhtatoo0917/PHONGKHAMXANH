@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:phongkhamfy/controllers/lich_kham_controller.dart';
 import 'package:phongkhamfy/widgets/loading_view.dart';
+import 'package:phongkhamfy/theme/app_theme.dart';
 
 extension _LichKhamMap on Map<String, dynamic> {
   int? get maLichLamViec => _toInt(this['MaLichLamViec']);
@@ -46,16 +47,7 @@ class DatLichKhamView extends StatefulWidget {
 }
 
 class _DatLichKhamViewState extends State<DatLichKhamView> {
-  static const _primary = Color(0xFF1565C0);
-  static const _secondary = Color(0xFF00A6A6);
-  static const _surface = Colors.white;
-  static const _background = Color(0xFFF4F7FB);
-  static const _text = Color(0xFF172033);
-  static const _muted = Color(0xFF667085);
-  static const _line = Color(0xFFE4E9F2);
-  static const _warning = Color(0xFFFFB020);
-
-  final LichKhamController _controller = Get.put(LichKhamController());
+final LichKhamController _controller = Get.put(LichKhamController());
   final DateFormat _apiDateFormat = DateFormat('yyyy-MM-dd');
   final DateFormat _dayFormat = DateFormat('dd/MM');
   late final List<DateTime> _days;
@@ -212,16 +204,20 @@ class _DatLichKhamViewState extends State<DatLichKhamView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _background,
-      body: SafeArea(
-        bottom: false,
-        child: RefreshIndicator(
+      backgroundColor: AppColors.bg,
+      appBar: iosAppBar(
+        title: 'Đặt lịch khám',
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_rounded),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+      body: RefreshIndicator(
           onRefresh: _loadData,
-          color: _primary,
+          color: AppColors.primary,
           child: CustomScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
-              SliverToBoxAdapter(child: _buildHeader()),
               SliverToBoxAdapter(child: _buildSectionTitle('Dịch vụ cần khám')),
               Obx(() => _buildServiceList()),
               SliverToBoxAdapter(child: _buildDateStrip()),
@@ -233,81 +229,13 @@ class _DatLichKhamViewState extends State<DatLichKhamView> {
             ],
           ),
         ),
-      ),
       bottomNavigationBar: _buildBottomBar(),
-    );
-  }
-
-  Widget _buildHeader() {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 18),
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [_primary, Color(0xFF0E8A9A)],
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              _IconButton(
-                icon: Icons.arrow_back_rounded,
-                onTap: () => Navigator.pop(context),
-              ),
-              const Spacer(),
-              _IconButton(icon: Icons.support_agent_rounded, onTap: () {}),
-            ],
-          ),
-          const SizedBox(height: 18),
-          const Text(
-            'Đặt lịch khám',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 28,
-              fontWeight: FontWeight.w800,
-              height: 1.05,
-            ),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'Chọn thời gian khám, dịch vụ cần thiết và xác nhận lịch hẹn.',
-            style: TextStyle(
-              color: Color(0xFFE8F6FF),
-              fontSize: 14,
-              height: 1.35,
-            ),
-          ),
-          const SizedBox(height: 18),
-          Row(
-            children: const [
-              Expanded(
-                child: _HeaderStat(
-                  icon: Icons.event_available_rounded,
-                  label: '14 ngày',
-                  value: 'Lịch gần nhất',
-                ),
-              ),
-              SizedBox(width: 10),
-              Expanded(
-                child: _HeaderStat(
-                  icon: Icons.verified_user_rounded,
-                  label: 'An toàn',
-                  value: 'Xác nhận nhanh',
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
     );
   }
 
   Widget _buildDateStrip() {
     return Container(
-      color: _surface,
+      color: AppColors.surface,
       padding: const EdgeInsets.fromLTRB(16, 14, 0, 14),
       child: SizedBox(
         height: 74,
@@ -329,9 +257,9 @@ class _DatLichKhamViewState extends State<DatLichKhamView> {
                 width: 68,
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 decoration: BoxDecoration(
-                  color: selected ? _primary : _background,
+                  color: selected ? AppColors.primary : AppColors.bg,
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: selected ? _primary : _line),
+                  border: Border.all(color: selected ? AppColors.primary : AppColors.separator),
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -341,7 +269,7 @@ class _DatLichKhamViewState extends State<DatLichKhamView> {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        color: selected ? Colors.white : _muted,
+                        color: selected ? Colors.white : AppColors.subLabel,
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
                       ),
@@ -350,7 +278,7 @@ class _DatLichKhamViewState extends State<DatLichKhamView> {
                     Text(
                       _dayFormat.format(day),
                       style: TextStyle(
-                        color: selected ? Colors.white : _text,
+                        color: selected ? Colors.white : AppColors.label,
                         fontSize: 15,
                         fontWeight: FontWeight.w800,
                       ),
@@ -371,7 +299,7 @@ class _DatLichKhamViewState extends State<DatLichKhamView> {
       child: Text(
         title,
         style: const TextStyle(
-          color: _text,
+          color: AppColors.label,
           fontSize: 18,
           fontWeight: FontWeight.w800,
         ),
@@ -515,8 +443,8 @@ class _DatLichKhamViewState extends State<DatLichKhamView> {
           math.max(MediaQuery.of(context).padding.bottom, 12),
         ),
         decoration: const BoxDecoration(
-          color: _surface,
-          border: Border(top: BorderSide(color: _line)),
+          color: AppColors.surface,
+          border: Border(top: BorderSide(color: AppColors.separator)),
         ),
         child: Row(
           children: [
@@ -534,7 +462,7 @@ class _DatLichKhamViewState extends State<DatLichKhamView> {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      color: _text,
+                      color: AppColors.label,
                       fontSize: 15,
                       fontWeight: FontWeight.w800,
                     ),
@@ -548,7 +476,7 @@ class _DatLichKhamViewState extends State<DatLichKhamView> {
                         : '${_controller.selectedServices.length} dịch vụ • ${_formatMoney(_totalPrice)}',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(color: _muted, fontSize: 12),
+                    style: const TextStyle(color: AppColors.subLabel, fontSize: 12),
                   ),
                 ],
               ),
@@ -559,8 +487,8 @@ class _DatLichKhamViewState extends State<DatLichKhamView> {
               child: FilledButton.icon(
                 onPressed: canBook ? _confirmBooking : null,
                 style: FilledButton.styleFrom(
-                  backgroundColor: _primary,
-                  disabledBackgroundColor: const Color(0xFFD7DEE8),
+                  backgroundColor: AppColors.primary,
+                  disabledBackgroundColor: AppColors.separator,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),
@@ -611,17 +539,17 @@ class _ScheduleCard extends StatelessWidget {
       child: Ink(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: _DatLichKhamViewState._surface,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
             color: selected
-                ? _DatLichKhamViewState._primary
-                : _DatLichKhamViewState._line,
+                ? AppColors.primary
+                : AppColors.separator,
             width: selected ? 1.6 : 1,
           ),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF101828).withOpacity(0.06),
+              color: Colors.black.withOpacity(0.06),
               blurRadius: 18,
               offset: const Offset(0, 8),
             ),
@@ -637,12 +565,12 @@ class _ScheduleCard extends StatelessWidget {
                   width: 50,
                   height: 50,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFEFF8FF),
+                    color: AppColors.primaryBg,
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: const Icon(
                     Icons.person_search_rounded,
-                    color: _DatLichKhamViewState._primary,
+                    color: AppColors.primary,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -655,7 +583,7 @@ class _ScheduleCard extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                          color: _DatLichKhamViewState._text,
+                          color: AppColors.label,
                           fontSize: 16,
                           fontWeight: FontWeight.w800,
                         ),
@@ -668,7 +596,7 @@ class _ScheduleCard extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                          color: _DatLichKhamViewState._muted,
+                          color: AppColors.subLabel,
                           fontSize: 13,
                         ),
                       ),
@@ -680,8 +608,8 @@ class _ScheduleCard extends StatelessWidget {
                       ? Icons.radio_button_checked_rounded
                       : Icons.radio_button_unchecked_rounded,
                   color: selected
-                      ? _DatLichKhamViewState._primary
-                      : const Color(0xFF98A2B3),
+                      ? AppColors.primary
+                      : AppColors.subLabel,
                 ),
               ],
             ),
@@ -693,13 +621,13 @@ class _ScheduleCard extends StatelessWidget {
                 _InfoPill(
                   icon: Icons.calendar_today_rounded,
                   text: dateText,
-                  color: _DatLichKhamViewState._primary,
+                  color: AppColors.primary,
                 ),
                 _InfoPill(
                   icon: Icons.schedule_rounded,
                   text:
                       '${formatTime(schedule.gioBatDau)} - ${formatTime(schedule.gioKetThuc)}',
-                  color: _DatLichKhamViewState._secondary,
+                  color: AppColors.accent,
                 ),
                 _InfoPill(
                   icon: Icons.meeting_room_rounded,
@@ -714,13 +642,13 @@ class _ScheduleCard extends StatelessWidget {
                 const Icon(
                   Icons.group_rounded,
                   size: 18,
-                  color: _DatLichKhamViewState._warning,
+                  color: AppColors.warning,
                 ),
                 const SizedBox(width: 6),
                 Text(
                   'Còn ${schedule.soChoTrong ?? 0}/${schedule.soLuongToiDa ?? 0} chỗ',
                   style: const TextStyle(
-                    color: _DatLichKhamViewState._text,
+                    color: AppColors.label,
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
                   ),
@@ -755,12 +683,12 @@ class _ServiceTile extends StatelessWidget {
       child: Ink(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: _DatLichKhamViewState._surface,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: selected
-                ? _DatLichKhamViewState._secondary
-                : _DatLichKhamViewState._line,
+                ? AppColors.accent
+                : AppColors.separator,
           ),
         ),
         child: Row(
@@ -770,15 +698,15 @@ class _ServiceTile extends StatelessWidget {
               height: 44,
               decoration: BoxDecoration(
                 color: selected
-                    ? const Color(0xFFE6FFFB)
-                    : const Color(0xFFF2F4F7),
+                    ? AppColors.primaryBg
+                    : AppColors.fill,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
                 Icons.medical_services_rounded,
                 color: selected
-                    ? _DatLichKhamViewState._secondary
-                    : _DatLichKhamViewState._muted,
+                    ? AppColors.accent
+                    : AppColors.subLabel,
               ),
             ),
             const SizedBox(width: 12),
@@ -791,7 +719,7 @@ class _ServiceTile extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      color: _DatLichKhamViewState._text,
+                      color: AppColors.label,
                       fontSize: 14,
                       fontWeight: FontWeight.w800,
                     ),
@@ -800,7 +728,7 @@ class _ServiceTile extends StatelessWidget {
                   Text(
                     priceText,
                     style: const TextStyle(
-                      color: _DatLichKhamViewState._muted,
+                      color: AppColors.subLabel,
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                     ),
@@ -813,8 +741,8 @@ class _ServiceTile extends StatelessWidget {
                   ? Icons.check_circle_rounded
                   : Icons.add_circle_outline_rounded,
               color: selected
-                  ? _DatLichKhamViewState._secondary
-                  : const Color(0xFF98A2B3),
+                  ? AppColors.accent
+                  : AppColors.subLabel,
             ),
           ],
         ),
@@ -867,7 +795,7 @@ class _ConfirmSheet extends StatelessWidget {
               width: 44,
               height: 5,
               decoration: BoxDecoration(
-                color: const Color(0xFFD0D5DD),
+                color: AppColors.separator,
                 borderRadius: BorderRadius.circular(99),
               ),
             ),
@@ -876,7 +804,7 @@ class _ConfirmSheet extends StatelessWidget {
           const Text(
             'Xác nhận lịch khám',
             style: TextStyle(
-              color: _DatLichKhamViewState._text,
+              color: AppColors.label,
               fontSize: 20,
               fontWeight: FontWeight.w900,
             ),
@@ -900,7 +828,7 @@ class _ConfirmSheet extends StatelessWidget {
           Text(
             services.isEmpty ? 'Chưa chọn dịch vụ' : 'Dịch vụ đã chọn',
             style: const TextStyle(
-              color: _DatLichKhamViewState._text,
+              color: AppColors.label,
               fontWeight: FontWeight.w800,
             ),
           ),
@@ -908,7 +836,7 @@ class _ConfirmSheet extends StatelessWidget {
           if (services.isEmpty)
             const Text(
               'Bạn có thể bổ sung dịch vụ tại quầy tiếp nhận.',
-              style: TextStyle(color: _DatLichKhamViewState._muted),
+              style: TextStyle(color: AppColors.subLabel),
             )
           else
             ...services.map(
@@ -919,7 +847,7 @@ class _ConfirmSheet extends StatelessWidget {
                     const Icon(
                       Icons.check_rounded,
                       size: 18,
-                      color: _DatLichKhamViewState._secondary,
+                      color: AppColors.accent,
                     ),
                     const SizedBox(width: 8),
                     Expanded(
@@ -928,7 +856,7 @@ class _ConfirmSheet extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                          color: _DatLichKhamViewState._text,
+                          color: AppColors.label,
                         ),
                       ),
                     ),
@@ -944,7 +872,7 @@ class _ConfirmSheet extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: const Color(0xFFF4F7FB),
+              color: AppColors.bg,
               borderRadius: BorderRadius.circular(16),
             ),
             child: Row(
@@ -952,7 +880,7 @@ class _ConfirmSheet extends StatelessWidget {
                 const Text(
                   'Tạm tính',
                   style: TextStyle(
-                    color: _DatLichKhamViewState._muted,
+                    color: AppColors.subLabel,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -960,7 +888,7 @@ class _ConfirmSheet extends StatelessWidget {
                 Text(
                   _formatMoney(totalPrice),
                   style: const TextStyle(
-                    color: _DatLichKhamViewState._primary,
+                    color: AppColors.primary,
                     fontSize: 18,
                     fontWeight: FontWeight.w900,
                   ),
@@ -975,7 +903,7 @@ class _ConfirmSheet extends StatelessWidget {
             child: FilledButton(
               onPressed: () => Navigator.pop(context, true),
               style: FilledButton.styleFrom(
-                backgroundColor: _DatLichKhamViewState._primary,
+                backgroundColor: AppColors.primary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
                 ),
@@ -1001,7 +929,7 @@ class _SummaryRow extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 10),
       child: Row(
         children: [
-          Icon(icon, size: 20, color: _DatLichKhamViewState._primary),
+          Icon(icon, size: 20, color: AppColors.primary),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
@@ -1009,65 +937,9 @@ class _SummaryRow extends StatelessWidget {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
-                color: _DatLichKhamViewState._text,
+                color: AppColors.label,
                 fontWeight: FontWeight.w600,
               ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _HeaderStat extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-
-  const _HeaderStat({
-    required this.icon,
-    required this.label,
-    required this.value,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.14),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.18)),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: Colors.white, size: 22),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  value,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: Color(0xFFE8F6FF),
-                    fontSize: 11,
-                  ),
-                ),
-              ],
             ),
           ),
         ],
@@ -1119,30 +991,6 @@ class _InfoPill extends StatelessWidget {
   }
 }
 
-class _IconButton extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback onTap;
-
-  const _IconButton({required this.icon, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        width: 42,
-        height: 42,
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.14),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Icon(icon, color: Colors.white),
-      ),
-    );
-  }
-}
-
 class _EmptyState extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -1160,19 +1008,19 @@ class _EmptyState extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: _DatLichKhamViewState._surface,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: _DatLichKhamViewState._line),
+        border: Border.all(color: AppColors.separator),
       ),
       child: Column(
         children: [
-          Icon(icon, size: 46, color: const Color(0xFF98A2B3)),
+          Icon(icon, size: 46, color: AppColors.subLabel),
           const SizedBox(height: 10),
           Text(
             title,
             textAlign: TextAlign.center,
             style: const TextStyle(
-              color: _DatLichKhamViewState._text,
+              color: AppColors.label,
               fontSize: 16,
               fontWeight: FontWeight.w800,
             ),
@@ -1182,7 +1030,7 @@ class _EmptyState extends StatelessWidget {
             message,
             textAlign: TextAlign.center,
             style: const TextStyle(
-              color: _DatLichKhamViewState._muted,
+              color: AppColors.subLabel,
               height: 1.35,
             ),
           ),

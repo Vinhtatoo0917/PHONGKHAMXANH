@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:phongkhamfy/theme/app_theme.dart';
 import '../../controllers/admin_controller.dart';
 import '../../utils/loading_utils.dart';
 import '../../widgets/loading_view.dart';
@@ -29,12 +30,6 @@ class _QuanLyPhongKhamViewState extends State<QuanLyPhongKhamView> {
   bool _isEditing = false;
   int? _editingPhongId;
 
-  // Colors
-  final _mauXanh = const Color(0xFF3DAA70);
-  final _mauNen = const Color(0xFFF0FAF5);
-  final _mauTrang = Colors.white;
-  final _mauChuDen = const Color(0xFF1A3D2E);
-  final _mauChuXam = const Color(0xFF5A8A70);
 
   @override
   void initState() {
@@ -178,18 +173,22 @@ class _QuanLyPhongKhamViewState extends State<QuanLyPhongKhamView> {
   }
 
   void _dienFormChinhSua(Map<String, dynamic> phong) {
-    _isEditing = true;
-    _editingPhongId = phong['MaPhong'];
-    _tenPhongController.text = phong['TenPhong'] ?? '';
-    _khuChon = phong['Khu'];
+    setState(() {
+      _isEditing = true;
+      _editingPhongId = phong['MaPhong'];
+      _tenPhongController.text = phong['TenPhong'] ?? '';
+      _khuChon = phong['Khu'];
+    });
     _showFormDialog();
   }
 
   void _clearForm() {
-    _tenPhongController.clear();
-    _isEditing = false;
-    _editingPhongId = null;
-    _khuChon = null;
+    setState(() {
+      _tenPhongController.clear();
+      _isEditing = false;
+      _editingPhongId = null;
+      _khuChon = null;
+    });
   }
 
   void _showAddKhuDialog() {
@@ -213,7 +212,7 @@ class _QuanLyPhongKhamViewState extends State<QuanLyPhongKhamView> {
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: _mauChuDen,
+                      color: AppColors.label,
                     ),
                   ),
                   IconButton(
@@ -225,23 +224,23 @@ class _QuanLyPhongKhamViewState extends State<QuanLyPhongKhamView> {
               const SizedBox(height: 20),
               TextField(
                 controller: tenKhuController,
-                style: TextStyle(fontSize: 15, color: _mauChuDen),
+                style: TextStyle(fontSize: 15, color: AppColors.label),
                 decoration: InputDecoration(
                   labelText: 'Tên khu (VD: Tầng 1, Khu A...)',
                   labelStyle: TextStyle(color: Colors.grey[600]),
-                  prefixIcon: Icon(Icons.domain, color: _mauXanh),
+                  prefixIcon: Icon(Icons.domain, color: AppColors.primary),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide(
-                      color: _mauXanh.withValues(alpha: 0.3),
+                      color: AppColors.primary.withValues(alpha: 0.3),
                     ),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: _mauXanh, width: 2),
+                    borderSide: BorderSide(color: AppColors.primary, width: 2),
                   ),
                 ),
               ),
@@ -253,7 +252,7 @@ class _QuanLyPhongKhamViewState extends State<QuanLyPhongKhamView> {
                       onPressed: () => Navigator.pop(context),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.grey[200],
-                        foregroundColor: _mauChuDen,
+                        foregroundColor: AppColors.label,
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
@@ -293,8 +292,8 @@ class _QuanLyPhongKhamViewState extends State<QuanLyPhongKhamView> {
                         }
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: _mauXanh,
-                        foregroundColor: _mauTrang,
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
@@ -316,7 +315,7 @@ class _QuanLyPhongKhamViewState extends State<QuanLyPhongKhamView> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: isError ? Colors.red : _mauXanh,
+        backgroundColor: isError ? Colors.red : AppColors.primary,
         duration: const Duration(seconds: 2),
       ),
     );
@@ -333,11 +332,7 @@ class _QuanLyPhongKhamViewState extends State<QuanLyPhongKhamView> {
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(24),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [_mauTrang, _mauNen],
-              ),
+              color: AppColors.surface,
             ),
             child: Padding(
               padding: const EdgeInsets.all(28),
@@ -358,7 +353,7 @@ class _QuanLyPhongKhamViewState extends State<QuanLyPhongKhamView> {
                                 vertical: 6,
                               ),
                               decoration: BoxDecoration(
-                                color: _mauXanh.withValues(alpha: 0.15),
+                                color: AppColors.primary.withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
@@ -366,7 +361,7 @@ class _QuanLyPhongKhamViewState extends State<QuanLyPhongKhamView> {
                                 style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
-                                  color: _mauXanh,
+                                  color: AppColors.primary,
                                   letterSpacing: 0.5,
                                 ),
                               ),
@@ -379,7 +374,7 @@ class _QuanLyPhongKhamViewState extends State<QuanLyPhongKhamView> {
                               style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.w700,
-                                color: _mauChuDen,
+                                color: AppColors.label,
                               ),
                             ),
                           ],
@@ -391,7 +386,7 @@ class _QuanLyPhongKhamViewState extends State<QuanLyPhongKhamView> {
                             : () => Navigator.pop(context),
                         icon: Icon(
                           Icons.close_rounded,
-                          color: _mauChuXam,
+                          color: AppColors.subLabel,
                           size: 28,
                         ),
                         splashRadius: 24,
@@ -402,10 +397,10 @@ class _QuanLyPhongKhamViewState extends State<QuanLyPhongKhamView> {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: _mauXanh.withValues(alpha: 0.05),
+                      color: AppColors.primary.withValues(alpha: 0.05),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: _mauXanh.withValues(alpha: 0.1),
+                        color: AppColors.primary.withValues(alpha: 0.1),
                       ),
                     ),
                     child: Column(
@@ -446,8 +441,8 @@ class _QuanLyPhongKhamViewState extends State<QuanLyPhongKhamView> {
                         ),
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: _mauXanh,
-                        foregroundColor: _mauTrang,
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
                         ),
@@ -477,7 +472,7 @@ class _QuanLyPhongKhamViewState extends State<QuanLyPhongKhamView> {
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w700,
-            color: _mauChuDen,
+            color: AppColors.label,
             letterSpacing: 0.3,
           ),
         ),
@@ -486,36 +481,36 @@ class _QuanLyPhongKhamViewState extends State<QuanLyPhongKhamView> {
           controller: controller,
           style: TextStyle(
             fontSize: 15,
-            color: _mauChuDen,
+            color: AppColors.label,
             fontWeight: FontWeight.w500,
           ),
           decoration: InputDecoration(
             prefixIcon: Padding(
               padding: const EdgeInsets.only(left: 12, right: 8),
-              child: Icon(icon, color: _mauXanh, size: 22),
+              child: Icon(icon, color: AppColors.primary, size: 22),
             ),
             prefixIconConstraints: const BoxConstraints(minHeight: 24, minWidth: 24),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(
-                color: _mauXanh.withValues(alpha: 0.2),
+                color: AppColors.primary.withValues(alpha: 0.2),
               ),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(
-                color: _mauXanh.withValues(alpha: 0.2),
+                color: AppColors.primary.withValues(alpha: 0.2),
               ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(
-                color: _mauXanh,
+                color: AppColors.primary,
                 width: 2,
               ),
             ),
             filled: true,
-            fillColor: _mauTrang,
+            fillColor: Colors.white,
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
               vertical: 14,
@@ -548,7 +543,7 @@ class _QuanLyPhongKhamViewState extends State<QuanLyPhongKhamView> {
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: _mauChuDen,
+                color: AppColors.label,
               ),
             ),
             GestureDetector(
@@ -556,20 +551,20 @@ class _QuanLyPhongKhamViewState extends State<QuanLyPhongKhamView> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: _mauXanh.withValues(alpha: 0.15),
+                  color: AppColors.primary.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.add, size: 14, color: _mauXanh),
+                    Icon(Icons.add, size: 14, color: AppColors.primary),
                     const SizedBox(width: 4),
                     Text(
                       'Thêm khu',
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
-                        color: _mauXanh,
+                        color: AppColors.primary,
                       ),
                     ),
                   ],
@@ -583,16 +578,16 @@ class _QuanLyPhongKhamViewState extends State<QuanLyPhongKhamView> {
           decoration: BoxDecoration(
             border: Border.all(
               color: value != null
-                  ? _mauXanh
-                  : _mauXanh.withValues(alpha: 0.3),
+                  ? AppColors.primary
+                  : AppColors.primary.withValues(alpha: 0.3),
               width: value != null ? 2 : 1,
             ),
             borderRadius: BorderRadius.circular(12),
-            color: _mauTrang,
+            color: Colors.white,
             boxShadow: value != null
                 ? [
                     BoxShadow(
-                      color: _mauXanh.withValues(alpha: 0.1),
+                      color: AppColors.primary.withValues(alpha: 0.1),
                       blurRadius: 8,
                       spreadRadius: 0,
                     )
@@ -614,14 +609,18 @@ class _QuanLyPhongKhamViewState extends State<QuanLyPhongKhamView> {
                           width: 8,
                           height: 8,
                           decoration: BoxDecoration(
-                            color: _mauXanh,
+                            color: AppColors.primary,
                             borderRadius: BorderRadius.circular(4),
                           ),
                         ),
                         const SizedBox(width: 8),
-                        Text(
-                          item,
-                          style: const TextStyle(fontSize: 14),
+                        Flexible(
+                          child: Text(
+                            item,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                            style: const TextStyle(fontSize: 14),
+                          ),
                         ),
                       ],
                     ),
@@ -646,17 +645,8 @@ class _QuanLyPhongKhamViewState extends State<QuanLyPhongKhamView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _mauNen,
-      appBar: AppBar(
-        title: const Text(
-          'Quản Lý Phòng Khám',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
-        ),
-        backgroundColor: _mauXanh,
-        foregroundColor: _mauTrang,
-        elevation: 0,
-        centerTitle: false,
-      ),
+      backgroundColor: AppColors.bg,
+      appBar: iosAppBar(title: 'Quản Lý Phòng Khám'),
       body: _isLoading && _danhSachPhongKham.isEmpty
           ? const LoadingView(
               message: 'Đang tải danh sách phòng khám...',
@@ -674,7 +664,7 @@ class _QuanLyPhongKhamViewState extends State<QuanLyPhongKhamView> {
                           borderRadius: BorderRadius.circular(14),
                           boxShadow: [
                             BoxShadow(
-                              color: _mauXanh.withValues(alpha: 0.1),
+                              color: AppColors.primary.withValues(alpha: 0.1),
                               blurRadius: 12,
                               spreadRadius: 0,
                             ),
@@ -688,7 +678,7 @@ class _QuanLyPhongKhamViewState extends State<QuanLyPhongKhamView> {
                           },
                           style: TextStyle(
                             fontSize: 15,
-                            color: _mauChuDen,
+                            color: AppColors.label,
                             fontWeight: FontWeight.w500,
                           ),
                           decoration: InputDecoration(
@@ -701,7 +691,7 @@ class _QuanLyPhongKhamViewState extends State<QuanLyPhongKhamView> {
                               padding: const EdgeInsets.only(left: 14, right: 10),
                               child: Icon(
                                 Icons.search_rounded,
-                                color: _mauXanh,
+                                color: AppColors.primary,
                                 size: 22,
                               ),
                             ),
@@ -729,24 +719,24 @@ class _QuanLyPhongKhamViewState extends State<QuanLyPhongKhamView> {
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(14),
                               borderSide: BorderSide(
-                                color: _mauXanh.withValues(alpha: 0.2),
+                                color: AppColors.primary.withValues(alpha: 0.2),
                               ),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(14),
                               borderSide: BorderSide(
-                                color: _mauXanh.withValues(alpha: 0.2),
+                                color: AppColors.primary.withValues(alpha: 0.2),
                               ),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(14),
                               borderSide: BorderSide(
-                                color: _mauXanh,
+                                color: AppColors.primary,
                                 width: 2,
                               ),
                             ),
                             filled: true,
-                            fillColor: _mauTrang,
+                            fillColor: Colors.white,
                             contentPadding: const EdgeInsets.symmetric(
                               horizontal: 16,
                               vertical: 14,
@@ -771,17 +761,17 @@ class _QuanLyPhongKhamViewState extends State<QuanLyPhongKhamView> {
                                 setState(() {});
                               },
                               backgroundColor: Colors.grey[200],
-                              selectedColor: _mauXanh,
+                              selectedColor: AppColors.primary,
                               labelStyle: TextStyle(
                                 color: _filterKhu == null
-                                    ? _mauTrang
+                                    ? Colors.white
                                     : Colors.grey[700],
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
                               ),
                               side: BorderSide(
                                 color: _filterKhu == null
-                                    ? _mauXanh
+                                    ? AppColors.primary
                                     : Colors.grey[300]!,
                                 width: 1.5,
                               ),
@@ -789,7 +779,7 @@ class _QuanLyPhongKhamViewState extends State<QuanLyPhongKhamView> {
                                   ? Icon(
                                       Icons.check_circle_rounded,
                                       size: 18,
-                                      color: _mauTrang,
+                                      color: Colors.white,
                                     )
                                   : null,
                             ),
@@ -814,15 +804,15 @@ class _QuanLyPhongKhamViewState extends State<QuanLyPhongKhamView> {
                                     setState(() {});
                                   },
                                   backgroundColor: Colors.grey[200],
-                                  selectedColor: _mauXanh.withValues(alpha: 0.85),
+                                  selectedColor: AppColors.primary.withValues(alpha: 0.85),
                                   labelStyle: TextStyle(
                                     color: _filterKhu == khu
-                                        ? _mauTrang
+                                        ? Colors.white
                                         : Colors.grey[700],
                                   ),
                                   side: BorderSide(
                                     color: _filterKhu == khu
-                                        ? _mauXanh
+                                        ? AppColors.primary
                                         : Colors.grey[300]!,
                                     width: 1.5,
                                   ),
@@ -830,7 +820,7 @@ class _QuanLyPhongKhamViewState extends State<QuanLyPhongKhamView> {
                                       ? Icon(
                                           Icons.done_rounded,
                                           size: 16,
-                                          color: _mauTrang,
+                                          color: Colors.white,
                                         )
                                       : null,
                                 ),
@@ -852,14 +842,14 @@ class _QuanLyPhongKhamViewState extends State<QuanLyPhongKhamView> {
                               Icon(
                                 Icons.location_off,
                                 size: 64,
-                                color: _mauChuXam.withValues(alpha: 0.3),
+                                color: AppColors.subLabel.withValues(alpha: 0.3),
                               ),
                               const SizedBox(height: 16),
                               Text(
                                 'Không tìm thấy phòng khám',
                                 style: TextStyle(
                                   fontSize: 16,
-                                  color: _mauChuXam,
+                                  color: AppColors.subLabel,
                                 ),
                               ),
                             ],
@@ -867,7 +857,7 @@ class _QuanLyPhongKhamViewState extends State<QuanLyPhongKhamView> {
                         )
                       : RefreshIndicator(
                           onRefresh: _loadData,
-                          color: _mauXanh,
+                          color: AppColors.primary,
                           child: ListView.builder(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 16,
@@ -891,7 +881,7 @@ class _QuanLyPhongKhamViewState extends State<QuanLyPhongKhamView> {
           _clearForm();
           _showFormDialog();
         },
-        backgroundColor: _mauXanh,
+        backgroundColor: AppColors.info,
         icon: const Icon(Icons.add),
         label: const Text('Thêm phòng'),
       ),
@@ -910,16 +900,9 @@ class _QuanLyPhongKhamViewState extends State<QuanLyPhongKhamView> {
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [_mauTrang, _mauNen],
-          ),
+          color: AppColors.surface,
           border: Border(
-            left: BorderSide(
-              color: _mauXanh,
-              width: 4,
-            ),
+            left: BorderSide(color: AppColors.primary, width: 4),
           ),
         ),
         child: Padding(
@@ -933,12 +916,12 @@ class _QuanLyPhongKhamViewState extends State<QuanLyPhongKhamView> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: _mauXanh.withValues(alpha: 0.15),
+                      color: AppColors.primary.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Icon(
                       Icons.location_on,
-                      color: _mauXanh,
+                      color: AppColors.primary,
                       size: 26,
                     ),
                   ),
@@ -952,7 +935,7 @@ class _QuanLyPhongKhamViewState extends State<QuanLyPhongKhamView> {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
-                            color: _mauChuDen,
+                            color: AppColors.label,
                             letterSpacing: 0.3,
                           ),
                         ),
@@ -963,7 +946,7 @@ class _QuanLyPhongKhamViewState extends State<QuanLyPhongKhamView> {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: _mauXanh.withValues(alpha: 0.2),
+                            color: AppColors.primary.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Row(
@@ -972,15 +955,19 @@ class _QuanLyPhongKhamViewState extends State<QuanLyPhongKhamView> {
                               Icon(
                                 Icons.domain,
                                 size: 12,
-                                color: _mauXanh,
+                                color: AppColors.primary,
                               ),
                               const SizedBox(width: 5),
-                              Text(
-                                khu,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: _mauXanh,
+                              Flexible(
+                                child: Text(
+                                  khu,
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.primary,
+                                  ),
                                 ),
                               ),
                             ],
@@ -989,33 +976,38 @@ class _QuanLyPhongKhamViewState extends State<QuanLyPhongKhamView> {
                       ],
                     ),
                   ),
-                  PopupMenuButton(
-                    icon: Icon(
-                      Icons.more_vert_rounded,
-                      color: _mauChuXam,
+                  const SizedBox(width: 8),
+                  SizedBox(
+                    width: 40,
+                    height: 40,
+                    child: PopupMenuButton(
+                      icon: Icon(
+                        Icons.more_vert_rounded,
+                        color: AppColors.subLabel,
+                      ),
+                      itemBuilder: (context) => [
+                        PopupMenuItem(
+                          child: const Row(
+                            children: [
+                              Icon(Icons.edit, size: 18),
+                              SizedBox(width: 8),
+                              Text('Chỉnh sửa'),
+                            ],
+                          ),
+                          onTap: () => _dienFormChinhSua(phong),
+                        ),
+                        PopupMenuItem(
+                          child: const Row(
+                            children: [
+                              Icon(Icons.delete, size: 18, color: Colors.red),
+                              SizedBox(width: 8),
+                              Text('Xóa', style: TextStyle(color: Colors.red)),
+                            ],
+                          ),
+                          onTap: () => _xoaPhongKham(phong['MaPhong']),
+                        ),
+                      ],
                     ),
-                    itemBuilder: (context) => [
-                      PopupMenuItem(
-                        child: const Row(
-                          children: [
-                            Icon(Icons.edit, size: 18),
-                            SizedBox(width: 8),
-                            Text('Chỉnh sửa'),
-                          ],
-                        ),
-                        onTap: () => _dienFormChinhSua(phong),
-                      ),
-                      PopupMenuItem(
-                        child: const Row(
-                          children: [
-                            Icon(Icons.delete, size: 18, color: Colors.red),
-                            SizedBox(width: 8),
-                            Text('Xóa', style: TextStyle(color: Colors.red)),
-                          ],
-                        ),
-                        onTap: () => _xoaPhongKham(phong['MaPhong']),
-                      ),
-                    ],
                   ),
                 ],
               ),
@@ -1026,10 +1018,10 @@ class _QuanLyPhongKhamViewState extends State<QuanLyPhongKhamView> {
                   vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: _mauXanh.withValues(alpha: 0.08),
+                  color: AppColors.primary.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: _mauXanh.withValues(alpha: 0.15),
+                    color: AppColors.primary.withValues(alpha: 0.15),
                   ),
                 ),
                 child: Row(
@@ -1038,14 +1030,14 @@ class _QuanLyPhongKhamViewState extends State<QuanLyPhongKhamView> {
                     Icon(
                       Icons.tag,
                       size: 14,
-                      color: _mauChuXam,
+                      color: AppColors.subLabel,
                     ),
                     const SizedBox(width: 6),
                     Text(
                       'Mã: $maPhong',
                       style: TextStyle(
                         fontSize: 12,
-                        color: _mauChuXam,
+                        color: AppColors.subLabel,
                         fontWeight: FontWeight.w500,
                       ),
                     ),

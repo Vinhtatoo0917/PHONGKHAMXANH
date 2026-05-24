@@ -1,14 +1,12 @@
+import 'package:dio/dio.dart';
+import '../config/api_config.dart';
 import '../utils/loading_utils.dart';
 
-// ═══════════════════════════════════════════════════════════════
-// CLASS: ThongTinXacNhanOTP
-// MÔ TẢ: Model chứa thông tin xác nhận OTP và mật khẩu mới
-// ═══════════════════════════════════════════════════════════════
 class ThongTinXacNhanOTP {
-  final String email; // Email người dùng
-  final String maOTP; // Mã OTP
-  final String matKhauMoi; // Mật khẩu mới
-  final String xacNhanMatKhau; // Xác nhận mật khẩu
+  final String email;
+  final String maOTP;
+  final String matKhauMoi;
+  final String xacNhanMatKhau;
 
   ThongTinXacNhanOTP({
     required this.email,
@@ -18,14 +16,10 @@ class ThongTinXacNhanOTP {
   });
 }
 
-// ═══════════════════════════════════════════════════════════════
-// CLASS: KetQuaXacNhanOTP
-// MÔ TẢ: Model chứa kết quả xử lý xác nhận OTP
-// ═══════════════════════════════════════════════════════════════
 class KetQuaXacNhanOTP {
-  final bool thanhCong; // Có thành công không?
-  final String thongBao; // Thông báo kết quả
-  final String? maLoi; // Mã lỗi (nếu có)
+  final bool thanhCong;
+  final String thongBao;
+  final String? maLoi;
 
   KetQuaXacNhanOTP({
     required this.thanhCong,
@@ -34,26 +28,10 @@ class KetQuaXacNhanOTP {
   });
 }
 
-// ═══════════════════════════════════════════════════════════════
-// CLASS: DichVuXacNhanOTP
-// MÔ TẢ: Service xử lý tất cả logic liên quan đến xác nhận OTP
-// ═══════════════════════════════════════════════════════════════
 class DichVuXacNhanOTP {
-  // ═══════════════════════════════════════════════════════════════
-  // HÀM KIỂM TRA THÔNG TIN
-  // ═══════════════════════════════════════════════════════════════
+  final _dio = Dio();
 
-  /// Kiểm tra thông tin xác nhận OTP có hợp lệ không
-  ///
-  /// Tham số:
-  /// - thongTin: Thông tin xác nhận OTP cần kiểm tra
-  ///
-  /// Trả về:
-  /// - KetQuaXacNhanOTP: Kết quả kiểm tra
   KetQuaXacNhanOTP kiemTraThongTin(ThongTinXacNhanOTP thongTin) {
-    // ─────────────────────────────────────────────────────────────
-    // KIỂM TRA MÃ OTP
-    // ─────────────────────────────────────────────────────────────
     if (thongTin.maOTP.trim().isEmpty) {
       return KetQuaXacNhanOTP(
         thanhCong: false,
@@ -70,7 +48,6 @@ class DichVuXacNhanOTP {
       );
     }
 
-    // Kiểm tra mã OTP chỉ chứa số
     if (!RegExp(r'^\d{6}$').hasMatch(thongTin.maOTP.trim())) {
       return KetQuaXacNhanOTP(
         thanhCong: false,
@@ -79,9 +56,6 @@ class DichVuXacNhanOTP {
       );
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // KIỂM TRA MẬT KHẨU MỚI
-    // ─────────────────────────────────────────────────────────────
     if (thongTin.matKhauMoi.isEmpty) {
       return KetQuaXacNhanOTP(
         thanhCong: false,
@@ -98,7 +72,6 @@ class DichVuXacNhanOTP {
       );
     }
 
-    // Kiểm tra độ mạnh mật khẩu (có chữ và số)
     if (!_kiemTraDoManhMatKhau(thongTin.matKhauMoi)) {
       return KetQuaXacNhanOTP(
         thanhCong: false,
@@ -107,9 +80,6 @@ class DichVuXacNhanOTP {
       );
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // KIỂM TRA XÁC NHẬN MẬT KHẨU
-    // ─────────────────────────────────────────────────────────────
     if (thongTin.xacNhanMatKhau.isEmpty) {
       return KetQuaXacNhanOTP(
         thanhCong: false,
@@ -126,88 +96,73 @@ class DichVuXacNhanOTP {
       );
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // TẤT CẢ THÔNG TIN HỢP LỆ
-    // ─────────────────────────────────────────────────────────────
     return KetQuaXacNhanOTP(thanhCong: true, thongBao: 'Thông tin hợp lệ');
   }
 
-  // ═══════════════════════════════════════════════════════════════
-  // HÀM XÁC NHẬN OTP VÀ CẬP NHẬT MẬT KHẨU
-  // ═══════════════════════════════════════════════════════════════
-
-  /// Xác nhận OTP và cập nhật mật khẩu mới
-  ///
-  /// Tham số:
-  /// - thongTin: Thông tin xác nhận OTP
-  ///
-  /// Trả về:
-  /// - Future KetQuaXacNhanOTP: Kết quả xác nhận (bất đồng bộ)
   Future<KetQuaXacNhanOTP> xacNhanOTPVaCapNhatMatKhau(
     ThongTinXacNhanOTP thongTin,
   ) async {
-    // ─────────────────────────────────────────────────────────────
-    // BƯỚC 1: KIỂM TRA THÔNG TIN
-    // ─────────────────────────────────────────────────────────────
     final ketQuaKiemTra = kiemTraThongTin(thongTin);
-    if (!ketQuaKiemTra.thanhCong) {
-      return ketQuaKiemTra;
-    }
+    if (!ketQuaKiemTra.thanhCong) return ketQuaKiemTra;
 
-    // ─────────────────────────────────────────────────────────────
-    // BƯỚC 2: GỌI API XÁC NHẬN OTP
-    // ─────────────────────────────────────────────────────────────
     LoadingUtils.showLoading(message: 'Đang xác nhận mã OTP...');
     try {
-      // ───────────────────────────────────────────────────────────
-      // BƯỚC 3: KIỂM TRA MÃ OTP CÓ ĐÚNG KHÔNG (giả lập)
-      // ───────────────────────────────────────────────────────────
-      final otpDung = await _kiemTraOTPDung(thongTin.email, thongTin.maOTP);
-      if (!otpDung) {
+      final response = await _dio.post(
+        ApiConfig.getFullUrl(ApiConfig.resetPassword),
+        data: {
+          'email': thongTin.email.trim(),
+          'otp': thongTin.maOTP.trim(),
+          'password': thongTin.matKhauMoi,
+        },
+        options: Options(
+          headers: {'Content-Type': 'application/json'},
+          validateStatus: (_) => true,
+        ),
+      );
+
+      final data = response.data as Map<String, dynamic>;
+      final success = data['success'] == true;
+      final message = (data['message'] ?? '').toString();
+
+      if (success) {
+        return KetQuaXacNhanOTP(
+          thanhCong: true,
+          thongBao: message.isNotEmpty
+              ? message
+              : 'Đặt lại mật khẩu thành công! Bạn có thể đăng nhập với mật khẩu mới.',
+        );
+      }
+
+      if (response.statusCode == 422) {
         return KetQuaXacNhanOTP(
           thanhCong: false,
-          thongBao: 'Mã xác nhận không đúng hoặc đã hết hạn',
+          thongBao: message.isNotEmpty ? message : 'Mã xác nhận không đúng hoặc đã hết hạn',
           maLoi: 'OTP_SAI',
         );
       }
 
-      // ───────────────────────────────────────────────────────────
-      // BƯỚC 4: CẬP NHẬT MẬT KHẨU MỚI (giả lập)
-      // ───────────────────────────────────────────────────────────
-      // TODO: Trong thực tế sẽ gọi API cập nhật mật khẩu
-
-      // ───────────────────────────────────────────────────────────
-      // BƯỚC 5: TRẢ VỀ KẾT QUẢ THÀNH CÔNG
-      // ───────────────────────────────────────────────────────────
       return KetQuaXacNhanOTP(
-        thanhCong: true,
-        thongBao:
-            'Cập nhật mật khẩu thành công! Bạn có thể đăng nhập với mật khẩu mới.',
+        thanhCong: false,
+        thongBao: message.isNotEmpty ? message : 'Có lỗi xảy ra. Vui lòng thử lại.',
+        maLoi: 'LOI_MANG',
+      );
+    } on DioException catch (e) {
+      final message = (e.response?.data is Map)
+          ? (e.response!.data['message'] ?? '').toString()
+          : '';
+      return KetQuaXacNhanOTP(
+        thanhCong: false,
+        thongBao: message.isNotEmpty ? message : 'Lỗi kết nối. Vui lòng kiểm tra mạng và thử lại.',
+        maLoi: 'LOI_KET_NOI',
       );
     } finally {
       LoadingUtils.hideLoading();
     }
   }
 
-  // ═══════════════════════════════════════════════════════════════
-  // CÁC HÀM PRIVATE (chỉ dùng trong class này)
-  // ═══════════════════════════════════════════════════════════════
-
-  /// Kiểm tra độ mạnh mật khẩu (có chữ và số)
   bool _kiemTraDoManhMatKhau(String matKhau) {
-    // Phải có ít nhất 1 chữ cái và 1 số
     final coChu = RegExp(r'[a-zA-Z]').hasMatch(matKhau);
     final coSo = RegExp(r'[0-9]').hasMatch(matKhau);
     return coChu && coSo;
-  }
-
-  /// Kiểm tra mã OTP có đúng không (giả lập)
-  Future<bool> _kiemTraOTPDung(String email, String otp) async {
-    // Giả lập độ trễ API
-    await Future.delayed(const Duration(milliseconds: 500));
-
-    // Giả lập: mã OTP đúng là "123456" cho tất cả email
-    // Trong thực tế sẽ kiểm tra với database
-    return otp == '123456';
   }
 }

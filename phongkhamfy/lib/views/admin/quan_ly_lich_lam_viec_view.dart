@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:phongkhamfy/theme/app_theme.dart';
 import '../../controllers/admin_controller.dart';
 import '../../utils/loading_utils.dart';
 import '../../widgets/loading_view.dart';
@@ -35,12 +36,6 @@ class _QuanLyLichLamViecViewState extends State<QuanLyLichLamViecView> {
   bool _isEditing = false;
   int? _editingLichId;
 
-  // Colors
-  final _mauXanh = const Color(0xFF3DAA70);
-  final _mauNen = const Color(0xFFF0FAF5);
-  final _mauTrang = Colors.white;
-  final _mauChuDen = const Color(0xFF1A3D2E);
-  final _mauChuXam = const Color(0xFF5A8A70);
 
   @override
   void initState() {
@@ -250,7 +245,7 @@ class _QuanLyLichLamViecViewState extends State<QuanLyLichLamViecView> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: isError ? Colors.red : _mauXanh,
+        backgroundColor: isError ? Colors.red : AppColors.primary,
         duration: const Duration(seconds: 2),
       ),
     );
@@ -260,101 +255,103 @@ class _QuanLyLichLamViecViewState extends State<QuanLyLichLamViecView> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(context).size.height * 0.8,
-          ),
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        _isEditing
-                            ? 'Chỉnh sửa lịch làm việc'
-                            : 'Tạo lịch làm việc mới',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: _mauChuDen,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.8,
+            ),
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          _isEditing
+                              ? 'Chỉnh sửa lịch làm việc'
+                              : 'Tạo lịch làm việc mới',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.label,
+                          ),
                         ),
-                      ),
-                      IconButton(
-                        onPressed: () => Navigator.pop(context),
-                        icon: const Icon(Icons.close),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  _buildDateField(
-                    'Chọn ngày *',
-                    _ngayChon,
-                    (date) => setState(() => _ngayChon = date),
-                  ),
-                  const SizedBox(height: 12),
-                  _buildDropdownField(
-                    'Chọn bác sĩ *',
-                    _bacSiDuocChon,
-                    _danhSachBacSi,
-                    'MaBacSi',
-                    (bacsi) =>
-                        '${bacsi['ho']} ${bacsi['ten']} - ${bacsi['ChuyenKhoa']}',
-                    (v) => setState(() => _bacSiDuocChon = v),
-                  ),
-                  const SizedBox(height: 12),
-                  _buildDropdownField(
-                    'Chọn ca khám *',
-                    _caDuocChon,
-                    _danhSachCaKham,
-                    'MaCa',
-                    (ca) =>
-                        '${ca['TenCa']} (${ca['GioBatDau']} - ${ca['GioKetThuc']})',
-                    (v) => setState(() => _caDuocChon = v),
-                  ),
-                  const SizedBox(height: 12),
-                  _buildDropdownField(
-                    'Chọn phòng khám *',
-                    _phongDuocChon,
-                    _danhSachPhongKham,
-                    'MaPhong',
-                    (phong) => '${phong['TenPhong']} - ${phong['Khu']}',
-                    (v) => setState(() => _phongDuocChon = v),
-                  ),
-                  const SizedBox(height: 24),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: ElevatedButton.icon(
-                      onPressed: (_isEditing
-                                ? _capNhatLichLamViec
-                                : _themLichLamViec),
-                      icon: Icon(_isEditing ? Icons.save : Icons.add),
-                      label: Text(
-                        _isEditing
-                            ? 'Cập nhật lịch làm việc'
-                            : 'Tạo lịch làm việc',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
+                        IconButton(
+                          onPressed: () => Navigator.pop(context),
+                          icon: const Icon(Icons.close),
                         ),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: _mauXanh,
-                        foregroundColor: _mauTrang,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    _buildDateField(
+                      'Chọn ngày *',
+                      _ngayChon,
+                      (date) => setDialogState(() => _ngayChon = date),
+                    ),
+                    const SizedBox(height: 12),
+                    _buildDropdownField(
+                      'Chọn bác sĩ *',
+                      _bacSiDuocChon,
+                      _danhSachBacSi,
+                      'MaBacSi',
+                      (bacsi) =>
+                          '${bacsi['ho']} ${bacsi['ten']} - ${bacsi['ChuyenKhoa']}',
+                      (v) => setDialogState(() => _bacSiDuocChon = v),
+                    ),
+                    const SizedBox(height: 12),
+                    _buildDropdownField(
+                      'Chọn ca khám *',
+                      _caDuocChon,
+                      _danhSachCaKham,
+                      'MaCa',
+                      (ca) =>
+                          '${ca['TenCa']} (${ca['GioBatDau']} - ${ca['GioKetThuc']})',
+                      (v) => setDialogState(() => _caDuocChon = v),
+                    ),
+                    const SizedBox(height: 12),
+                    _buildDropdownField(
+                      'Chọn phòng khám *',
+                      _phongDuocChon,
+                      _danhSachPhongKham,
+                      'MaPhong',
+                      (phong) => '${phong['TenPhong']} - ${phong['Khu']}',
+                      (v) => setDialogState(() => _phongDuocChon = v),
+                    ),
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton.icon(
+                        onPressed: _isEditing
+                            ? _capNhatLichLamViec
+                            : _themLichLamViec,
+                        icon: Icon(_isEditing ? Icons.save : Icons.add),
+                        label: Text(
+                          _isEditing
+                              ? 'Cập nhật lịch làm việc'
+                              : 'Tạo lịch làm việc',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -376,7 +373,7 @@ class _QuanLyLichLamViecViewState extends State<QuanLyLichLamViecView> {
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: _mauChuDen,
+            color: AppColors.label,
           ),
         ),
         const SizedBox(height: 6),
@@ -393,18 +390,18 @@ class _QuanLyLichLamViecViewState extends State<QuanLyLichLamViecView> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              border: Border.all(color: _mauXanh.withValues(alpha: 0.3)),
+              border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
               children: [
-                Icon(Icons.calendar_today, color: _mauXanh, size: 20),
+                Icon(Icons.calendar_today, color: AppColors.primary, size: 20),
                 const SizedBox(width: 12),
                 Text(
                   DateFormat('dd/MM/yyyy').format(value),
                   style: TextStyle(
                     fontSize: 14,
-                    color: _mauChuDen,
+                    color: AppColors.label,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -432,7 +429,7 @@ class _QuanLyLichLamViecViewState extends State<QuanLyLichLamViecView> {
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: _mauChuDen,
+            color: AppColors.label,
           ),
         ),
         const SizedBox(height: 6),
@@ -441,7 +438,7 @@ class _QuanLyLichLamViecViewState extends State<QuanLyLichLamViecView> {
           decoration: InputDecoration(
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: _mauXanh.withValues(alpha: 0.3)),
+              borderSide: BorderSide(color: AppColors.primary.withValues(alpha: 0.3)),
             ),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
@@ -470,17 +467,8 @@ class _QuanLyLichLamViecViewState extends State<QuanLyLichLamViecView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _mauNen,
-      appBar: AppBar(
-        title: const Text(
-          'Quản Lý Lịch Làm Việc',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
-        ),
-        backgroundColor: _mauXanh,
-        foregroundColor: _mauTrang,
-        elevation: 0,
-        centerTitle: false,
-      ),
+      backgroundColor: AppColors.bg,
+      appBar: iosAppBar(title: 'Quản Lý Lịch Làm Việc'),
       body: Column(
         children: [
           // Search & Filter
@@ -496,11 +484,11 @@ class _QuanLyLichLamViecViewState extends State<QuanLyLichLamViecView> {
                   },
                   decoration: InputDecoration(
                     hintText: 'Tìm kiếm bác sĩ...',
-                    prefixIcon: Icon(Icons.search, color: _mauXanh),
+                    prefixIcon: Icon(Icons.search, color: AppColors.primary),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide(
-                        color: _mauXanh.withValues(alpha: 0.3),
+                        color: AppColors.primary.withValues(alpha: 0.3),
                       ),
                     ),
                     contentPadding: const EdgeInsets.symmetric(
@@ -533,16 +521,16 @@ class _QuanLyLichLamViecViewState extends State<QuanLyLichLamViecView> {
                     ),
                     decoration: BoxDecoration(
                       border: Border.all(
-                        color: _mauXanh.withValues(alpha: 0.3),
+                        color: AppColors.primary.withValues(alpha: 0.3),
                       ),
                       borderRadius: BorderRadius.circular(12),
-                      color: _mauXanh.withValues(alpha: 0.05),
+                      color: AppColors.primary.withValues(alpha: 0.05),
                     ),
                     child: Row(
                       children: [
                         Icon(
                           Icons.calendar_today,
-                          color: _mauXanh,
+                          color: AppColors.primary,
                           size: 20,
                         ),
                         const SizedBox(width: 12),
@@ -550,7 +538,7 @@ class _QuanLyLichLamViecViewState extends State<QuanLyLichLamViecView> {
                           'Lọc theo ngày: ${DateFormat('dd/MM/yyyy').format(_filterNgay)}',
                           style: TextStyle(
                             fontSize: 14,
-                            color: _mauChuDen,
+                            color: AppColors.label,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -576,14 +564,14 @@ class _QuanLyLichLamViecViewState extends State<QuanLyLichLamViecView> {
                         Icon(
                           Icons.calendar_today,
                           size: 64,
-                          color: _mauChuXam.withValues(alpha: 0.3),
+                          color: AppColors.subLabel.withValues(alpha: 0.3),
                         ),
                         const SizedBox(height: 16),
                         Text(
                           'Không tìm thấy lịch làm việc',
                           style: TextStyle(
                             fontSize: 16,
-                            color: _mauChuXam,
+                            color: AppColors.subLabel,
                           ),
                         ),
                       ],
@@ -591,7 +579,7 @@ class _QuanLyLichLamViecViewState extends State<QuanLyLichLamViecView> {
                   )
                 : RefreshIndicator(
                     onRefresh: _loadData,
-                    color: _mauXanh,
+                    color: AppColors.primary,
                     child: ListView.builder(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 16,
@@ -612,7 +600,7 @@ class _QuanLyLichLamViecViewState extends State<QuanLyLichLamViecView> {
           _clearForm();
           _showFormDialog();
         },
-        backgroundColor: _mauXanh,
+        backgroundColor: AppColors.info,
         icon: const Icon(Icons.add),
         label: const Text('Thêm lịch'),
       ),
@@ -627,11 +615,7 @@ class _QuanLyLichLamViecViewState extends State<QuanLyLichLamViecView> {
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [_mauTrang, _mauNen],
-          ),
+          color: AppColors.surface,
         ),
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -643,12 +627,12 @@ class _QuanLyLichLamViecViewState extends State<QuanLyLichLamViecView> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: _mauXanh.withValues(alpha: 0.1),
+                      color: AppColors.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Icon(
                       Icons.calendar_today,
-                      color: _mauXanh,
+                      color: AppColors.primary,
                       size: 24,
                     ),
                   ),
@@ -662,14 +646,14 @@ class _QuanLyLichLamViecViewState extends State<QuanLyLichLamViecView> {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: _mauChuDen,
+                            color: AppColors.label,
                           ),
                         ),
                         Text(
                           lich['ChuyenKhoa'] ?? '',
                           style: TextStyle(
                             fontSize: 12,
-                            color: _mauChuXam,
+                            color: AppColors.subLabel,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -742,19 +726,19 @@ class _QuanLyLichLamViecViewState extends State<QuanLyLichLamViecView> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: _mauXanh.withValues(alpha: 0.1),
+        color: AppColors.primary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: _mauXanh),
+          Icon(icon, size: 14, color: AppColors.primary),
           const SizedBox(width: 6),
           Text(
             value,
             style: TextStyle(
               fontSize: 12,
-              color: _mauChuDen,
+              color: AppColors.label,
               fontWeight: FontWeight.w500,
             ),
             maxLines: 1,

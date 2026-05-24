@@ -575,39 +575,69 @@ class LichKhamController extends Controller
     private function taoHoaDon($maLichKham, $maBenhNhan)
     {
         try {
-            // Lấy các dịch vụ đã sử dụng trong lịch khám
-            $chiTietLichKham = DB::table('chitietlichkham as ct')
+            // 1. Dịch vụ khám trực tiếp
+            $dichVuKham = DB::table('chitietlichkham as ct')
                 ->join('dichvu as dv', 'ct.MaDichVu', '=', 'dv.MaDichVu')
                 ->where('ct.MaLichKham', $maLichKham)
                 ->select(
-                    'ct.MaChiTiet',
-                    'ct.MaDichVu',
-                    'dv.TenDichVu',
+                    'ct.MaDichVu as MaThamChieu',
+                    'dv.TenDichVu as TenHienThi',
                     'ct.SoLuong',
                     DB::raw('COALESCE(ct.DonGia, dv.Gia) as DonGia'),
                     DB::raw('COALESCE(ct.ThanhTien, ct.SoLuong * COALESCE(ct.DonGia, dv.Gia)) as ThanhTien')
                 )
-                ->get();
+                ->get()
+                ->map(fn($r) => (array)$r + ['Loai' => 'dich_vu']);
 
-            if ($chiTietLichKham->isEmpty()) {
-                return; // Không có dịch vụ, không tạo hoá đơn
+            // 2. Dịch vụ xét nghiệm từ phiếu chỉ định (đã hoàn thành)
+            $xetNghiem = DB::table('phieuchidinh as pc')
+                ->join('chitietphieuchidinh as ctpc', 'pc.MaPhieu', '=', 'ctpc.MaPhieu')
+                ->join('dichvu as dv', 'ctpc.MaDichVu', '=', 'dv.MaDichVu')
+                ->where('pc.MaLichKham', $maLichKham)
+                ->where('pc.TrangThai', 'completed')
+                ->select(
+                    'ctpc.MaDichVu as MaThamChieu',
+                    'dv.TenDichVu as TenHienThi',
+                    DB::raw('1 as SoLuong'),
+                    'dv.Gia as DonGia',
+                    'dv.Gia as ThanhTien'
+                )
+                ->get()
+                ->map(fn($r) => (array)$r + ['Loai' => 'xet_nghiem']);
+
+            // 3. Thuốc từ đơn thuốc
+            $thuoc = DB::table('donthuoc as dt')
+                ->join('ct_donthuoc as ctdt', 'dt.MaDonThuoc', '=', 'ctdt.MaDonThuoc')
+                ->join('thuoc as t', 'ctdt.MaThuoc', '=', 't.MaThuoc')
+                ->where('dt.MaLichKham', $maLichKham)
+                ->select(
+                    'ctdt.MaThuoc as MaThamChieu',
+                    't.TenThuoc as TenHienThi',
+                    'ctdt.SoLuong',
+                    't.Gia as DonGia',
+                    DB::raw('ctdt.SoLuong * t.Gia as ThanhTien')
+                )
+                ->get()
+                ->map(fn($r) => (array)$r + ['Loai' => 'thuoc']);
+
+            $tatCaChiTiet = collect()
+                ->merge($dichVuKham)
+                ->merge($xetNghiem)
+                ->merge($thuoc);
+
+            if ($tatCaChiTiet->isEmpty()) {
+                return;
             }
 
-            // Tính tổng tiền
-            $tongTien = $chiTietLichKham->sum('ThanhTien');
+            $tongTien = $tatCaChiTiet->sum('ThanhTien');
 
-            // Kiểm tra hoá đơn đã tồn tại chưa
-            $hoaDonCu = DB::table('hoadon')
-                ->where('MaLichKham', $maLichKham)
-                ->first();
-
+            // Xóa hoá đơn cũ nếu có (khi bác sĩ kết luận lại)
+            $hoaDonCu = DB::table('hoadon')->where('MaLichKham', $maLichKham)->first();
             if ($hoaDonCu) {
-                // Xóa hoá đơn cũ và chi tiết
                 DB::table('ct_hoadon')->where('MaHoaDon', $hoaDonCu->MaHoaDon)->delete();
                 DB::table('hoadon')->where('MaHoaDon', $hoaDonCu->MaHoaDon)->delete();
             }
 
-            // Tạo hoá đơn mới
             $maHoaDon = DB::table('hoadon')->insertGetId([
                 'MaBenhNhan' => $maBenhNhan,
                 'MaLichKham' => $maLichKham,
@@ -619,20 +649,18 @@ class LichKhamController extends Controller
                 'NgayTao' => Carbon::now(),
             ]);
 
-            // Tạo chi tiết hoá đơn
-            foreach ($chiTietLichKham as $item) {
+            foreach ($tatCaChiTiet as $item) {
                 DB::table('ct_hoadon')->insert([
                     'MaHoaDon' => $maHoaDon,
-                    'Loai' => 'dich_vu',
-                    'MaThamChieu' => $item->MaDichVu,
-                    'TenHienThi' => $item->TenDichVu,
-                    'SoLuong' => $item->SoLuong,
-                    'DonGia' => $item->DonGia,
-                    'ThanhTien' => $item->ThanhTien,
+                    'Loai' => $item['Loai'],
+                    'MaThamChieu' => $item['MaThamChieu'],
+                    'TenHienThi' => $item['TenHienThi'],
+                    'SoLuong' => $item['SoLuong'],
+                    'DonGia' => $item['DonGia'],
+                    'ThanhTien' => $item['ThanhTien'],
                 ]);
             }
         } catch (\Exception $e) {
-            // Log error but don't throw to avoid blocking appointment completion
             \Log::error('Tao hoa don that bai: ' . $e->getMessage());
         }
     }

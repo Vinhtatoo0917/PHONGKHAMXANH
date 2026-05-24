@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
-import 'dart:ui';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:intl/intl.dart';
 import 'package:phongkhamfy/services/session_manager.dart';
 import 'package:dio/dio.dart';
 import 'package:phongkhamfy/config/api_config.dart';
+import 'package:get/get.dart';
+import 'package:phongkhamfy/views/patient/vnpay_payment_view.dart';
+import 'package:phongkhamfy/theme/app_theme.dart';
 
 class HoaDonCuaToiView extends StatefulWidget {
   const HoaDonCuaToiView({super.key});
@@ -13,14 +16,7 @@ class HoaDonCuaToiView extends StatefulWidget {
 }
 
 class _HoaDonCuaToiViewState extends State<HoaDonCuaToiView> {
-  static const _primary = Color(0xFF1565C0);
-  static const _background = Color(0xFFF4F7FB);
-  static const _text = Color(0xFF172033);
-  static const _muted = Color(0xFF667085);
-  static const _success = Color(0xFF43A047);
-  static const _warning = Color(0xFFFFB020);
-
-  final NumberFormat _moneyFormat = NumberFormat.currency(
+final NumberFormat _moneyFormat = NumberFormat.currency(
     locale: 'vi_VN',
     symbol: 'đ',
   );
@@ -101,13 +97,8 @@ class _HoaDonCuaToiViewState extends State<HoaDonCuaToiView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _background,
-      appBar: AppBar(
-        title: const Text('Thanh toán hoá đơn', style: TextStyle(fontWeight: FontWeight.w900)),
-        backgroundColor: Colors.white,
-        foregroundColor: _text,
-        elevation: 0,
-      ),
+      backgroundColor: AppColors.bg,
+      appBar: iosAppBar(title: 'Hoá đơn của tôi'),
       body: _isLoading
           ? const Center(
               child: CircularProgressIndicator(),
@@ -142,7 +133,7 @@ class _HoaDonCuaToiViewState extends State<HoaDonCuaToiView> {
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w900,
-                          color: _text,
+                          color: AppColors.label,
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -150,7 +141,7 @@ class _HoaDonCuaToiViewState extends State<HoaDonCuaToiView> {
                         'Quản lý và thanh toán các hóa đơn từ các lần khám',
                         style: TextStyle(
                           fontSize: 12,
-                          color: _muted,
+                          color: AppColors.subLabel,
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -177,7 +168,7 @@ class _HoaDonCuaToiViewState extends State<HoaDonCuaToiView> {
             'Tổng hóa đơn',
             totalInvoices.toString(),
             Icons.receipt_rounded,
-            _primary,
+            AppColors.primary,
           ),
         ),
         const SizedBox(width: 12),
@@ -186,7 +177,7 @@ class _HoaDonCuaToiViewState extends State<HoaDonCuaToiView> {
             'Đã thanh toán',
             paidInvoices.toString(),
             Icons.check_circle_rounded,
-            _success,
+            AppColors.success,
           ),
         ),
         const SizedBox(width: 12),
@@ -195,7 +186,7 @@ class _HoaDonCuaToiViewState extends State<HoaDonCuaToiView> {
             'Tổng tiền',
             '${(totalAmount / 1000000).toStringAsFixed(1)}M',
             Icons.trending_up_rounded,
-            _warning,
+            AppColors.warning,
           ),
         ),
       ],
@@ -219,47 +210,22 @@ class _HoaDonCuaToiViewState extends State<HoaDonCuaToiView> {
 
   Widget _buildFilterChip(String label, String value) {
     final isSelected = _filterStatus == value;
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-        child: GestureDetector(
-          onTap: () {
-            setState(() {
-              _filterStatus = value;
-            });
-          },
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: isSelected
-                    ? [
-                        _primary.withValues(alpha: 0.2),
-                        _primary.withValues(alpha: 0.1),
-                      ]
-                    : [
-                        Colors.white.withValues(alpha: 0.6),
-                        Colors.white.withValues(alpha: 0.4),
-                      ],
-              ),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: isSelected
-                    ? _primary.withValues(alpha: 0.4)
-                    : Colors.grey.withValues(alpha: 0.2),
-                width: 1.5,
-              ),
-            ),
-            child: Text(
-              label,
-              style: TextStyle(
-                fontWeight: FontWeight.w700,
-                color: isSelected ? _primary : _muted,
-              ),
-            ),
+    return GestureDetector(
+      onTap: () => setState(() => _filterStatus = value),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.primaryBg : AppColors.surface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? AppColors.primary.withValues(alpha: 0.4) : AppColors.separator,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontWeight: FontWeight.w700,
+            color: isSelected ? AppColors.primary : AppColors.subLabel,
           ),
         ),
       ),
@@ -267,66 +233,39 @@ class _HoaDonCuaToiViewState extends State<HoaDonCuaToiView> {
   }
 
   Widget _buildStatCard(String label, String value, IconData icon, Color color) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Colors.white.withValues(alpha: 0.9),
-                Colors.white.withValues(alpha: 0.85),
-              ],
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: AppDecor.card,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
             ),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: color.withValues(alpha: 0.2),
-              width: 1.5,
+            child: Icon(icon, color: color, size: 20),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            value,
+            style: TextStyle(
+              fontWeight: FontWeight.w900,
+              fontSize: 18,
+              color: color,
             ),
-            boxShadow: [
-              BoxShadow(
-                color: color.withValues(alpha: 0.1),
-                blurRadius: 12,
-                offset: const Offset(0, 6),
-              ),
-            ],
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(icon, color: color, size: 20),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                value,
-                style: TextStyle(
-                  fontWeight: FontWeight.w900,
-                  fontSize: 18,
-                  color: color,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 11,
-                  color: _muted,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
+          const SizedBox(height: 2),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              color: AppColors.subLabel,
+              fontWeight: FontWeight.w600,
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -350,13 +289,13 @@ class _HoaDonCuaToiViewState extends State<HoaDonCuaToiView> {
                 width: 80,
                 height: 80,
                 decoration: BoxDecoration(
-                  color: _primary.withValues(alpha: 0.1),
+                  color: AppColors.primary.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   Icons.inbox_rounded,
                   size: 40,
-                  color: _primary,
+                  color: AppColors.primary,
                 ),
               ),
               const SizedBox(height: 16),
@@ -365,7 +304,7 @@ class _HoaDonCuaToiViewState extends State<HoaDonCuaToiView> {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
-                  color: _text,
+                  color: AppColors.label,
                 ),
               ),
               const SizedBox(height: 8),
@@ -377,7 +316,7 @@ class _HoaDonCuaToiViewState extends State<HoaDonCuaToiView> {
                         : 'Chọn bộ lọc khác để xem hóa đơn',
                 style: TextStyle(
                   fontSize: 13,
-                  color: _muted,
+                  color: AppColors.subLabel,
                 ),
               ),
             ],
@@ -399,36 +338,12 @@ class _HoaDonCuaToiViewState extends State<HoaDonCuaToiView> {
 
   Widget _buildInvoiceCard(Map<String, dynamic> invoice) {
     final isPaid = invoice['TrangThai'] == 'paid';
-    final statusColor = isPaid ? _success : _warning;
+    final statusColor = isPaid ? AppColors.success : AppColors.warning;
     final statusLabel = isPaid ? 'Đã thanh toán' : 'Chờ thanh toán';
 
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Colors.white.withValues(alpha: 0.95),
-                Colors.white.withValues(alpha: 0.92),
-              ],
-            ),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: _primary.withValues(alpha: 0.15),
-              width: 1.5,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: _primary.withValues(alpha: 0.08),
-                blurRadius: 15,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
+    return Container(
+          decoration: AppDecor.card,
+          clipBehavior: Clip.hardEdge,
           child: Material(
             color: Colors.transparent,
             child: InkWell(
@@ -450,12 +365,12 @@ class _HoaDonCuaToiViewState extends State<HoaDonCuaToiView> {
                                   Container(
                                     padding: const EdgeInsets.all(8),
                                     decoration: BoxDecoration(
-                                      color: _primary.withValues(alpha: 0.1),
+                                      color: AppColors.primary.withValues(alpha: 0.1),
                                       borderRadius: BorderRadius.circular(10),
                                     ),
                                     child: Icon(
                                       Icons.receipt_rounded,
-                                      color: _primary,
+                                      color: AppColors.primary,
                                       size: 20,
                                     ),
                                   ),
@@ -469,7 +384,7 @@ class _HoaDonCuaToiViewState extends State<HoaDonCuaToiView> {
                                           style: const TextStyle(
                                             fontWeight: FontWeight.w900,
                                             fontSize: 14,
-                                            color: _text,
+                                            color: AppColors.label,
                                           ),
                                         ),
                                         const SizedBox(height: 2),
@@ -478,7 +393,7 @@ class _HoaDonCuaToiViewState extends State<HoaDonCuaToiView> {
                                               .format(invoice['NgayTao'] as DateTime),
                                           style: TextStyle(
                                             fontSize: 12,
-                                            color: _muted,
+                                            color: AppColors.subLabel,
                                             fontWeight: FontWeight.w600,
                                           ),
                                         ),
@@ -515,7 +430,7 @@ class _HoaDonCuaToiViewState extends State<HoaDonCuaToiView> {
                     ),
                     const SizedBox(height: 12),
                     Divider(
-                      color: _primary.withValues(alpha: 0.1),
+                      color: AppColors.primary.withValues(alpha: 0.1),
                       height: 1,
                     ),
                     const SizedBox(height: 12),
@@ -529,7 +444,7 @@ class _HoaDonCuaToiViewState extends State<HoaDonCuaToiView> {
                               'Số tiền phải trả',
                               style: TextStyle(
                                 fontSize: 12,
-                                color: _muted,
+                                color: AppColors.subLabel,
                               ),
                             ),
                             const SizedBox(height: 4),
@@ -542,7 +457,7 @@ class _HoaDonCuaToiViewState extends State<HoaDonCuaToiView> {
                                   style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.w900,
-                                    color: _primary,
+                                    color: AppColors.primary,
                                   ),
                                 );
                               },
@@ -554,7 +469,7 @@ class _HoaDonCuaToiViewState extends State<HoaDonCuaToiView> {
                             FilledButton(
                               onPressed: () => _showInvoiceDetail(invoice),
                               style: FilledButton.styleFrom(
-                                backgroundColor: _primary,
+                                backgroundColor: AppColors.primary,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(10),
                                 ),
@@ -580,8 +495,6 @@ class _HoaDonCuaToiViewState extends State<HoaDonCuaToiView> {
               ),
             ),
           ),
-        ),
-      ),
     );
   }
 
@@ -596,7 +509,7 @@ class _HoaDonCuaToiViewState extends State<HoaDonCuaToiView> {
 
   Widget _buildInvoiceDetailSheet(Map<String, dynamic> invoice) {
     final isPaid = invoice['TrangThai'] == 'paid';
-    final statusColor = isPaid ? _success : _warning;
+    final statusColor = isPaid ? AppColors.success : AppColors.warning;
 
     final tongTien = invoice['TongTien'];
     final tongTienValue = tongTien is String ? double.parse(tongTien) : (tongTien as num).toDouble();
@@ -607,27 +520,10 @@ class _HoaDonCuaToiViewState extends State<HoaDonCuaToiView> {
     final soTienPhaiTra = invoice['SoTienPhaiTra'];
     final soTienPhaiTraValue = soTienPhaiTra is String ? double.parse(soTienPhaiTra) : (soTienPhaiTra as num).toDouble();
 
-    return ClipRRect(
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Colors.white.withValues(alpha: 0.98),
-                Colors.white.withValues(alpha: 0.95),
-              ],
-            ),
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-            border: Border(
-              top: BorderSide(
-                color: _primary.withValues(alpha: 0.2),
-                width: 1.5,
-              ),
-            ),
+    return Container(
+          decoration: const BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
           ),
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
@@ -643,7 +539,7 @@ class _HoaDonCuaToiViewState extends State<HoaDonCuaToiView> {
                       style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.w900,
-                        color: _text,
+                        color: AppColors.label,
                       ),
                     ),
                     IconButton(
@@ -664,9 +560,13 @@ class _HoaDonCuaToiViewState extends State<HoaDonCuaToiView> {
                   isPaid ? 'Đã thanh toán' : 'Chờ thanh toán',
                   valueColor: statusColor,
                 ),
+                if ((invoice['TenBacSi'] ?? '').toString().trim().isNotEmpty)
+                  _buildDetailRow('Bác sĩ', invoice['TenBacSi'].toString().trim()),
+                if ((invoice['ChuyenKhoa'] ?? '').toString().trim().isNotEmpty)
+                  _buildDetailRow('Chuyên khoa', invoice['ChuyenKhoa'].toString().trim()),
                 const SizedBox(height: 16),
                 Divider(
-                  color: _primary.withValues(alpha: 0.1),
+                  color: AppColors.primary.withValues(alpha: 0.1),
                   height: 1,
                 ),
                 const SizedBox(height: 16),
@@ -675,22 +575,16 @@ class _HoaDonCuaToiViewState extends State<HoaDonCuaToiView> {
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w900,
-                    color: _text,
+                    color: AppColors.label,
                   ),
                 ),
                 const SizedBox(height: 12),
-                ...(invoice['ChiTiet'] as List).map((item) {
-                  final thanhTien = item['ThanhTien'];
-                  final value = thanhTien is String ? double.parse(thanhTien) : (thanhTien as num).toDouble();
-                  return _buildCostItem(
-                    item['TenHienThi'] ?? 'Dịch vụ',
-                    value,
-                    Icons.receipt_rounded,
-                  );
-                }),
+                ...(invoice['ChiTiet'] as List).map((item) =>
+                  _buildCostItem(Map<String, dynamic>.from(item as Map)),
+                ),
                 const SizedBox(height: 16),
                 Divider(
-                  color: _primary.withValues(alpha: 0.1),
+                  color: AppColors.primary.withValues(alpha: 0.1),
                   height: 1,
                 ),
                 const SizedBox(height: 16),
@@ -704,25 +598,16 @@ class _HoaDonCuaToiViewState extends State<HoaDonCuaToiView> {
                   _buildDetailRow(
                     'Giảm BHYT',
                     '-${_moneyFormat.format(giamBHYTValue)}',
-                    valueColor: _success,
+                    valueColor: AppColors.success,
                   ),
                 ],
                 const SizedBox(height: 12),
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        _primary.withValues(alpha: 0.1),
-                        _primary.withValues(alpha: 0.05),
-                      ],
-                    ),
+                    color: AppColors.primaryBg,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: _primary.withValues(alpha: 0.2),
-                    ),
+                    border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -732,7 +617,7 @@ class _HoaDonCuaToiViewState extends State<HoaDonCuaToiView> {
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
-                          color: _text,
+                          color: AppColors.label,
                         ),
                       ),
                       Text(
@@ -740,7 +625,7 @@ class _HoaDonCuaToiViewState extends State<HoaDonCuaToiView> {
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w900,
-                          color: _primary,
+                          color: AppColors.primary,
                         ),
                       ),
                     ],
@@ -751,9 +636,78 @@ class _HoaDonCuaToiViewState extends State<HoaDonCuaToiView> {
                   SizedBox(
                     width: double.infinity,
                     child: FilledButton(
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () async {
+                        final maHoaDonRaw = invoice['MaHoaDon'];
+                        final maHoaDon = maHoaDonRaw is int ? maHoaDonRaw.toString() : maHoaDonRaw as String;
+                        final soTien = invoice['SoTienPhaiTra'];
+                        final amount = soTien is String ? double.parse(soTien) : (soTien as num).toDouble();
+
+                        Get.dialog(
+                          const Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                          barrierDismissible: false,
+                        );
+
+                        try {
+                          final token = await _sessionManager.getToken();
+                          final response = await _dio.post(
+                            '${ApiConfig.baseUrl}/vnpay/create-payment',
+                            data: {
+                              'maHoaDon': maHoaDon,
+                              'soTien': amount,
+                              if (kIsWeb) 'app_return_url': Uri.base.origin,
+                            },
+                            options: Options(
+                              headers: {
+                                'Authorization': 'Bearer $token',
+                                'Content-Type': 'application/json',
+                              },
+                            ),
+                          );
+
+                          Get.back();
+
+                          if (response.statusCode == 200 && response.data['success'] == true) {
+                            final paymentUrl = response.data['data']['payment_url'] as String;
+
+                            if (!mounted) return;
+
+                            final result = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => VNPayPaymentView(
+                                  paymentUrl: paymentUrl,
+                                  maHoaDon: maHoaDon,
+                                ),
+                              ),
+                            );
+
+                            if (!mounted) return;
+
+                            if (result == true) {
+                              Navigator.pop(context);
+                              _loadInvoices();
+                            }
+                          } else {
+                            Get.back();
+                            Get.snackbar(
+                              'Lỗi',
+                              'Không thể tạo link thanh toán',
+                              snackPosition: SnackPosition.BOTTOM,
+                            );
+                          }
+                        } catch (e) {
+                          Get.back();
+                          Get.snackbar(
+                            'Lỗi',
+                            e.toString(),
+                            snackPosition: SnackPosition.BOTTOM,
+                          );
+                        }
+                      },
                       style: FilledButton.styleFrom(
-                        backgroundColor: _success,
+                        backgroundColor: AppColors.success,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -771,46 +725,60 @@ class _HoaDonCuaToiViewState extends State<HoaDonCuaToiView> {
               ],
             ),
           ),
-        ),
-      ),
     );
   }
 
-  Widget _buildCostItem(String label, double amount, IconData icon) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+  Widget _buildCostItem(Map<String, dynamic> item) {
+    final label = (item['TenHienThi'] ?? 'Dịch vụ').toString();
+    final soLuong = item['SoLuong'] is String
+        ? int.tryParse(item['SoLuong'] as String) ?? 1
+        : (item['SoLuong'] as num?)?.toInt() ?? 1;
+    final donGia = item['DonGia'] is String
+        ? double.tryParse(item['DonGia'] as String) ?? 0
+        : (item['DonGia'] as num?)?.toDouble() ?? 0;
+    final thanhTien = item['ThanhTien'] is String
+        ? double.tryParse(item['ThanhTien'] as String) ?? 0
+        : (item['ThanhTien'] as num?)?.toDouble() ?? 0;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: AppColors.fill,
+        borderRadius: BorderRadius.circular(12),
+      ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: _primary.withValues(alpha: 0.1),
+              color: AppColors.primaryBg,
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(
-              icon,
-              color: _primary,
-              size: 18,
-            ),
+            child: const Icon(Icons.receipt_rounded, color: AppColors.primary, size: 16),
           ),
           const SizedBox(width: 12),
           Expanded(
-            child: Text(
-              label,
-              style: const TextStyle(
-                fontSize: 13,
-                color: _text,
-                fontWeight: FontWeight.w600,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.label),
+                ),
+                if (soLuong > 0 && donGia > 0) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    '$soLuong × ${_moneyFormat.format(donGia)}',
+                    style: const TextStyle(fontSize: 11, color: AppColors.subLabel),
+                  ),
+                ],
+              ],
             ),
           ),
           Text(
-            _moneyFormat.format(amount),
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w700,
-              color: _primary,
-            ),
+            _moneyFormat.format(thanhTien),
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.primary),
           ),
         ],
       ),
@@ -832,7 +800,7 @@ class _HoaDonCuaToiViewState extends State<HoaDonCuaToiView> {
             label,
             style: TextStyle(
               fontSize: 13,
-              color: _muted,
+              color: AppColors.subLabel,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -840,7 +808,7 @@ class _HoaDonCuaToiViewState extends State<HoaDonCuaToiView> {
             value,
             style: TextStyle(
               fontSize: isBold ? 15 : 13,
-              color: valueColor ?? _text,
+              color: valueColor ?? AppColors.label,
               fontWeight: isBold ? FontWeight.w900 : FontWeight.w700,
             ),
           ),

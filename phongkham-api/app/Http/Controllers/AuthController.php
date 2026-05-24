@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\OtpResetPasswordMail;
 
 class AuthController extends Controller
 {
@@ -196,6 +198,88 @@ class AuthController extends Controller
             'success' => true,
             'message' => 'Đăng xuất thành công'
         ], 200);
+    }
+
+    /**
+     * Gửi OTP đặt lại mật khẩu qua email
+     */
+    public function forgotPassword(Request $request)
+    {
+        $request->validate(['email' => 'required|email']);
+
+        $taikhoan = DB::table('taikhoan')->where('email', $request->email)->first();
+
+        if (!$taikhoan) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Email này chưa được đăng ký trong hệ thống',
+            ], 404);
+        }
+
+        $otp = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        $expiresAt = now()->addMinutes(10);
+
+        DB::table('taikhoan')
+            ->where('MaTaiKhoan', $taikhoan->MaTaiKhoan)
+            ->update([
+                'otp_reset_code' => $otp,
+                'otp_reset_expires_at' => $expiresAt,
+            ]);
+
+        Mail::to($request->email)->send(new OtpResetPasswordMail($otp));
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Mã xác nhận đã được gửi đến email của bạn',
+        ]);
+    }
+
+    /**
+     * Xác nhận OTP và cập nhật mật khẩu mới
+     */
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'email'    => 'required|email',
+            'otp'      => 'required|string|size:6',
+            'password' => 'required|string|min:6',
+        ]);
+
+        $taikhoan = DB::table('taikhoan')->where('email', $request->email)->first();
+
+        if (!$taikhoan) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Email không tồn tại trong hệ thống',
+            ], 404);
+        }
+
+        if ($taikhoan->otp_reset_code !== $request->otp) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Mã xác nhận không đúng',
+            ], 422);
+        }
+
+        if (!$taikhoan->otp_reset_expires_at || now()->isAfter($taikhoan->otp_reset_expires_at)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Mã xác nhận đã hết hạn, vui lòng yêu cầu mã mới',
+            ], 422);
+        }
+
+        DB::table('taikhoan')
+            ->where('MaTaiKhoan', $taikhoan->MaTaiKhoan)
+            ->update([
+                'MatKhau'              => Hash::make($request->password),
+                'otp_reset_code'       => null,
+                'otp_reset_expires_at' => null,
+            ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Đặt lại mật khẩu thành công. Bạn có thể đăng nhập với mật khẩu mới.',
+        ]);
     }
 
     /**

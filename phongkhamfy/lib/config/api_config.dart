@@ -37,6 +37,8 @@ class ApiConfig {
   static const String register = '/register';
   static const String logout = '/logout';
   static const String me = '/me';
+  static const String forgotPassword = '/forgot-password';
+  static const String resetPassword = '/reset-password';
 
   // ─────────────────────────────────────────────────────────────
   // HELPER

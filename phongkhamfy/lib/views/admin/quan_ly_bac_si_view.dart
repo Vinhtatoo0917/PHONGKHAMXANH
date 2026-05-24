@@ -2,12 +2,14 @@
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:phongkhamfy/theme/app_theme.dart';
 import '../../controllers/admin_controller.dart';
 import '../../utils/loading_utils.dart';
 import '../../widgets/loading_view.dart';
 
 class QuanLyBacSiView extends StatefulWidget {
-  const QuanLyBacSiView({super.key});
+  final bool isInTab;
+  const QuanLyBacSiView({super.key, this.isInTab = false});
 
   @override
   State<QuanLyBacSiView> createState() => _QuanLyBacSiViewState();
@@ -65,12 +67,6 @@ class _QuanLyBacSiViewState extends State<QuanLyBacSiView> {
     'Trên 20 năm',
   ];
 
-  // Colors
-  final _mauXanh = const Color(0xFF3DAA70);
-  final _mauNen = const Color(0xFFF0FAF5);
-  final _mauTrang = Colors.white;
-  final _mauChuDen = const Color(0xFF1A3D2E);
-  final _mauChuXam = const Color(0xFF5A8A70);
 
   @override
   void initState() {
@@ -337,7 +333,7 @@ class _QuanLyBacSiViewState extends State<QuanLyBacSiView> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: isError ? Colors.red : _mauXanh,
+        backgroundColor: isError ? Colors.red : AppColors.primary,
         duration: const Duration(seconds: 2),
       ),
     );
@@ -364,7 +360,7 @@ class _QuanLyBacSiViewState extends State<QuanLyBacSiView> {
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
-                        color: _mauChuDen,
+                        color: AppColors.label,
                       ),
                     ),
                     IconButton(
@@ -406,7 +402,7 @@ class _QuanLyBacSiViewState extends State<QuanLyBacSiView> {
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: _mauChuDen,
+                    color: AppColors.label,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -419,7 +415,7 @@ class _QuanLyBacSiViewState extends State<QuanLyBacSiView> {
                             value: 'Nam',
                             groupValue: _gioiTinh,
                             onChanged: (v) => setState(() => _gioiTinh = v!),
-                            activeColor: _mauXanh,
+                            activeColor: AppColors.primary,
                           ),
                           const Text('Nam'),
                         ],
@@ -432,7 +428,7 @@ class _QuanLyBacSiViewState extends State<QuanLyBacSiView> {
                             value: 'Nữ',
                             groupValue: _gioiTinh,
                             onChanged: (v) => setState(() => _gioiTinh = v!),
-                            activeColor: _mauXanh,
+                            activeColor: AppColors.primary,
                           ),
                           const Text('Nữ'),
                         ],
@@ -478,8 +474,8 @@ class _QuanLyBacSiViewState extends State<QuanLyBacSiView> {
                       ),
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: _mauXanh,
-                      foregroundColor: _mauTrang,
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -509,7 +505,7 @@ class _QuanLyBacSiViewState extends State<QuanLyBacSiView> {
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: _mauChuDen,
+            color: AppColors.label,
           ),
         ),
         const SizedBox(height: 6),
@@ -518,10 +514,10 @@ class _QuanLyBacSiViewState extends State<QuanLyBacSiView> {
           obscureText: obscureText,
           keyboardType: keyboardType,
           decoration: InputDecoration(
-            prefixIcon: Icon(icon, color: _mauXanh, size: 20),
+            prefixIcon: Icon(icon, color: AppColors.primary, size: 20),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: _mauXanh.withValues(alpha: 0.3)),
+              borderSide: BorderSide(color: AppColors.primary.withValues(alpha: 0.3)),
             ),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
@@ -542,7 +538,7 @@ class _QuanLyBacSiViewState extends State<QuanLyBacSiView> {
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: _mauChuDen,
+            color: AppColors.label,
           ),
         ),
         const SizedBox(height: 6),
@@ -559,12 +555,12 @@ class _QuanLyBacSiViewState extends State<QuanLyBacSiView> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              border: Border.all(color: _mauXanh.withValues(alpha: 0.3)),
+              border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
               children: [
-                Icon(Icons.calendar_today, color: _mauXanh, size: 20),
+                Icon(Icons.calendar_today, color: AppColors.primary, size: 20),
                 const SizedBox(width: 12),
                 Text(
                   value != null
@@ -572,7 +568,7 @@ class _QuanLyBacSiViewState extends State<QuanLyBacSiView> {
                       : 'Chọn ngày sinh',
                   style: TextStyle(
                     fontSize: 14,
-                    color: value != null ? _mauChuDen : Colors.grey[600],
+                    color: value != null ? AppColors.label : Colors.grey[600],
                   ),
                 ),
               ],
@@ -597,7 +593,7 @@ class _QuanLyBacSiViewState extends State<QuanLyBacSiView> {
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: _mauChuDen,
+            color: AppColors.label,
           ),
         ),
         const SizedBox(height: 6),
@@ -606,7 +602,7 @@ class _QuanLyBacSiViewState extends State<QuanLyBacSiView> {
           decoration: InputDecoration(
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: _mauXanh.withValues(alpha: 0.3)),
+              borderSide: BorderSide(color: AppColors.primary.withValues(alpha: 0.3)),
             ),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
@@ -625,149 +621,125 @@ class _QuanLyBacSiViewState extends State<QuanLyBacSiView> {
 
   @override
   Widget build(BuildContext context) {
+    final fab = FloatingActionButton.extended(
+      onPressed: () { _clearForm(); _showFormDialog(); },
+      backgroundColor: AppColors.info,
+      icon: const Icon(Icons.add),
+      label: const Text('Thêm bác sĩ'),
+    );
+
+    final content = Column(
+      children: [
+        _buildSearchFilter(),
+        Expanded(child: _buildList()),
+      ],
+    );
+
+    if (widget.isInTab) {
+      return Stack(
+        children: [content, Positioned(bottom: 16, right: 16, child: fab)],
+      );
+    }
+
     return Scaffold(
-      backgroundColor: _mauNen,
-      appBar: AppBar(
-        title: const Text(
-          'Quản Lý Bác Sĩ',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
-        ),
-        backgroundColor: _mauXanh,
-        foregroundColor: _mauTrang,
-        elevation: 0,
-        centerTitle: false,
-      ),
-      body: Column(
+      backgroundColor: AppColors.bg,
+      appBar: iosAppBar(title: 'Quản Lý Bác Sĩ'),
+      body: content,
+      floatingActionButton: fab,
+    );
+  }
+
+  Widget _buildSearchFilter() {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
         children: [
-          // Search & Filter
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
+          TextField(
+            onChanged: (value) {
+              _searchQuery = value;
+              _applyFilters();
+              setState(() {});
+            },
+            decoration: InputDecoration(
+              hintText: 'Tìm kiếm bác sĩ...',
+              prefixIcon: Icon(Icons.search, color: AppColors.primary),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: AppColors.primary.withValues(alpha: 0.3)),
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            ),
+          ),
+          const SizedBox(height: 12),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
               children: [
-                TextField(
-                  onChanged: (value) {
-                    _searchQuery = value;
+                FilterChip(
+                  label: const Text('Tất cả'),
+                  selected: _filterChuyenKhoa == null,
+                  onSelected: (_) {
+                    _filterChuyenKhoa = null;
                     _applyFilters();
                     setState(() {});
                   },
-                  decoration: InputDecoration(
-                    hintText: 'Tìm kiếm bác sĩ...',
-                    prefixIcon: Icon(Icons.search, color: _mauXanh),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(
-                        color: _mauXanh.withValues(alpha: 0.3),
-                      ),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
+                  backgroundColor: Colors.grey[200],
+                  selectedColor: AppColors.primary,
+                  labelStyle: TextStyle(
+                    color: _filterChuyenKhoa == null ? Colors.white : AppColors.label,
                   ),
                 ),
-                const SizedBox(height: 12),
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      FilterChip(
-                        label: const Text('Tất cả'),
-                        selected: _filterChuyenKhoa == null,
-                        onSelected: (_) {
-                          _filterChuyenKhoa = null;
-                          _applyFilters();
-                          setState(() {});
-                        },
-                        backgroundColor: Colors.grey[200],
-                        selectedColor: _mauXanh,
-                        labelStyle: TextStyle(
-                          color: _filterChuyenKhoa == null
-                              ? _mauTrang
-                              : _mauChuDen,
-                        ),
+                const SizedBox(width: 8),
+                ..._danhSachChuyenKhoa.map(
+                  (khoa) => Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: FilterChip(
+                      label: Text(khoa),
+                      selected: _filterChuyenKhoa == khoa,
+                      onSelected: (_) {
+                        _filterChuyenKhoa = khoa;
+                        _applyFilters();
+                        setState(() {});
+                      },
+                      backgroundColor: Colors.grey[200],
+                      selectedColor: AppColors.primary,
+                      labelStyle: TextStyle(
+                        color: _filterChuyenKhoa == khoa ? Colors.white : AppColors.label,
                       ),
-                      const SizedBox(width: 8),
-                      ..._danhSachChuyenKhoa.map(
-                        (khoa) => Padding(
-                          padding: const EdgeInsets.only(right: 8),
-                          child: FilterChip(
-                            label: Text(khoa),
-                            selected: _filterChuyenKhoa == khoa,
-                            onSelected: (_) {
-                              _filterChuyenKhoa = khoa;
-                              _applyFilters();
-                              setState(() {});
-                            },
-                            backgroundColor: Colors.grey[200],
-                            selectedColor: _mauXanh,
-                            labelStyle: TextStyle(
-                              color: _filterChuyenKhoa == khoa
-                                  ? _mauTrang
-                                  : _mauChuDen,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
               ],
             ),
           ),
-          // List
-          Expanded(
-            child: _isLoading
-                ? const LoadingView(
-                    message: 'Đang tải danh sách bác sĩ...',
-                    isOverlay: false,
-                  )
-                : _danhSachBacSiFiltered.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.person_off,
-                          size: 64,
-                          color: _mauChuXam.withValues(alpha: 0.3),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Không tìm thấy bác sĩ',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: _mauChuXam,
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
-                : RefreshIndicator(
-                    onRefresh: _taiDanhSachBacSi,
-                    color: _mauXanh,
-                    child: ListView.builder(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
-                      ),
-                      itemCount: _danhSachBacSiFiltered.length,
-                      itemBuilder: (context, index) {
-                        final bacsi = _danhSachBacSiFiltered[index];
-                        return _buildBacSiCard(bacsi);
-                      },
-                    ),
-                  ),
-          ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          _clearForm();
-          _showFormDialog();
-        },
-        backgroundColor: _mauXanh,
-        icon: const Icon(Icons.add),
-        label: const Text('Thêm bác sĩ'),
+    );
+  }
+
+  Widget _buildList() {
+    if (_isLoading) {
+      return const LoadingView(message: 'Đang tải danh sách bác sĩ...', isOverlay: false);
+    }
+    if (_danhSachBacSiFiltered.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.person_off, size: 64, color: AppColors.subLabel.withValues(alpha: 0.3)),
+            const SizedBox(height: 16),
+            Text('Không tìm thấy bác sĩ', style: TextStyle(fontSize: 16, color: AppColors.subLabel)),
+          ],
+        ),
+      );
+    }
+    return RefreshIndicator(
+      onRefresh: _taiDanhSachBacSi,
+      color: AppColors.primary,
+      child: ListView.builder(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 80),
+        itemCount: _danhSachBacSiFiltered.length,
+        itemBuilder: (context, index) => _buildBacSiCard(_danhSachBacSiFiltered[index]),
       ),
     );
   }
@@ -780,11 +752,7 @@ class _QuanLyBacSiViewState extends State<QuanLyBacSiView> {
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [_mauTrang, _mauNen],
-          ),
+          color: AppColors.surface,
         ),
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -795,10 +763,10 @@ class _QuanLyBacSiViewState extends State<QuanLyBacSiView> {
                 children: [
                   CircleAvatar(
                     radius: 28,
-                    backgroundColor: _mauXanh.withValues(alpha: 0.1),
+                    backgroundColor: AppColors.primary.withValues(alpha: 0.1),
                     child: Icon(
                       bacsi['gioitinh'] == 'Nam' ? Icons.male : Icons.female,
-                      color: _mauXanh,
+                      color: AppColors.primary,
                       size: 28,
                     ),
                   ),
@@ -812,14 +780,14 @@ class _QuanLyBacSiViewState extends State<QuanLyBacSiView> {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: _mauChuDen,
+                            color: AppColors.label,
                           ),
                         ),
                         Text(
                           bacsi['ChuyenKhoa'] ?? 'N/A',
                           style: TextStyle(
                             fontSize: 13,
-                            color: _mauChuXam,
+                            color: AppColors.subLabel,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -891,19 +859,19 @@ class _QuanLyBacSiViewState extends State<QuanLyBacSiView> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: _mauXanh.withValues(alpha: 0.1),
+        color: AppColors.primary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: _mauXanh),
+          Icon(icon, size: 14, color: AppColors.primary),
           const SizedBox(width: 6),
           Text(
             value,
             style: TextStyle(
               fontSize: 12,
-              color: _mauChuDen,
+              color: AppColors.label,
               fontWeight: FontWeight.w500,
             ),
             maxLines: 1,

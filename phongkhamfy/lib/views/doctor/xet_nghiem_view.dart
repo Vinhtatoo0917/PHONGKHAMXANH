@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:phongkhamfy/controllers/lich_kham_controller.dart';
 import 'package:phongkhamfy/widgets/loading_view.dart';
 import 'package:intl/intl.dart';
+import 'package:phongkhamfy/theme/app_theme.dart';
 
 class XetNghiemView extends StatefulWidget {
   const XetNghiemView({super.key});
@@ -16,13 +17,6 @@ class _XetNghiemViewState extends State<XetNghiemView> with SingleTickerProvider
   final controller = Get.find<LichKhamController>();
 
   final RxString _statusFilter = 'all'.obs;
-
-  static const _primary = Color(0xFF1565C0);
-  static const _accent = Color(0xFF42A5F5);
-  static const _bg = Color(0xFFF5F7FA);
-  static const _pending = Color(0xFFFF9800);
-  static const _processing = Color(0xFF2196F3);
-  static const _completed = Color(0xFF4CAF50);
 
   @override
   void initState() {
@@ -46,122 +40,36 @@ class _XetNghiemViewState extends State<XetNghiemView> with SingleTickerProvider
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _bg,
-      body: NestedScrollView(
-        headerSliverBuilder: (context, _) => [
-          _buildAppBar(),
-          _buildSourceTabBar(),
-        ],
-        body: TabBarView(
-          controller: _sourceTabController,
-          children: [
-            _buildDirectAppointmentsTab(),
-            _buildReferralOrdersTab(),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAppBar() {
-    return SliverAppBar(
-      expandedHeight: 170,
-      floating: false,
-      pinned: true,
-      elevation: 0,
-      backgroundColor: _primary,
-      automaticallyImplyLeading: false,
-      flexibleSpace: FlexibleSpaceBar(
-        background: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [_primary, _accent],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+      backgroundColor: AppColors.bg,
+      appBar: iosAppBar(title: 'Xét nghiệm'),
+      body: Column(
+        children: [
+          Container(
+            color: AppColors.surface,
+            child: TabBar(
+              controller: _sourceTabController,
+              labelColor: AppColors.primary,
+              unselectedLabelColor: AppColors.subLabel,
+              indicatorColor: AppColors.primary,
+              indicatorWeight: 3,
+              labelStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800),
+              unselectedLabelStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+              tabs: const [
+                Tab(icon: Icon(Icons.event_note_rounded, size: 20), text: 'Lịch xét nghiệm'),
+                Tab(icon: Icon(Icons.assignment_rounded, size: 20), text: 'Phiếu chỉ định'),
+              ],
             ),
           ),
-          child: Stack(
-            children: [
-              Positioned(
-                right: -40,
-                top: -40,
-                child: CircleAvatar(radius: 80, backgroundColor: Colors.white.withValues(alpha: 0.05)),
-              ),
-              Positioned(
-                left: -20,
-                bottom: -30,
-                child: CircleAvatar(radius: 60, backgroundColor: Colors.white.withValues(alpha: 0.04)),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(24, 56, 24, 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: const Icon(Icons.biotech_rounded, color: Colors.white, size: 30),
-                        ),
-                        const SizedBox(width: 16),
-                        const Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Công việc xét nghiệm',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: 0.3,
-                                ),
-                              ),
-                              SizedBox(height: 4),
-                              Text(
-                                'Lịch xét nghiệm trực tiếp & phiếu chỉ định',
-                                style: TextStyle(color: Colors.white70, fontSize: 13),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
+          Expanded(
+            child: TabBarView(
+              controller: _sourceTabController,
+              children: [
+                _buildDirectAppointmentsTab(),
+                _buildReferralOrdersTab(),
+              ],
+            ),
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSourceTabBar() {
-    return SliverPersistentHeader(
-      pinned: true,
-      delegate: _StickyTabBarDelegate(
-        Container(
-          color: Colors.white,
-          child: TabBar(
-            controller: _sourceTabController,
-            labelColor: _primary,
-            unselectedLabelColor: Colors.grey,
-            indicatorColor: _primary,
-            indicatorWeight: 3,
-            labelStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800),
-            unselectedLabelStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-            tabs: const [
-              Tab(icon: Icon(Icons.event_note_rounded, size: 20), text: 'Lịch xét nghiệm'),
-              Tab(icon: Icon(Icons.assignment_rounded, size: 20), text: 'Phiếu chỉ định'),
-            ],
-          ),
-        ),
+        ],
       ),
     );
   }
@@ -186,9 +94,9 @@ class _XetNghiemViewState extends State<XetNghiemView> with SingleTickerProvider
                   fontWeight: FontWeight.w700,
                   fontSize: 12.5,
                 ),
-                selectedColor: _primary,
+                selectedColor: AppColors.primary,
                 backgroundColor: Colors.white,
-                side: BorderSide(color: isSelected ? _primary : Colors.grey.shade300),
+                side: BorderSide(color: isSelected ? AppColors.primary : Colors.grey.shade300),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               ),
             );
@@ -309,7 +217,7 @@ class _XetNghiemViewState extends State<XetNghiemView> with SingleTickerProvider
                             style: const TextStyle(
                               fontSize: 16.5,
                               fontWeight: FontWeight.w900,
-                              color: Color(0xFF2C3E50),
+                              color: AppColors.label,
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -363,19 +271,19 @@ class _XetNghiemViewState extends State<XetNghiemView> with SingleTickerProvider
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: _primary.withValues(alpha: 0.06),
+                      color: AppColors.primary.withValues(alpha: 0.06),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.science_rounded, size: 16, color: _primary),
+                        Icon(Icons.science_rounded, size: 16, color: AppColors.primary),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             'Có ${phieuChiDinh.length} phiếu xét nghiệm kèm theo',
                             style: TextStyle(
                               fontSize: 12.5,
-                              color: _primary,
+                              color: AppColors.primary,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
@@ -395,9 +303,9 @@ class _XetNghiemViewState extends State<XetNghiemView> with SingleTickerProvider
   (Color, IconData, String) _mapDirectStatus(String status) {
     switch (status) {
       case 'confirmed':
-        return (_pending, Icons.access_time_rounded, 'Đang chờ');
+        return (AppColors.warning, Icons.access_time_rounded, 'Đang chờ');
       case 'completed':
-        return (_completed, Icons.check_circle_rounded, 'Hoàn thành');
+        return (AppColors.success, Icons.check_circle_rounded, 'Hoàn thành');
       case 'no-show':
         return (Colors.redAccent, Icons.cancel_rounded, 'Vắng mặt');
       default:
@@ -503,7 +411,7 @@ class _XetNghiemViewState extends State<XetNghiemView> with SingleTickerProvider
                             style: const TextStyle(
                               fontSize: 16.5,
                               fontWeight: FontWeight.w900,
-                              color: Color(0xFF2C3E50),
+                              color: AppColors.label,
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -546,7 +454,7 @@ class _XetNghiemViewState extends State<XetNghiemView> with SingleTickerProvider
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF5F7FA),
+                      color: AppColors.fill,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
@@ -561,7 +469,7 @@ class _XetNghiemViewState extends State<XetNghiemView> with SingleTickerProvider
                                 'BS yêu cầu: $bacSiYC',
                                 style: const TextStyle(
                                   fontSize: 12.5,
-                                  color: Color(0xFF2C3E50),
+                                  color: AppColors.label,
                                   fontWeight: FontWeight.w700,
                                 ),
                               ),
@@ -591,12 +499,12 @@ class _XetNghiemViewState extends State<XetNghiemView> with SingleTickerProvider
                       return Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                         decoration: BoxDecoration(
-                          color: _primary.withValues(alpha: 0.08),
+                          color: AppColors.primary.withValues(alpha: 0.08),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
                           name,
-                          style: TextStyle(fontSize: 11.5, color: _primary, fontWeight: FontWeight.w700),
+                          style: TextStyle(fontSize: 11.5, color: AppColors.primary, fontWeight: FontWeight.w700),
                         ),
                       );
                     }).toList()
@@ -650,11 +558,11 @@ class _XetNghiemViewState extends State<XetNghiemView> with SingleTickerProvider
   (Color, IconData, String) _mapReferralStatus(String status) {
     switch (status) {
       case 'pending':
-        return (_pending, Icons.pending_actions_rounded, 'Chờ xử lý');
+        return (AppColors.warning, Icons.pending_actions_rounded, 'Chờ xử lý');
       case 'processing':
-        return (_processing, Icons.science_rounded, 'Đang xử lý');
+        return (AppColors.info, Icons.science_rounded, 'Đang xử lý');
       case 'completed':
-        return (_completed, Icons.check_circle_rounded, 'Hoàn thành');
+        return (AppColors.success, Icons.check_circle_rounded, 'Hoàn thành');
       default:
         return (Colors.grey, Icons.help_outline, status);
     }
@@ -723,7 +631,7 @@ class _XetNghiemViewState extends State<XetNghiemView> with SingleTickerProvider
                     const SizedBox(height: 8),
                     const Text(
                       'Phiếu chỉ định đính kèm',
-                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: Color(0xFF2C3E50)),
+                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.label),
                     ),
                     const SizedBox(height: 8),
                     ...phieuChiDinh.map((p) => _buildPhieuChiDinhSummary(Map<String, dynamic>.from(p as Map))),
@@ -737,7 +645,7 @@ class _XetNghiemViewState extends State<XetNghiemView> with SingleTickerProvider
                         icon: const Icon(Icons.check_circle_rounded),
                         label: const Text('Hoàn tất khám'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: _completed,
+                          backgroundColor: AppColors.success,
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
@@ -792,7 +700,7 @@ class _XetNghiemViewState extends State<XetNghiemView> with SingleTickerProvider
             children: [
               Text(
                 title,
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Color(0xFF2C3E50)),
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.label),
               ),
               const SizedBox(height: 4),
               Container(
@@ -821,7 +729,7 @@ class _XetNghiemViewState extends State<XetNghiemView> with SingleTickerProvider
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 18, color: _primary),
+          Icon(icon, size: 18, color: AppColors.primary),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
@@ -834,7 +742,7 @@ class _XetNghiemViewState extends State<XetNghiemView> with SingleTickerProvider
                 const SizedBox(height: 2),
                 Text(
                   value,
-                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: Color(0xFF2C3E50)),
+                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.label),
                 ),
               ],
             ),
@@ -851,20 +759,20 @@ class _XetNghiemViewState extends State<XetNghiemView> with SingleTickerProvider
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: _primary.withValues(alpha: 0.05),
+        color: AppColors.primary.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: _primary.withValues(alpha: 0.2)),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(Icons.science_rounded, size: 16, color: _primary),
+              Icon(Icons.science_rounded, size: 16, color: AppColors.primary),
               const SizedBox(width: 6),
               Text(
                 'Phiếu #${phieu['MaPhieu']}',
-                style: TextStyle(fontSize: 13, color: _primary, fontWeight: FontWeight.w800),
+                style: TextStyle(fontSize: 13, color: AppColors.primary, fontWeight: FontWeight.w800),
               ),
               const Spacer(),
               if (statusText.isNotEmpty)
@@ -886,7 +794,7 @@ class _XetNghiemViewState extends State<XetNghiemView> with SingleTickerProvider
                   Expanded(
                     child: Text(
                       m['TenDichVu']?.toString() ?? '',
-                      style: const TextStyle(fontSize: 12.5, color: Color(0xFF2C3E50)),
+                      style: const TextStyle(fontSize: 12.5, color: AppColors.label),
                     ),
                   ),
                 ],
@@ -928,30 +836,11 @@ class _XetNghiemViewState extends State<XetNghiemView> with SingleTickerProvider
   }
 }
 
-class _StickyTabBarDelegate extends SliverPersistentHeaderDelegate {
-  final Widget child;
 
-  _StickyTabBarDelegate(this.child);
-
-  @override
-  double get minExtent => 72;
-
-  @override
-  double get maxExtent => 72;
-
-  @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return SizedBox(height: 72, child: child);
-  }
-
-  @override
-  bool shouldRebuild(_StickyTabBarDelegate oldDelegate) => false;
-}
-
-const _wfPrimary = Color(0xFF1565C0);
-const _wfPending = Color(0xFFFF9800);
-const _wfProcessing = Color(0xFF2196F3);
-const _wfCompleted = Color(0xFF4CAF50);
+const _wfPrimary = AppColors.primary;
+const _wfPending = AppColors.warning;
+const _wfProcessing = AppColors.info;
+const _wfCompleted = AppColors.success;
 
 class _ReferralWorkflowSheet extends StatefulWidget {
   final Map<String, dynamic> order;
@@ -1212,7 +1101,7 @@ class _ReferralWorkflowSheetState extends State<_ReferralWorkflowSheet> {
         const SizedBox(width: 8),
         Text(
           title,
-          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: Color(0xFF2C3E50)),
+          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: AppColors.label),
         ),
       ],
     );
@@ -1252,7 +1141,7 @@ class _ReferralWorkflowSheetState extends State<_ReferralWorkflowSheet> {
                   children: [
                     Text(
                       name,
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Color(0xFF2C3E50)),
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: AppColors.label),
                     ),
                     if (ageGender.isNotEmpty) ...[
                       const SizedBox(height: 2),
@@ -1309,7 +1198,7 @@ class _ReferralWorkflowSheetState extends State<_ReferralWorkflowSheet> {
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(fontSize: 12.5, color: Color(0xFF2C3E50), fontWeight: FontWeight.w600),
+              style: const TextStyle(fontSize: 12.5, color: AppColors.label, fontWeight: FontWeight.w600),
             ),
           ),
         ],
@@ -1405,7 +1294,7 @@ class _ReferralWorkflowSheetState extends State<_ReferralWorkflowSheet> {
                   Expanded(
                     child: RichText(
                       text: TextSpan(
-                        style: const TextStyle(fontSize: 12.5, color: Color(0xFF2C3E50)),
+                        style: const TextStyle(fontSize: 12.5, color: AppColors.label),
                         children: [
                           const TextSpan(
                             text: 'Ghi chú từ BS yêu cầu: ',
@@ -1433,7 +1322,7 @@ class _ReferralWorkflowSheetState extends State<_ReferralWorkflowSheet> {
       padding: const EdgeInsets.only(bottom: 3),
       child: RichText(
         text: TextSpan(
-          style: const TextStyle(fontSize: 12.5, color: Color(0xFF2C3E50), height: 1.4),
+          style: const TextStyle(fontSize: 12.5, color: AppColors.label, height: 1.4),
           children: [
             TextSpan(text: '$label: ', style: const TextStyle(fontWeight: FontWeight.w800)),
             TextSpan(text: value, style: const TextStyle(fontWeight: FontWeight.w600)),
@@ -1482,7 +1371,7 @@ class _ReferralWorkflowSheetState extends State<_ReferralWorkflowSheet> {
                   children: [
                     Text(
                       name,
-                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: Color(0xFF2C3E50)),
+                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.label),
                     ),
                     if (tenKhoa.isNotEmpty || maDV.isNotEmpty) ...[
                       const SizedBox(height: 2),
@@ -1709,7 +1598,7 @@ class _ReferralWorkflowSheetState extends State<_ReferralWorkflowSheet> {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFFF5F7FA),
+        color: AppColors.fill,
         borderRadius: BorderRadius.circular(14),
       ),
       child: Row(
@@ -1781,7 +1670,7 @@ class _ReferralWorkflowSheetState extends State<_ReferralWorkflowSheet> {
             children: [
               Text(
                 title,
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Color(0xFF2C3E50)),
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.label),
               ),
               const SizedBox(height: 4),
               Container(

@@ -939,4 +939,29 @@ class LichKhamController extends GetxController {
       return null;
     }
   }
+
+  Future<String?> createVNPayPayment(String maHoaDon, double soTien) async {
+    try {
+      final response = await _dio.post(
+        '$_baseUrl/vnpay/create-payment',
+        data: {
+          'maHoaDon': maHoaDon,
+          'soTien': soTien,
+        },
+        options: await _jsonOptions(),
+      );
+
+      if (response.statusCode == 200 && response.data['success']) {
+        return response.data['data']['payment_url'] as String?;
+      }
+      throw Exception(response.data['message'] ?? 'Lỗi tạo link thanh toán');
+    } catch (e) {
+      Get.snackbar(
+        'Lỗi',
+        _message(_friendlyError(e, 'Không thể tạo link thanh toán')),
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return null;
+    }
+  }
 }

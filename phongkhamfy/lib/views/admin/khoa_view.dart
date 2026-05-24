@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:phongkhamfy/theme/app_theme.dart' show iosAppBar;
 import '../../controllers/admin_controller.dart';
 import '../../utils/constants.dart';
 import '../../utils/loading_utils.dart';
@@ -340,16 +341,7 @@ class _KhoaViewState extends State<KhoaView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text(
-          'Quản Lý Khoa',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
-        ),
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.textWhite,
-        elevation: 0,
-        centerTitle: false,
-      ),
+      appBar: iosAppBar(title: 'Quản Lý Khoa'),
       body: _isLoading && _danhSachKhoa.isEmpty
           ? const LoadingView(
               message: 'Đang tải danh sách khoa...',
@@ -428,7 +420,7 @@ class _KhoaViewState extends State<KhoaView> {
           _clearForm();
           _showFormDialog();
         },
-        backgroundColor: AppColors.primary,
+        backgroundColor: AppColors.info,
         icon: const Icon(Icons.add),
         label: const Text('Thêm khoa'),
       ),
@@ -449,11 +441,7 @@ class _KhoaViewState extends State<KhoaView> {
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(AppSizes.radiusLG),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [AppColors.surface, AppColors.primary.withOpacity(0.02)],
-            ),
+            color: AppColors.surface,
           ),
           child: Padding(
             padding: const EdgeInsets.all(AppSizes.paddingMD),
@@ -465,11 +453,7 @@ class _KhoaViewState extends State<KhoaView> {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [AppColors.primary, AppColors.primaryDark],
-                        ),
+                        color: AppColors.primary,
                         borderRadius: BorderRadius.circular(AppSizes.radiusMD),
                         boxShadow: [
                           BoxShadow(

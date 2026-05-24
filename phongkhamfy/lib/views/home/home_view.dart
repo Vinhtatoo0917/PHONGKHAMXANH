@@ -5,6 +5,7 @@ import 'package:phongkhamfy/views/patient/dat_lich_kham_view.dart';
 import 'package:phongkhamfy/views/patient/lich_kham_cua_toi_view.dart';
 import 'package:phongkhamfy/views/patient/hoa_don_cua_toi_view.dart';
 import 'package:phongkhamfy/views/patient/change_password_view.dart';
+import 'package:phongkhamfy/views/home/news_detail_view.dart';
 import 'package:phongkhamfy/widgets/dialog_dang_xuat.dart';
 import 'package:phongkhamfy/widgets/loading_dang_xuat.dart';
 import 'package:phongkhamfy/views/patient/edit_profile_view.dart';
@@ -37,6 +38,29 @@ class _HomeViewState extends State<HomeView> {
       'title': 'Tư vấn thuốc',
       'subtitle': 'Được bác sĩ tư vấn đầy đủ trước khi dùng thuốc',
       'color': const Color(0xFF4CAF50),
+    },
+  ];
+
+  final List<Map<String, dynamic>> _news = [
+    {
+      'id': 1,
+      'tieuDe': 'Khám sức khỏe định kỳ có tầm quan trọng gì?',
+      'moTa': 'Khám sức khỏe định kỳ giúp phát hiện sớm các bệnh lý, duy trì tình trạng sức khỏe tốt nhất.',
+    },
+    {
+      'id': 2,
+      'tieuDe': 'Cách phòng ngừa cúm mùa hiệu quả',
+      'moTa': 'Vệ sinh tay sạch, mặc khẩu trang nơi công cộng, tiêm vắc xin là các cách phòng ngừa hiệu quả.',
+    },
+    {
+      'id': 3,
+      'tieuDe': 'Lợi ích của chế độ ăn uống cân bằng',
+      'moTa': 'Ăn uống cân bằng giúp cung cấp đủ dinh dưỡng, tăng sức đề kháng và duy trì cân nặng lý tưởng.',
+    },
+    {
+      'id': 4,
+      'tieuDe': 'Tập thể dục đều đặn mang lại những lợi ích gì?',
+      'moTa': 'Tập thể dục giúp tăng cường sức khỏe tim mạch, giảm stress và cải thiện chất lượng giấc ngủ.',
     },
   ];
 
@@ -88,6 +112,8 @@ class _HomeViewState extends State<HomeView> {
             ),
             const SizedBox(height: 16),
             _buildBannerCarousel(),
+            const SizedBox(height: 20),
+            _buildNewsSection(),
             const SizedBox(height: 20),
             _buildMainFeaturesSection(),
             const SizedBox(height: 24),
@@ -215,6 +241,145 @@ class _HomeViewState extends State<HomeView> {
     );
   }
 
+  Widget _buildNewsSection() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('TIN TỨC', style: AppText.caption.copyWith(
+            color: AppColors.subLabel, fontWeight: FontWeight.w600, letterSpacing: 0.8)),
+          const SizedBox(height: 12),
+          ..._news.take(2).map((item) => _buildNewsCard(item)),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () => _showAllNews(),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+                elevation: 0,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+              child: Text(
+                'Xem thêm',
+                style: AppText.body.copyWith(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNewsCard(Map<String, dynamic> item) {
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => NewsDetailView(
+            tieuDe: item['tieuDe'],
+            moTa: item['moTa'],
+          ),
+        ),
+      ),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        decoration: AppDecor.card,
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            children: [
+              Container(
+                width: 70,
+                height: 70,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  color: AppColors.primaryBg,
+                ),
+                child: const Icon(Icons.article_rounded, color: AppColors.primary, size: 32),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item['tieuDe'],
+                      style: AppText.footnote.copyWith(
+                        color: AppColors.label,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      item['moTa'],
+                      style: AppText.caption.copyWith(color: AppColors.subLabel),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              const Icon(Icons.chevron_right_rounded, color: AppColors.subLabel, size: 20),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showAllNews() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.bg,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => DraggableScrollableSheet(
+        initialChildSize: 0.7,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        expand: false,
+        builder: (_, scrollController) => Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Tất cả tin tức', style: AppText.title3),
+                  IconButton(
+                    icon: const Icon(Icons.close_rounded),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: ListView.builder(
+                controller: scrollController,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                itemCount: _news.length,
+                itemBuilder: (_, index) => Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: _buildNewsCard(_news[index]),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildMainFeaturesSection() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -241,10 +406,8 @@ class _HomeViewState extends State<HomeView> {
                   () => Navigator.push(context, MaterialPageRoute(builder: (_) => const LichKhamCuaToiView()))),
                 _featureItem(Icons.receipt_long_rounded, 'Hóa đơn', const Color(0xFFE91E63),
                   () => Navigator.push(context, MaterialPageRoute(builder: (_) => const HoaDonCuaToiView()))),
-                _featureItem(Icons.payment_rounded, 'Thanh toán', const Color(0xFFFF9800), () {}),
                 _featureItem(Icons.medical_information_rounded, 'Hồ sơ SK', const Color(0xFF9C27B0), () {}),
                 _featureItem(Icons.science_rounded, 'Kết quả', const Color(0xFF00BCD4), () {}),
-                _featureItem(Icons.app_registration_rounded, 'Nhập viện', const Color(0xFF3F51B5), () {}),
                 _featureItem(Icons.headset_mic_rounded, 'Hỗ trợ', const Color(0xFFFF5722), () {}),
               ],
             ),
@@ -303,15 +466,9 @@ class _HomeViewState extends State<HomeView> {
                   onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const LichKhamCuaToiView()))),
                 IosMenuCard(icon: Icons.receipt_long_rounded, label: 'Hóa đơn', color: const Color(0xFFE91E63),
                   onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const HoaDonCuaToiView()))),
-                IosMenuCard(icon: Icons.payment_rounded, label: 'Thanh toán', color: const Color(0xFFFF9800), onTap: () {}),
                 IosMenuCard(icon: Icons.medical_information_rounded, label: 'Hồ sơ SK', color: const Color(0xFF9C27B0), onTap: () {}),
                 IosMenuCard(icon: Icons.science_rounded, label: 'Kết quả XN', color: const Color(0xFF00BCD4), onTap: () {}),
-                IosMenuCard(icon: Icons.app_registration_rounded, label: 'Nhập viện', color: const Color(0xFF3F51B5), onTap: () {}),
                 IosMenuCard(icon: Icons.headset_mic_rounded, label: 'Hỗ trợ', color: const Color(0xFFFF5722), onTap: () {}),
-                IosMenuCard(icon: Icons.book_rounded, label: 'Hướng dẫn', color: const Color(0xFF607D8B), onTap: () {}),
-                IosMenuCard(icon: Icons.favorite_rounded, label: 'Thư viện SK', color: const Color(0xFFE91E63), onTap: () {}),
-                IosMenuCard(icon: Icons.article_rounded, label: 'Tin tức', color: const Color(0xFF9C27B0), onTap: () {}),
-                IosMenuCard(icon: Icons.phone_rounded, label: 'Liên hệ', color: const Color(0xFF00BCD4), onTap: () {}),
               ],
             ),
           ],

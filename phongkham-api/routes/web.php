@@ -14,6 +14,12 @@ use App\Http\Controllers\Admin\DichVuController;
 use App\Http\Controllers\Admin\ThuocController;
 use App\Http\Controllers\benhnhan\ProfileController;
 use App\Http\Controllers\cashier\HoaDonController;
+use App\Http\Controllers\cashier\VNPayController;
+use App\Http\Controllers\bacsi\LichKhamController as BacSiLichKhamController;
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\BenhNhanController;
+use App\Http\Controllers\Admin\StatisticsController;
+use App\Http\Controllers\Admin\ThuNganController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -23,6 +29,8 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/logout', [AuthController::class, 'logout']);
 Route::get('/me', [AuthController::class, 'me']);
+Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
+Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 
 // ==================== LỊCH KHÁM ====================
 Route::get('/lich-kham/available', [BenhNhanLichKhamController::class, 'getAvailableSchedules']);
@@ -122,6 +130,28 @@ Route::prefix('admin')->group(function () {
     Route::post('/phong-kham', [PhongKhamController::class, 'store']);
     Route::put('/phong-kham/{id}', [PhongKhamController::class, 'update']);
     Route::delete('/phong-kham/{id}', [PhongKhamController::class, 'destroy']);
+
+    // ==================== DASHBOARD ====================
+    Route::get('/dashboard-stats', [DashboardController::class, 'dashboardStats']);
+    Route::get('/doctor-schedules', [DashboardController::class, 'doctorSchedules']);
+
+    // ==================== QUẢN LÝ BỆNH NHÂN ====================
+    Route::get('/benh-nhan', [BenhNhanController::class, 'index']);
+    Route::get('/benh-nhan/{id}', [BenhNhanController::class, 'show']);
+    Route::patch('/benh-nhan/{id}/trang-thai', [BenhNhanController::class, 'updateStatus']);
+    Route::delete('/benh-nhan/{id}', [BenhNhanController::class, 'destroy']);
+
+    // ==================== THỐNG KÊ BÁO CÁO ====================
+    Route::get('/statistics', [StatisticsController::class, 'overview']);
+
+    // ==================== QUẢN LÝ THU NGÂN ====================
+    Route::get('/thu-ngan', [ThuNganController::class, 'index']);
+    Route::post('/thu-ngan', [ThuNganController::class, 'store']);
+    Route::get('/thu-ngan/{id}', [ThuNganController::class, 'show']);
+    Route::put('/thu-ngan/{id}', [ThuNganController::class, 'update']);
+    Route::patch('/thu-ngan/{id}/trang-thai', [ThuNganController::class, 'updateStatus']);
+    Route::delete('/thu-ngan/{id}', [ThuNganController::class, 'destroy']);
+    Route::patch('/thu-ngan/{id}/reset-mat-khau', [ThuNganController::class, 'resetPassword']);
 });
 
 Route::prefix('bacsi')->group(function () {
@@ -149,5 +179,14 @@ Route::prefix('bacsi')->group(function () {
 
 Route::prefix('cashier')->group(function () {
     Route::get('/unpaid-invoices', [HoaDonController::class, 'getUnpaidInvoices']);
+    Route::get('/today-statistics', [HoaDonController::class, 'getTodayStatistics']);
+    Route::get('/all-invoices', [HoaDonController::class, 'getAllInvoices']);
     Route::post('/invoices/{maHoaDon}/mark-paid', [HoaDonController::class, 'markInvoicePaid']);
+});
+
+Route::prefix('vnpay')->group(function () {
+    Route::post('/create-payment', [VNPayController::class, 'createPayment']);
+    Route::get('/return', [VNPayController::class, 'handleReturn']);
+    Route::post('/ipn', [VNPayController::class, 'handleIPN']);
+    Route::post('/verify-payment', [VNPayController::class, 'verifyPayment']);
 });

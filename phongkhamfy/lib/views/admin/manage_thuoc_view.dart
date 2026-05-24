@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:phongkhamfy/controllers/thuoc_controller.dart';
+import 'package:phongkhamfy/theme/app_theme.dart';
 import 'package:phongkhamfy/utils/loading_utils.dart';
 import 'package:phongkhamfy/widgets/loading_view.dart';
-import 'dart:ui';
 
 class ManageThuocView extends StatefulWidget {
   const ManageThuocView({super.key});
@@ -17,98 +17,54 @@ class _ManageThuocViewState extends State<ManageThuocView> {
   final TextEditingController _searchController = TextEditingController();
   final RxString _searchQuery = ''.obs;
 
-  final _primary = const Color(0xFF6366F1); // Modern Indigo
-  final _accent = const Color(0xFF10B981); // Emerald Green
-  final _bg = const Color(0xFFF8FAFC);
-  final _slate = const Color(0xFF1E293B);
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _bg,
-      body: Stack(
+      backgroundColor: AppColors.bg,
+      appBar: iosAppBar(title: 'Danh mục thuốc'),
+      body: Column(
         children: [
-          CustomScrollView(
-            slivers: [
-              _buildAppBar(),
-              _buildSearchSection(),
-              _buildMedicineList(),
-              const SliverPadding(padding: EdgeInsets.only(bottom: 100)),
-            ],
-          ),
+          _buildSearchSection(),
+          Expanded(child: _buildMedicineList()),
           _buildAddButton(),
         ],
       ),
     );
   }
 
-  Widget _buildAppBar() {
-    return SliverAppBar(
-      expandedHeight: 120.0,
-      floating: false,
-      pinned: true,
-      elevation: 0,
-      backgroundColor: Colors.white,
-      flexibleSpace: FlexibleSpaceBar(
-        titlePadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        centerTitle: false,
-        title: Text(
-          'Danh mục thuốc',
-          style: TextStyle(
-            color: _slate,
-            fontWeight: FontWeight.w900,
-            fontSize: 20,
-            letterSpacing: -0.5,
-          ),
-        ),
-        background: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            Container(
-              height: 1,
-              color: Colors.grey[100],
+  Widget _buildSearchSection() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 20,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildSearchSection() {
-    return SliverToBoxAdapter(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.03),
-                blurRadius: 20,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: TextField(
-            controller: _searchController,
-            onChanged: (v) => _searchQuery.value = v,
-            decoration: InputDecoration(
-              hintText: 'Tìm kiếm tên thuốc, mã...',
-              hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
-              prefixIcon: Icon(Icons.search_rounded, color: _primary),
-              suffixIcon: Obx(() => _searchQuery.isEmpty 
-                ? const SizedBox.shrink() 
-                : IconButton(
-                    icon: const Icon(Icons.close_rounded, size: 20),
-                    onPressed: () {
-                      _searchController.clear();
-                      _searchQuery.value = '';
-                    },
-                  )),
-              border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-            ),
+        child: TextField(
+          controller: _searchController,
+          onChanged: (v) => _searchQuery.value = v,
+          decoration: InputDecoration(
+            hintText: 'Tìm kiếm tên thuốc, mã...',
+            hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+            prefixIcon: Icon(Icons.search_rounded, color: AppColors.primary),
+            suffixIcon: Obx(() => _searchQuery.isEmpty
+              ? const SizedBox.shrink()
+              : IconButton(
+                  icon: const Icon(Icons.close_rounded, size: 20),
+                  onPressed: () {
+                    _searchController.clear();
+                    _searchQuery.value = '';
+                  },
+                )),
+            border: InputBorder.none,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
           ),
         ),
       ),
@@ -118,11 +74,9 @@ class _ManageThuocViewState extends State<ManageThuocView> {
   Widget _buildMedicineList() {
     return Obx(() {
       if (controller.isLoading.value && controller.medicines.isEmpty) {
-        return const SliverFillRemaining(
-          child: LoadingView(
-            message: 'Đang tải danh sách thuốc...',
-            isOverlay: false,
-          ),
+        return const LoadingView(
+          message: 'Đang tải danh sách thuốc...',
+          isOverlay: false,
         );
       }
 
@@ -134,36 +88,47 @@ class _ManageThuocViewState extends State<ManageThuocView> {
       }).toList();
 
       if (items.isEmpty) {
-        return SliverFillRemaining(
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.medication_liquid_rounded, size: 80, color: Colors.grey[200]),
-                const SizedBox(height: 16),
-                Text('Không tìm thấy thuốc nào', style: TextStyle(color: Colors.grey[400], fontWeight: FontWeight.w600)),
-              ],
-            ),
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.medication_liquid_rounded, size: 80, color: Colors.grey[200]),
+              const SizedBox(height: 16),
+              Text('Không tìm thấy thuốc nào', style: TextStyle(color: Colors.grey[400], fontWeight: FontWeight.w600)),
+            ],
           ),
         );
       }
 
-      return SliverPadding(
+      return ListView.builder(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        sliver: SliverList(
-          delegate: SliverChildBuilderDelegate(
-            (context, index) => _buildThuocCard(items[index]),
-            childCount: items.length,
-          ),
-        ),
+        itemCount: items.length,
+        itemBuilder: (context, index) => _buildThuocCard(items[index]),
       );
     });
+  }
+
+  Widget _buildAddButton() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 12, 24, 30),
+      child: FilledButton.icon(
+        onPressed: () => _showThuocForm(),
+        icon: const Icon(Icons.add_rounded),
+        label: const Text('Thêm thuốc mới', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
+        style: FilledButton.styleFrom(
+          backgroundColor: AppColors.primary,
+          minimumSize: const Size(double.infinity, 60),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          elevation: 0,
+        ),
+      ),
+    );
   }
 
   Widget _buildThuocCard(Map<String, dynamic> thuoc) {
     Color statusColor;
     switch (thuoc['TrangThai']) {
-      case 'Kinh doanh': statusColor = _accent; break;
+      case 'Kinh doanh': statusColor = AppColors.accent; break;
       case 'Hết hàng': statusColor = Colors.orange; break;
       case 'Ngừng kinh doanh': statusColor = Colors.redAccent; break;
       default: statusColor = Colors.grey;
@@ -200,10 +165,10 @@ class _ManageThuocViewState extends State<ManageThuocView> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: _primary.withValues(alpha: 0.08),
+                          color: AppColors.primary.withValues(alpha: 0.08),
                           borderRadius: BorderRadius.circular(16),
                         ),
-                        child: Icon(Icons.medication_rounded, color: _primary, size: 28),
+                        child: Icon(Icons.medication_rounded, color: AppColors.primary, size: 28),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
@@ -215,7 +180,7 @@ class _ManageThuocViewState extends State<ManageThuocView> {
                               style: TextStyle(
                                 fontSize: 17,
                                 fontWeight: FontWeight.w900,
-                                color: _slate,
+                                color: AppColors.label,
                                 letterSpacing: -0.2,
                               ),
                             ),
@@ -243,7 +208,7 @@ class _ManageThuocViewState extends State<ManageThuocView> {
                           const SizedBox(height: 4),
                           Text(
                             '${thuoc['Gia']}đ / ${thuoc['DonViTinh']}',
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: _primary),
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.primary),
                           ),
                         ],
                       ),
@@ -294,48 +259,6 @@ class _ManageThuocViewState extends State<ManageThuocView> {
     );
   }
 
-  Widget _buildAddButton() {
-    return Positioned(
-      bottom: 30,
-      right: 24,
-      left: 24,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-          child: InkWell(
-            onTap: () => _showThuocForm(),
-            child: Container(
-              height: 60,
-              decoration: BoxDecoration(
-                color: _primary.withValues(alpha: 0.9),
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: _primary.withValues(alpha: 0.3),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10),
-                  ),
-                ],
-              ),
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.add_rounded, color: Colors.white),
-                  SizedBox(width: 8),
-                  Text(
-                    'Thêm thuốc mới',
-                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 16),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   void _showThuocForm({Map<String, dynamic>? thuoc}) {
     final tenController = TextEditingController(text: thuoc?['TenThuoc']);
     final dvtController = TextEditingController(text: thuoc?['DonViTinh']);
@@ -368,7 +291,7 @@ class _ManageThuocViewState extends State<ManageThuocView> {
               ),
               const SizedBox(height: 24),
               Text(thuoc == null ? 'Thêm thuốc mới' : 'Cập nhật thuốc', 
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: _slate)),
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: AppColors.label)),
               const SizedBox(height: 8),
               Text('Điền đầy đủ thông tin vào các trường bên dưới', 
                 style: TextStyle(color: Colors.grey[500], fontSize: 13)),
@@ -392,9 +315,9 @@ class _ManageThuocViewState extends State<ManageThuocView> {
                     .map((s) => DropdownMenuItem(value: s, child: Text(s, style: const TextStyle(fontSize: 14)))).toList(),
                 onChanged: (v) => trangThai = v ?? 'Kinh doanh',
                 decoration: InputDecoration(
-                  prefixIcon: Icon(Icons.info_outline_rounded, size: 20, color: _primary),
+                  prefixIcon: Icon(Icons.info_outline_rounded, size: 20, color: AppColors.primary),
                   filled: true,
-                  fillColor: const Color(0xFFF1F5F9),
+                  fillColor: AppColors.fill,
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: BorderSide.none),
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 ),
@@ -438,7 +361,7 @@ class _ManageThuocViewState extends State<ManageThuocView> {
                     }
                   },
                   style: FilledButton.styleFrom(
-                    backgroundColor: _primary, 
+                    backgroundColor: AppColors.primary, 
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                     elevation: 0,
                   ),
@@ -469,9 +392,9 @@ class _ManageThuocViewState extends State<ManageThuocView> {
             decoration: InputDecoration(
               hintText: hint,
               hintStyle: TextStyle(color: Colors.grey[300], fontSize: 14),
-              prefixIcon: Icon(icon, size: 20, color: _primary),
+              prefixIcon: Icon(icon, size: 20, color: AppColors.primary),
               filled: true,
-              fillColor: const Color(0xFFF1F5F9),
+              fillColor: AppColors.fill,
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: BorderSide.none),
               contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
             ),
@@ -483,53 +406,49 @@ class _ManageThuocViewState extends State<ManageThuocView> {
 
   void _confirmDelete(Map<String, dynamic> thuoc) {
     Get.dialog(
-      BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-        child: AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
-          backgroundColor: Colors.white,
-          title: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(color: Colors.red[50], shape: BoxShape.circle),
-                child: const Icon(Icons.warning_amber_rounded, color: Colors.redAccent),
-              ),
-              const SizedBox(width: 12),
-              const Text('Xác nhận xóa', style: TextStyle(fontWeight: FontWeight.w900)),
-            ],
-          ),
-          content: Text('Bạn có chắc muốn gỡ bỏ thuốc "${thuoc['TenThuoc']}" khỏi hệ thống?', 
-            style: const TextStyle(color: Colors.grey, fontSize: 15)),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context), 
-              child: Text('Quay lại', style: TextStyle(color: Colors.grey[600], fontWeight: FontWeight.bold))
-            ),
+      AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+        backgroundColor: Colors.white,
+        title: Row(
+          children: [
             Container(
-              margin: const EdgeInsets.only(left: 12),
-              child: FilledButton(
-                onPressed: () async {
-                  LoadingUtils.showLoading(message: 'Đang xóa thuốc...');
-                  final success =
-                      await controller.deleteMedicine(thuoc['MaThuoc']);
-                  LoadingUtils.hideLoading();
-
-                  if (success) {
-                    // Dialog được mở bằng Get.dialog => đóng bằng Get.back()
-                    Get.back();
-                  }
-                },
-                style: FilledButton.styleFrom(
-                  backgroundColor: Colors.redAccent,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                ),
-                child: const Text('Đồng ý xóa', style: TextStyle(fontWeight: FontWeight.bold)),
-              ),
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(color: Colors.red[50], shape: BoxShape.circle),
+              child: const Icon(Icons.warning_amber_rounded, color: Colors.redAccent),
             ),
+            const SizedBox(width: 12),
+            const Text('Xác nhận xóa', style: TextStyle(fontWeight: FontWeight.w900)),
           ],
-          actionsPadding: const EdgeInsets.fromLTRB(0, 0, 24, 24),
         ),
+        content: Text('Bạn có chắc muốn gỡ bỏ thuốc "${thuoc['TenThuoc']}" khỏi hệ thống?',
+          style: const TextStyle(color: Colors.grey, fontSize: 15)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Quay lại', style: TextStyle(color: Colors.grey[600], fontWeight: FontWeight.bold))
+          ),
+          Container(
+            margin: const EdgeInsets.only(left: 12),
+            child: FilledButton(
+              onPressed: () async {
+                LoadingUtils.showLoading(message: 'Đang xóa thuốc...');
+                final success =
+                    await controller.deleteMedicine(thuoc['MaThuoc']);
+                LoadingUtils.hideLoading();
+
+                if (success) {
+                  Get.back();
+                }
+              },
+              style: FilledButton.styleFrom(
+                backgroundColor: Colors.redAccent,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              ),
+              child: const Text('Đồng ý xóa', style: TextStyle(fontWeight: FontWeight.bold)),
+            ),
+          ),
+        ],
+        actionsPadding: const EdgeInsets.fromLTRB(0, 0, 24, 24),
       ),
     );
   }

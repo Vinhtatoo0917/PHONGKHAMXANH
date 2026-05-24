@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:phongkhamfy/controllers/profile_controller.dart';
 import 'package:phongkhamfy/widgets/loading_view.dart';
+import 'package:phongkhamfy/theme/app_theme.dart';
 
 class EditProfileView extends StatefulWidget {
   const EditProfileView({super.key});
@@ -24,11 +25,6 @@ class _EditProfileViewState extends State<EditProfileView> {
   
   String? _gioiTinh;
   DateTime? _ngaySinh;
-
-  final _primary = const Color(0xFF0F9F7A);
-  final _ink = const Color(0xFF12312A);
-  final _muted = const Color(0xFF64748B);
-  final _surface = Colors.white;
 
   @override
   void initState() {
@@ -92,7 +88,7 @@ class _EditProfileViewState extends State<EditProfileView> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(primary: _primary),
+            colorScheme: ColorScheme.light(primary: AppColors.primary),
           ),
           child: child!,
         );
@@ -134,10 +130,10 @@ class _EditProfileViewState extends State<EditProfileView> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: _primary.withValues(alpha: 0.1),
+                  color: AppColors.primary.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(Icons.check_circle_rounded, color: _primary, size: 64),
+                child: Icon(Icons.check_circle_rounded, color: AppColors.primary, size: 64),
               ),
               const SizedBox(height: 24),
               const Text(
@@ -156,7 +152,7 @@ class _EditProfileViewState extends State<EditProfileView> {
                 child: FilledButton(
                   onPressed: () => Navigator.pop(context),
                   style: FilledButton.styleFrom(
-                    backgroundColor: _primary,
+                    backgroundColor: AppColors.primary,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                   child: const Text('Đóng', style: TextStyle(fontWeight: FontWeight.w800)),
@@ -174,7 +170,14 @@ class _EditProfileViewState extends State<EditProfileView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: AppColors.bg,
+      appBar: iosAppBar(
+        title: 'Thông tin cá nhân',
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded),
+          onPressed: () => Get.back(),
+        ),
+      ),
       body: Obx(() {
         if (controller.isLoading.value) {
           return const LoadingView(
@@ -185,42 +188,13 @@ class _EditProfileViewState extends State<EditProfileView> {
 
         return Stack(
           children: [
-            CustomScrollView(
-              slivers: [
-                SliverAppBar(
-                  expandedHeight: 120,
-                  floating: false,
-                  pinned: true,
-                  elevation: 0,
-                  backgroundColor: _primary,
-                  flexibleSpace: FlexibleSpaceBar(
-                    title: const Text(
-                      'Thông tin cá nhân',
-                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 18),
-                    ),
-                    background: Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [_primary, _primary.withValues(alpha: 0.8)],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                      ),
-                    ),
-                  ),
-                  leading: IconButton(
-                    icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
-                    onPressed: () => Get.back(),
-                  ),
-                ),
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 24, 20, 100),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
+            SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(20, 24, 20, 100),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                           Center(
                             child: Stack(
                               children: [
@@ -230,13 +204,13 @@ class _EditProfileViewState extends State<EditProfileView> {
                                     color: Colors.white,
                                     shape: BoxShape.circle,
                                     boxShadow: [
-                                      BoxShadow(color: _primary.withValues(alpha: 0.1), blurRadius: 20, offset: const Offset(0, 10)),
+                                      BoxShadow(color: AppColors.primary.withValues(alpha: 0.1), blurRadius: 20, offset: const Offset(0, 10)),
                                     ],
                                   ),
                                   child: const CircleAvatar(
                                     radius: 50,
-                                    backgroundColor: Color(0xFFF1F5F9),
-                                    child: Icon(Icons.person_rounded, size: 50, color: Color(0xFFCBD5E1)),
+                                    backgroundColor: AppColors.fill,
+                                    child: Icon(Icons.person_rounded, size: 50, color: AppColors.separator),
                                   ),
                                 ),
                                 Positioned(
@@ -244,7 +218,7 @@ class _EditProfileViewState extends State<EditProfileView> {
                                   right: 0,
                                   child: Container(
                                     padding: const EdgeInsets.all(8),
-                                    decoration: BoxDecoration(color: _primary, shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 3)),
+                                    decoration: BoxDecoration(color: AppColors.primary, shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 3)),
                                     child: const Icon(Icons.camera_alt_rounded, color: Colors.white, size: 18),
                                   ),
                                 ),
@@ -302,9 +276,9 @@ class _EditProfileViewState extends State<EditProfileView> {
                             child: FilledButton(
                               onPressed: controller.isUpdating.value ? null : _onSave,
                               style: FilledButton.styleFrom(
-                                backgroundColor: _primary,
+                                backgroundColor: AppColors.primary,
                                 elevation: 8,
-                                shadowColor: _primary.withValues(alpha: 0.3),
+                                shadowColor: AppColors.primary.withValues(alpha: 0.3),
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
                               ),
                               child: const Text('Lưu thay đổi', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900)),
@@ -313,9 +287,6 @@ class _EditProfileViewState extends State<EditProfileView> {
                         ],
                       ),
                     ),
-                  ),
-                ),
-              ],
             ),
             if (controller.isUpdating.value) const LoadingView(message: 'Đang lưu thông tin...'),
           ],
@@ -329,7 +300,7 @@ class _EditProfileViewState extends State<EditProfileView> {
       padding: const EdgeInsets.only(left: 4),
       child: Text(
         title,
-        style: const TextStyle(color: Color(0xFF1E293B), fontSize: 16, fontWeight: FontWeight.w900),
+        style: const TextStyle(color: AppColors.label, fontSize: 16, fontWeight: FontWeight.w900),
       ),
     );
   }
@@ -353,7 +324,7 @@ class _EditProfileViewState extends State<EditProfileView> {
       controller: controller,
       keyboardType: keyboardType,
       maxLines: maxLines,
-      style: const TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.w700),
+      style: const TextStyle(color: AppColors.label, fontWeight: FontWeight.w700),
       decoration: _inputDecoration(label, icon),
       validator: (v) => v == null || v.trim().isEmpty ? 'Vui lòng nhập $label' : null,
     );
@@ -367,7 +338,7 @@ class _EditProfileViewState extends State<EditProfileView> {
         decoration: _inputDecoration(label, Icons.calendar_today_outlined),
         child: Text(
           value != null ? DateFormat('dd/MM/yyyy').format(value) : 'Chọn ngày',
-          style: const TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.w700),
+          style: const TextStyle(color: AppColors.label, fontWeight: FontWeight.w700),
         ),
       ),
     );
@@ -378,7 +349,7 @@ class _EditProfileViewState extends State<EditProfileView> {
       initialValue: _gioiTinh,
       items: options.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
       decoration: _inputDecoration(label, icon),
-      style: const TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.w700),
+      style: const TextStyle(color: AppColors.label, fontWeight: FontWeight.w700),
       onChanged: (v) => setState(() => _gioiTinh = v),
     );
   }
@@ -386,13 +357,13 @@ class _EditProfileViewState extends State<EditProfileView> {
   InputDecoration _inputDecoration(String label, IconData icon) {
     return InputDecoration(
       labelText: label,
-      labelStyle: const TextStyle(color: Color(0xFF64748B), fontWeight: FontWeight.w500, fontSize: 14),
-      prefixIcon: Icon(icon, color: _primary, size: 20),
+      labelStyle: const TextStyle(color: AppColors.subLabel, fontWeight: FontWeight.w500, fontSize: 14),
+      prefixIcon: Icon(icon, color: AppColors.primary, size: 20),
       filled: true,
-      fillColor: const Color(0xFFF8FAFC),
+      fillColor: AppColors.fill,
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
       enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
-      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: _primary, width: 1.5)),
+      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: AppColors.primary, width: 1.5)),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
     );
   }

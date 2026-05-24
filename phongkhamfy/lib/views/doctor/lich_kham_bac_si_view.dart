@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'dart:ui';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:phongkhamfy/controllers/lich_kham_controller.dart';
 import 'package:phongkhamfy/utils/loading_utils.dart';
 import 'package:phongkhamfy/widgets/loading_view.dart';
+import 'package:phongkhamfy/theme/app_theme.dart';
 
 class LichKhamBacSiView extends StatefulWidget {
   const LichKhamBacSiView({super.key});
@@ -16,12 +16,6 @@ class LichKhamBacSiView extends StatefulWidget {
 class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
   final controller = Get.put(LichKhamController());
   late DateTime selectedDate;
-
-  final _primary = const Color(0xFF0D47A1);
-  final _accent = const Color(0xFF1976D2);
-  final _bg = const Color(0xFFF0F4F8);
-  final _success = const Color(0xFF43A047);
-  final _warning = const Color(0xFFFFA000);
 
   @override
   void initState() {
@@ -47,12 +41,9 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _bg,
-      appBar: AppBar(
-        title: const Text('Công việc khám của tôi', style: TextStyle(fontWeight: FontWeight.w900)),
-        backgroundColor: Colors.white,
-        foregroundColor: const Color(0xFF2C3E50),
-        elevation: 0,
+      backgroundColor: AppColors.bg,
+      appBar: iosAppBar(
+        title: 'Lịch khám của tôi',
         actions: [
           IconButton(
             onPressed: _loadSchedule,
@@ -106,9 +97,9 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
               width: 60,
               margin: const EdgeInsets.only(right: 12),
               decoration: BoxDecoration(
-                color: isSelected ? _primary : Colors.transparent,
+                color: isSelected ? AppColors.primary : Colors.transparent,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: isSelected ? _primary : Colors.grey.withValues(alpha: 0.1)),
+                border: Border.all(color: isSelected ? AppColors.primary : Colors.grey.withValues(alpha: 0.1)),
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -125,7 +116,7 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
                   Text(
                     dayNum,
                     style: TextStyle(
-                      color: isSelected ? Colors.white : const Color(0xFF2C3E50),
+                      color: isSelected ? Colors.white : AppColors.label,
                       fontSize: 18,
                       fontWeight: FontWeight.w900,
                     ),
@@ -170,15 +161,15 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
             children: [
               Text(
                 'Danh sách bệnh nhân',
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Color(0xFF2C3E50)),
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.label),
               ),
               const Spacer(),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                decoration: BoxDecoration(color: _primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(20)),
+                decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(20)),
                 child: Text(
                   '${patients.length} người',
-                  style: TextStyle(color: _primary, fontWeight: FontWeight.bold, fontSize: 13),
+                  style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 13),
                 ),
               ),
             ],
@@ -199,17 +190,13 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [_primary, _accent],
-        ),
-        borderRadius: BorderRadius.circular(30),
+        color: AppColors.primary,
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: _primary.withValues(alpha: 0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
+            color: AppColors.primary.withValues(alpha: 0.25),
+            blurRadius: 16,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
@@ -314,10 +301,10 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
               children: [
                 Container(
                   padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(color: const Color(0xFFF8F9FA), borderRadius: BorderRadius.circular(16)),
+                  decoration: BoxDecoration(color: AppColors.fill, borderRadius: BorderRadius.circular(16)),
                   child: Text(
                     '${patient['SoThuTu'] ?? '0'}',
-                    style: TextStyle(color: _primary, fontWeight: FontWeight.w900, fontSize: 20),
+                    style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w900, fontSize: 20),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -327,7 +314,7 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
                     children: [
                       Text(
                         patient['TenBenhNhan'] ?? 'Chưa rõ',
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Color(0xFF2C3E50)),
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.label),
                       ),
                       const SizedBox(height: 4),
                       Row(
@@ -351,8 +338,8 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
                   Container(
                     width: 36,
                     height: 36,
-                    decoration: BoxDecoration(color: _success.withValues(alpha: 0.1), shape: BoxShape.circle),
-                    child: Icon(Icons.play_arrow_rounded, color: _success),
+                    decoration: BoxDecoration(color: AppColors.success.withValues(alpha: 0.1), shape: BoxShape.circle),
+                    child: Icon(Icons.play_arrow_rounded, color: AppColors.success),
                   )
                 else
                   Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.grey.withValues(alpha: 0.5)),
@@ -393,8 +380,8 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
                       children: [
                         CircleAvatar(
                           radius: 30,
-                          backgroundColor: _primary.withValues(alpha: 0.1),
-                          child: Icon(Icons.person_rounded, color: _primary, size: 32),
+                          backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+                          child: Icon(Icons.person_rounded, color: AppColors.primary, size: 32),
                         ),
                         const SizedBox(width: 16),
                         Expanded(
@@ -407,7 +394,7 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
                               ),
                               Text(
                                 'Số thứ tự: ${patient['SoThuTu']}',
-                                style: TextStyle(color: _primary, fontWeight: FontWeight.bold),
+                                style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
                               ),
                             ],
                           ),
@@ -431,7 +418,7 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
                                 child: _buildActionButtonWithLock(
                                   Icons.assignment_turned_in_rounded,
                                   'Kết luận khám',
-                                  _success,
+                                  AppColors.success,
                                   () => _showConclusionForm(patient),
                                   patient,
                                 ),
@@ -441,7 +428,7 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
                                 child: _buildActionButtonWithLock(
                                   Icons.note_add_rounded,
                                   'Tạo phiếu chỉ định',
-                                  _accent,
+                                  AppColors.accent,
                                   () => _showIndicationForm(patient),
                                   patient,
                                 ),
@@ -463,7 +450,7 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
                             child: _actionButton(
                               Icons.edit_rounded,
                               'Chỉnh sửa kết luận',
-                              _accent,
+                              AppColors.accent,
                               () => _showConclusionForm(patient),
                             ),
                           ),
@@ -474,7 +461,7 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
                               child: _actionButton(
                                 Icons.description_rounded,
                                 'Xem phiếu chỉ định (${(patient['PhieuChiDinh'] as List).length})',
-                                const Color(0xFF34495E),
+                                AppColors.label,
                                 () => _showIndicationsDialog(patient),
                               ),
                             ),
@@ -489,7 +476,7 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
                         child: _actionButton(
                           Icons.description_rounded,
                           'Xem lịch sử phiếu chỉ định (${(patient['PhieuChiDinh'] as List).length})',
-                          const Color(0xFF34495E),
+                          AppColors.label,
                           () => _showIndicationsDialog(patient),
                         ),
                       ),
@@ -516,13 +503,13 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
       return Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: _success.withValues(alpha: 0.1),
+          color: AppColors.success.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: _success.withValues(alpha: 0.3)),
+          border: Border.all(color: AppColors.success.withValues(alpha: 0.3)),
         ),
         child: Row(
           children: [
-            Icon(Icons.check_circle_rounded, color: _success, size: 24),
+            Icon(Icons.check_circle_rounded, color: AppColors.success, size: 24),
             const SizedBox(width: 12),
             const Expanded(
               child: Text(
@@ -530,7 +517,7 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
                   fontSize: 14,
-                  color: Color(0xFF2C3E50),
+                  color: AppColors.label,
                 ),
               ),
             ),
@@ -560,7 +547,7 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
                   }
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _success,
+                  backgroundColor: AppColors.success,
                 ),
                 child: const Text(
                   'Tiếp nhận',
@@ -574,7 +561,7 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
       icon: const Icon(Icons.person_add_rounded),
       label: const Text('Tiếp nhận bệnh nhân'),
       style: ElevatedButton.styleFrom(
-        backgroundColor: _success,
+        backgroundColor: AppColors.success,
         foregroundColor: Colors.white,
         padding: const EdgeInsets.symmetric(vertical: 16),
         shape: RoundedRectangleBorder(
@@ -588,13 +575,13 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: _success.withValues(alpha: 0.1),
+        color: AppColors.success.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: _success.withValues(alpha: 0.3)),
+        border: Border.all(color: AppColors.success.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
-          Icon(Icons.done_all_rounded, color: _success, size: 24),
+          Icon(Icons.done_all_rounded, color: AppColors.success, size: 24),
           const SizedBox(width: 12),
           const Expanded(
             child: Text(
@@ -602,7 +589,7 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
               style: TextStyle(
                 fontWeight: FontWeight.w600,
                 fontSize: 14,
-                color: Color(0xFF2C3E50),
+                color: AppColors.label,
               ),
             ),
           ),
@@ -725,7 +712,7 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Lịch sử chỉ định', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Color(0xFF2C3E50))),
+                  const Text('Lịch sử chỉ định', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: AppColors.label)),
                   IconButton(onPressed: () => Get.back(), icon: const Icon(Icons.close_rounded))
                 ],
               ),
@@ -962,7 +949,7 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
                             subtitle: Text('Giá: ${NumberFormat.currency(locale: 'vi_VN', symbol: 'đ', decimalDigits: 0).format(double.tryParse(service['Gia']?.toString() ?? '0') ?? 0)}'),
                             onChanged: (val) => selectedServiceId.value = val,
                             contentPadding: EdgeInsets.zero,
-                            activeColor: _accent,
+                            activeColor: AppColors.accent,
                           ));
                         }).toList(),
                       );
@@ -1002,7 +989,7 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
                     }
                   },
                 style: FilledButton.styleFrom(
-                  backgroundColor: _accent,
+                  backgroundColor: AppColors.accent,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                 ),
                 child: controller.isCreatingReferral.value 
@@ -1025,81 +1012,6 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
           Text(label, style: const TextStyle(color: Colors.grey, fontWeight: FontWeight.w600)),
           Text(value, style: const TextStyle(fontWeight: FontWeight.w800)),
         ],
-      ),
-    );
-  }
-
-  Widget _glassmorphicCard({
-    required IconData icon,
-    required String label,
-    required String value,
-    required Gradient gradient,
-    required Color borderColor,
-  }) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(20),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            gradient: gradient,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: borderColor.withValues(alpha: 0.4),
-              width: 1.5,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: borderColor.withValues(alpha: 0.08),
-                blurRadius: 15,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      borderColor.withValues(alpha: 0.3),
-                      borderColor.withValues(alpha: 0.1),
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: borderColor.withValues(alpha: 0.5),
-                    width: 1,
-                  ),
-                ),
-                child: Icon(icon, color: borderColor, size: 24),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      label,
-                      style: TextStyle(fontSize: 12, color: Colors.grey[600], fontWeight: FontWeight.w600),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      value,
-                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: Color(0xFF1A3A52)),
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
@@ -1199,8 +1111,8 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
                           setInternalState(() => huongDieuTri = type);
                           setState(() => {}); // Sync with parent if needed
                         },
-                        selectedColor: _primary.withValues(alpha: 0.2),
-                        labelStyle: TextStyle(color: huongDieuTri == type ? _primary : Colors.grey, fontWeight: FontWeight.w700),
+                        selectedColor: AppColors.primary.withValues(alpha: 0.2),
+                        labelStyle: TextStyle(color: huongDieuTri == type ? AppColors.primary : Colors.grey, fontWeight: FontWeight.w700),
                       )).toList(),
                     ),
                     const SizedBox(height: 8),
@@ -1238,7 +1150,7 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
                       _loadSchedule();
                     }
                   },
-                  style: FilledButton.styleFrom(backgroundColor: _primary, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18))),
+                  style: FilledButton.styleFrom(backgroundColor: AppColors.primary, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18))),
                   child: controller.isSubmittingConclusion.value 
                     ? const CircularProgressIndicator(color: Colors.white)
                     : const Text('Hoàn tất & Lưu', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
@@ -1313,8 +1225,8 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
                 runSpacing: 8,
                 children: controller.availableServices.map((svc) => Chip(
                   label: Text(svc['TenDichVu'], style: const TextStyle(fontSize: 12)),
-                  backgroundColor: _accent.withValues(alpha: 0.1),
-                  side: BorderSide(color: _accent.withValues(alpha: 0.2)),
+                  backgroundColor: AppColors.accent.withValues(alpha: 0.1),
+                  side: BorderSide(color: AppColors.accent.withValues(alpha: 0.2)),
                 )).toList(),
               ),
             ],
@@ -1331,7 +1243,7 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: _primary.withValues(alpha: 0.1)),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.1)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1387,12 +1299,12 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
       labelText: label,
       hintText: hint,
       hintStyle: const TextStyle(fontSize: 11),
-      labelStyle: TextStyle(fontSize: 12, color: _primary, fontWeight: FontWeight.bold),
+      labelStyle: TextStyle(fontSize: 12, color: AppColors.primary, fontWeight: FontWeight.bold),
       isDense: true,
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey[200]!)),
       enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey[200]!)),
-      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: _primary)),
+      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: AppColors.primary)),
     );
   }
 
@@ -1433,7 +1345,7 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
                       subtitle: Text('${med['HamLuong']} - ${med['DonViTinh']}'),
                       trailing: Icon(
                         isPicked ? Icons.check_circle_rounded : Icons.add_circle_outline_rounded,
-                        color: isPicked ? _success : _primary,
+                        color: isPicked ? AppColors.success : AppColors.primary,
                       ),
                       onTap: isPicked ? null : () {
                         selectedList.add({...med, 'so_luong': '1', 'lieu_dung': ''});
@@ -1453,9 +1365,9 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
   InputDecoration _inputDecoration(String hint, IconData icon) {
     return InputDecoration(
       hintText: hint,
-      prefixIcon: Icon(icon, size: 20, color: _primary),
+      prefixIcon: Icon(icon, size: 20, color: AppColors.primary),
       filled: true,
-      fillColor: const Color(0xFFF8F9FA),
+      fillColor: AppColors.fill,
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
     );
@@ -1463,10 +1375,10 @@ class _LichKhamBacSiViewState extends State<LichKhamBacSiView> {
 
   Color _getStatusColor(String? status) {
     switch (status) {
-      case 'completed': return _success;
-      case 'examining': return _accent;
-      case 'confirmed': return _accent;
-      case 'pending': return _warning;
+      case 'completed': return AppColors.success;
+      case 'examining': return AppColors.accent;
+      case 'confirmed': return AppColors.accent;
+      case 'pending': return AppColors.warning;
       case 'cancelled': return Colors.red;
       default: return Colors.grey;
     }

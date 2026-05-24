@@ -2106,4 +2106,98 @@ class AdminController {
     }
   }
 
+  // ═══════════════════════════════════════════════════════════════
+  // QUẢN LÝ BỆNH NHÂN
+  // ═══════════════════════════════════════════════════════════════
+
+  /// Lấy danh sách bệnh nhân
+  /// GET /admin/benh-nhan
+  Future<List<Map<String, dynamic>>> layDanhSachBenhNhan({String? search}) async {
+    try {
+      final headers = await _getHeaders();
+      var url = '${ApiConfig.baseUrl}/admin/benh-nhan';
+      if (search != null && search.isNotEmpty) url += '?search=$search';
+
+      final response = await _client.get(Uri.parse(url), headers: headers).timeout(_timeout);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) {
+          return (data['data'] as List).cast<Map<String, dynamic>>();
+        }
+      }
+      return [];
+    } catch (e) {
+      print('❌ [ADMIN] Lỗi lấy danh sách bệnh nhân: $e');
+      return [];
+    }
+  }
+
+  /// Lấy chi tiết bệnh nhân
+  /// GET /admin/benh-nhan/{id}
+  Future<Map<String, dynamic>?> layChiTietBenhNhan(int maBenhNhan) async {
+    try {
+      final headers = await _getHeaders();
+      final url = '${ApiConfig.baseUrl}/admin/benh-nhan/$maBenhNhan';
+
+      final response = await _client.get(Uri.parse(url), headers: headers).timeout(_timeout);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) return data['data'];
+      }
+      return null;
+    } catch (e) {
+      print('❌ [ADMIN] Lỗi lấy chi tiết bệnh nhân: $e');
+      return null;
+    }
+  }
+
+  /// Khóa/Mở khóa tài khoản bệnh nhân
+  /// PATCH /admin/benh-nhan/{id}/trang-thai
+  Future<Map<String, dynamic>> capNhatTrangThaiBenhNhan({
+    required int maBenhNhan,
+    required String trangThai,
+  }) async {
+    try {
+      final headers = await _getHeaders();
+      final url = '${ApiConfig.baseUrl}/admin/benh-nhan/$maBenhNhan/trang-thai';
+
+      final response = await http.patch(
+        Uri.parse(url),
+        headers: headers,
+        body: jsonEncode({'trangthaihoatdong': trangThai}),
+      );
+
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        return {'success': true, 'message': data['message'] ?? 'Cập nhật thành công'};
+      }
+      return {'success': false, 'message': data['message'] ?? 'Cập nhật thất bại'};
+    } catch (e) {
+      print('❌ [ADMIN] Lỗi cập nhật trạng thái bệnh nhân: $e');
+      return {'success': false, 'message': 'Không thể kết nối đến server'};
+    }
+  }
+
+  /// Xóa bệnh nhân
+  /// DELETE /admin/benh-nhan/{id}
+  Future<Map<String, dynamic>> xoaBenhNhan(int maBenhNhan) async {
+    try {
+      final headers = await _getHeaders();
+      final url = '${ApiConfig.baseUrl}/admin/benh-nhan/$maBenhNhan';
+
+      final response = await http.delete(Uri.parse(url), headers: headers);
+
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        return {'success': true, 'message': data['message'] ?? 'Xóa thành công'};
+      }
+      return {'success': false, 'message': data['message'] ?? 'Xóa thất bại'};
+    } catch (e) {
+      print('❌ [ADMIN] Lỗi xóa bệnh nhân: $e');
+      return {'success': false, 'message': 'Không thể kết nối đến server'};
+    }
+  }
+
 }

@@ -55,6 +55,15 @@ dependencies:
   # Data table for desktop views
   data_table_2: ^2.7.2
 
+  # WebView for VNPay payment
+  webview_flutter: ^4.4.2
+
+  # URL Launcher
+  url_launcher: ^6.2.4
+
+  # Charts
+  fl_chart: ^0.69.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

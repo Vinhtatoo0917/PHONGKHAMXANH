@@ -1,11 +1,11 @@
 import 'dart:math' as math;
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:phongkhamfy/controllers/lich_kham_controller.dart';
 import 'package:phongkhamfy/widgets/loading_view.dart';
+import 'package:phongkhamfy/theme/app_theme.dart';
 
 extension _AppointmentMap on Map<String, dynamic> {
   int? get maLichKham => _toInt(this['MaLichKham']);
@@ -63,17 +63,7 @@ class LichKhamCuaToiView extends StatefulWidget {
 }
 
 class _LichKhamCuaToiViewState extends State<LichKhamCuaToiView> {
-  static const _primary = Color(0xFF1565C0);
-  static const _secondary = Color(0xFF00A6A6);
-  static const _surface = Colors.white;
-  static const _background = Color(0xFFF4F7FB);
-  static const _text = Color(0xFF172033);
-  static const _muted = Color(0xFF667085);
-  static const _line = Color(0xFFE4E9F2);
-  static const _warning = Color(0xFFFFB020);
-  static const _danger = Color(0xFFE5484D);
-
-  final LichKhamController controller = Get.put(LichKhamController());
+final LichKhamController controller = Get.put(LichKhamController());
   final DateFormat _dateFormat = DateFormat('dd/MM/yyyy');
   final NumberFormat _moneyFormat = NumberFormat.currency(
     locale: 'vi_VN',
@@ -89,17 +79,27 @@ class _LichKhamCuaToiViewState extends State<LichKhamCuaToiView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _background,
-      body: SafeArea(
-        bottom: false,
-        child: Obx(() {
+      backgroundColor: AppColors.bg,
+      appBar: iosAppBar(
+        title: 'Lịch khám của tôi',
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_rounded),
+          onPressed: () => Navigator.maybePop(context),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add_rounded),
+            onPressed: () => Get.toNamed('/dat-lich-kham'),
+          ),
+        ],
+      ),
+      body: Obx(() {
           return RefreshIndicator(
-            color: _primary,
+            color: AppColors.primary,
             onRefresh: controller.getMyAppointments,
             child: CustomScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
               slivers: [
-                SliverToBoxAdapter(child: _buildHeader()),
                 if (controller.isLoadingMyAppointments.value)
                   _buildLoadingList()
                 else if (controller.myAppointments.isEmpty)
@@ -117,57 +117,6 @@ class _LichKhamCuaToiViewState extends State<LichKhamCuaToiView> {
             ),
           );
         }),
-      ),
-    );
-  }
-
-  Widget _buildHeader() {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [_primary, Color(0xFF0E8A9A)],
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              _IconButton(
-                icon: Icons.arrow_back_rounded,
-                onTap: () => Navigator.maybePop(context),
-              ),
-              const Spacer(),
-              _IconButton(
-                icon: Icons.add_rounded,
-                onTap: () => Get.toNamed('/dat-lich-kham'),
-              ),
-            ],
-          ),
-          const SizedBox(height: 18),
-          const Text(
-            'Lịch khám của tôi',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 28,
-              fontWeight: FontWeight.w900,
-              height: 1.05,
-            ),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'Theo dõi lịch hẹn, phòng khám, dịch vụ và trạng thái thanh toán trong một nơi.',
-            style: TextStyle(
-              color: Color(0xFFE8F6FF),
-              fontSize: 14,
-              height: 1.35,
-            ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -184,7 +133,7 @@ class _LichKhamCuaToiViewState extends State<LichKhamCuaToiView> {
         .length;
 
     return Container(
-      color: _surface,
+      color: AppColors.surface,
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
       child: Row(
         children: [
@@ -193,7 +142,7 @@ class _LichKhamCuaToiViewState extends State<LichKhamCuaToiView> {
               icon: Icons.event_available_rounded,
               label: 'Sắp tới',
               value: upcoming.toString(),
-              color: _primary,
+              color: AppColors.primary,
             ),
           ),
           const SizedBox(width: 10),
@@ -202,7 +151,7 @@ class _LichKhamCuaToiViewState extends State<LichKhamCuaToiView> {
               icon: Icons.task_alt_rounded,
               label: 'Hoàn tất',
               value: completed.toString(),
-              color: _secondary,
+              color: AppColors.accent,
             ),
           ),
           const SizedBox(width: 10),
@@ -211,7 +160,7 @@ class _LichKhamCuaToiViewState extends State<LichKhamCuaToiView> {
               icon: Icons.receipt_long_rounded,
               label: 'Tổng lịch',
               value: appointments.length.toString(),
-              color: _warning,
+              color: AppColors.warning,
             ),
           ),
         ],
@@ -225,7 +174,7 @@ class _LichKhamCuaToiViewState extends State<LichKhamCuaToiView> {
       child: Text(
         'Lịch sử đặt khám',
         style: TextStyle(
-          color: _text,
+          color: AppColors.label,
           fontSize: 18,
           fontWeight: FontWeight.w900,
         ),
@@ -282,13 +231,13 @@ class _LichKhamCuaToiViewState extends State<LichKhamCuaToiView> {
             width: 86,
             height: 86,
             decoration: BoxDecoration(
-              color: const Color(0xFFEFF8FF),
+              color: AppColors.primaryBg,
               borderRadius: BorderRadius.circular(24),
             ),
             child: const Icon(
               Icons.calendar_month_rounded,
               size: 42,
-              color: _primary,
+              color: AppColors.primary,
             ),
           ),
           const SizedBox(height: 18),
@@ -296,7 +245,7 @@ class _LichKhamCuaToiViewState extends State<LichKhamCuaToiView> {
             'Chưa có lịch khám nào',
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: _text,
+              color: AppColors.label,
               fontSize: 20,
               fontWeight: FontWeight.w900,
             ),
@@ -305,7 +254,7 @@ class _LichKhamCuaToiViewState extends State<LichKhamCuaToiView> {
           const Text(
             'Chọn dịch vụ cần khám để hệ thống gợi ý bác sĩ và suất khám phù hợp.',
             textAlign: TextAlign.center,
-            style: TextStyle(color: _muted, height: 1.4),
+            style: TextStyle(color: AppColors.subLabel, height: 1.4),
           ),
           const SizedBox(height: 22),
           SizedBox(
@@ -313,7 +262,7 @@ class _LichKhamCuaToiViewState extends State<LichKhamCuaToiView> {
             child: FilledButton.icon(
               onPressed: () => Get.toNamed('/dat-lich-kham'),
               style: FilledButton.styleFrom(
-                backgroundColor: _primary,
+                backgroundColor: AppColors.primary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
                 ),
@@ -346,19 +295,19 @@ class _LichKhamCuaToiViewState extends State<LichKhamCuaToiView> {
   Color _getStatusColor(String? status) {
     switch (status) {
       case 'pending':
-        return _warning;
+        return AppColors.warning;
       case 'confirmed':
-        return _primary;
+        return AppColors.primary;
       case 'examining':
-        return _primary;
+        return AppColors.primary;
       case 'completed':
-        return _secondary;
+        return AppColors.accent;
       case 'cancelled':
-        return _danger;
+        return AppColors.danger;
       case 'no-show':
-        return _muted;
+        return AppColors.subLabel;
       default:
-        return _muted;
+        return AppColors.subLabel;
     }
   }
 
@@ -408,7 +357,7 @@ class _LichKhamCuaToiViewState extends State<LichKhamCuaToiView> {
               Get.back();
               await controller.cancelAppointment(maLichKham);
             },
-            style: FilledButton.styleFrom(backgroundColor: _danger),
+            style: FilledButton.styleFrom(backgroundColor: AppColors.danger),
             child: const Text('Hủy lịch'),
           ),
         ],
@@ -463,12 +412,12 @@ class _AppointmentCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: _LichKhamCuaToiViewState._surface,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: _LichKhamCuaToiViewState._line),
+        border: Border.all(color: AppColors.separator),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF101828).withValues(alpha: 0.06),
+            color: Colors.black.withValues(alpha: 0.06),
             blurRadius: 18,
             offset: const Offset(0, 8),
           ),
@@ -499,7 +448,7 @@ class _AppointmentCard extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                        color: _LichKhamCuaToiViewState._text,
+                        color: AppColors.label,
                         fontSize: 16,
                         fontWeight: FontWeight.w900,
                       ),
@@ -510,7 +459,7 @@ class _AppointmentCard extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                        color: _LichKhamCuaToiViewState._muted,
+                        color: AppColors.subLabel,
                         fontSize: 13,
                       ),
                     ),
@@ -528,12 +477,12 @@ class _AppointmentCard extends StatelessWidget {
               _InfoPill(
                 icon: Icons.calendar_today_rounded,
                 text: dateText,
-                color: _LichKhamCuaToiViewState._primary,
+                color: AppColors.primary,
               ),
               _InfoPill(
                 icon: Icons.schedule_rounded,
                 text: timeText,
-                color: _LichKhamCuaToiViewState._secondary,
+                color: AppColors.accent,
               ),
               _InfoPill(
                 icon: Icons.meeting_room_rounded,
@@ -568,7 +517,7 @@ class _AppointmentCard extends StatelessWidget {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
-                color: _LichKhamCuaToiViewState._text,
+                color: AppColors.label,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -579,14 +528,14 @@ class _AppointmentCard extends StatelessWidget {
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: (appointment.trangThai == 'rejected'
-                        ? _LichKhamCuaToiViewState._danger
-                        : _LichKhamCuaToiViewState._primary)
+                        ? AppColors.danger
+                        : AppColors.primary)
                     .withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: (appointment.trangThai == 'rejected'
-                          ? _LichKhamCuaToiViewState._danger
-                          : _LichKhamCuaToiViewState._primary)
+                          ? AppColors.danger
+                          : AppColors.primary)
                       .withValues(alpha: 0.1),
                 ),
               ),
@@ -596,8 +545,8 @@ class _AppointmentCard extends StatelessWidget {
                     Icons.info_outline_rounded,
                     size: 18,
                     color: appointment.trangThai == 'rejected'
-                        ? _LichKhamCuaToiViewState._danger
-                        : _LichKhamCuaToiViewState._primary,
+                        ? AppColors.danger
+                        : AppColors.primary,
                   ),
                   const SizedBox(width: 8),
                   Expanded(
@@ -605,8 +554,8 @@ class _AppointmentCard extends StatelessWidget {
                       'Ghi chú: ${appointment.reason}',
                       style: TextStyle(
                         color: appointment.trangThai == 'rejected'
-                            ? _LichKhamCuaToiViewState._danger
-                            : _LichKhamCuaToiViewState._text,
+                            ? AppColors.danger
+                            : AppColors.label,
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
                       ),
@@ -624,9 +573,9 @@ class _AppointmentCard extends StatelessWidget {
                   child: OutlinedButton.icon(
                     onPressed: onCancel,
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: _LichKhamCuaToiViewState._danger,
+                      foregroundColor: AppColors.danger,
                       side: const BorderSide(
-                        color: _LichKhamCuaToiViewState._danger,
+                        color: AppColors.danger,
                       ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),
@@ -642,7 +591,7 @@ class _AppointmentCard extends StatelessWidget {
                 child: FilledButton.icon(
                   onPressed: onDetail,
                   style: FilledButton.styleFrom(
-                    backgroundColor: _LichKhamCuaToiViewState._primary,
+                    backgroundColor: AppColors.primary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
@@ -702,7 +651,7 @@ class _DetailSheet extends StatelessWidget {
                 width: 44,
                 height: 5,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFD0D5DD),
+                  color: AppColors.separator,
                   borderRadius: BorderRadius.circular(99),
                 ),
               ),
@@ -717,7 +666,7 @@ class _DetailSheet extends StatelessWidget {
                       Text(
                         'STT: #${appointment.soThuTu ?? '--'}',
                         style: const TextStyle(
-                          color: _LichKhamCuaToiViewState._muted,
+                          color: AppColors.subLabel,
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
                         ),
@@ -726,7 +675,7 @@ class _DetailSheet extends StatelessWidget {
                       Text(
                         dateText,
                         style: const TextStyle(
-                          color: _LichKhamCuaToiViewState._text,
+                          color: AppColors.label,
                           fontSize: 16,
                           fontWeight: FontWeight.w900,
                         ),
@@ -735,7 +684,7 @@ class _DetailSheet extends StatelessWidget {
                       Text(
                         '$timeText • ${appointment.tenPhong ?? 'Phòng'}',
                         style: const TextStyle(
-                          color: _LichKhamCuaToiViewState._primary,
+                          color: AppColors.primary,
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
                         ),
@@ -786,7 +735,7 @@ class _DetailSheet extends StatelessWidget {
             const Text(
               'Dịch vụ',
               style: TextStyle(
-                color: _LichKhamCuaToiViewState._text,
+                color: AppColors.label,
                 fontWeight: FontWeight.w900,
               ),
             ),
@@ -794,7 +743,7 @@ class _DetailSheet extends StatelessWidget {
             if (services.isEmpty)
               const Text(
                 'Chưa có dịch vụ trong lịch khám này.',
-                style: TextStyle(color: _LichKhamCuaToiViewState._muted),
+                style: TextStyle(color: AppColors.subLabel),
               )
             else
               ...services.map(
@@ -805,7 +754,7 @@ class _DetailSheet extends StatelessWidget {
                       const Icon(
                         Icons.check_rounded,
                         size: 18,
-                        color: _LichKhamCuaToiViewState._secondary,
+                        color: AppColors.accent,
                       ),
                       const SizedBox(width: 8),
                       Expanded(
@@ -814,7 +763,7 @@ class _DetailSheet extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
-                            color: _LichKhamCuaToiViewState._text,
+                            color: AppColors.label,
                           ),
                         ),
                       ),
@@ -828,7 +777,7 @@ class _DetailSheet extends StatelessWidget {
               const Text(
                 'Phiếu chỉ định xét nghiệm',
                 style: TextStyle(
-                  color: _LichKhamCuaToiViewState._text,
+                  color: AppColors.label,
                   fontWeight: FontWeight.w900,
                 ),
               ),
@@ -841,16 +790,16 @@ class _DetailSheet extends StatelessWidget {
                   margin: const EdgeInsets.only(bottom: 12),
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF0F9FF),
+                    color: AppColors.primaryBg,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: _LichKhamCuaToiViewState._primary.withValues(alpha: 0.2)),
+                    border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         children: [
-                          const Icon(Icons.science_rounded, size: 18, color: _LichKhamCuaToiViewState._primary),
+                          const Icon(Icons.science_rounded, size: 18, color: AppColors.primary),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Column(
@@ -862,19 +811,19 @@ class _DetailSheet extends StatelessWidget {
                                 ),
                                 Text(
                                   '$tenBacSi${chuyenKhoa.isNotEmpty ? " • $chuyenKhoa" : ""}',
-                                  style: const TextStyle(fontSize: 11, color: _LichKhamCuaToiViewState._muted),
+                                  style: const TextStyle(fontSize: 11, color: AppColors.subLabel),
                                 ),
                                 if ((phieu['TenPhongXetNghiem']?.toString() ?? '').isNotEmpty)
                                   Padding(
                                     padding: const EdgeInsets.only(top: 2),
                                     child: Row(
                                       children: [
-                                        const Icon(Icons.meeting_room_rounded, size: 11, color: _LichKhamCuaToiViewState._secondary),
+                                        const Icon(Icons.meeting_room_rounded, size: 11, color: AppColors.accent),
                                         const SizedBox(width: 4),
                                         Expanded(
                                           child: Text(
                                             'Phòng: ${phieu['TenPhongXetNghiem']}${(phieu['KhuPhongXetNghiem']?.toString() ?? '').isNotEmpty ? " (Khu ${phieu['KhuPhongXetNghiem']})" : ""}',
-                                            style: const TextStyle(fontSize: 10, color: _LichKhamCuaToiViewState._secondary, fontWeight: FontWeight.w600),
+                                            style: const TextStyle(fontSize: 10, color: AppColors.accent, fontWeight: FontWeight.w600),
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
                                           ),
@@ -888,12 +837,12 @@ class _DetailSheet extends StatelessWidget {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                             decoration: BoxDecoration(
-                              color: _LichKhamCuaToiViewState._primary.withValues(alpha: 0.1),
+                              color: AppColors.primary.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
                               phieu['TrangThai'] == 'pending' ? 'Chờ xử lý' : phieu['TrangThai'] == 'processing' ? 'Đang xử lý' : 'Hoàn tất',
-                              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: _LichKhamCuaToiViewState._primary),
+                              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.primary),
                             ),
                           ),
                         ],
@@ -918,7 +867,7 @@ class _DetailSheet extends StatelessWidget {
                                     Icon(
                                       trangThai == 'completed' ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
                                       size: 10,
-                                      color: trangThai == 'completed' ? _LichKhamCuaToiViewState._secondary : _LichKhamCuaToiViewState._muted,
+                                      color: trangThai == 'completed' ? AppColors.accent : AppColors.subLabel,
                                     ),
                                     const SizedBox(width: 6),
                                     Expanded(child: Text(tenDV, style: const TextStyle(fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis)),
@@ -931,9 +880,9 @@ class _DetailSheet extends StatelessWidget {
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         if (chiSo.isNotEmpty)
-                                          Text('Chỉ số: $chiSo', style: const TextStyle(fontSize: 10, color: _LichKhamCuaToiViewState._secondary, fontWeight: FontWeight.w600)),
+                                          Text('Chỉ số: $chiSo', style: const TextStyle(fontSize: 10, color: AppColors.accent, fontWeight: FontWeight.w600)),
                                         if (ketQua.isNotEmpty)
-                                          Text('Kết quả: $ketQua', style: const TextStyle(fontSize: 10, color: _LichKhamCuaToiViewState._secondary, fontWeight: FontWeight.w600)),
+                                          Text('Kết quả: $ketQua', style: const TextStyle(fontSize: 10, color: AppColors.accent, fontWeight: FontWeight.w600)),
                                       ],
                                     ),
                                   ),
@@ -947,7 +896,7 @@ class _DetailSheet extends StatelessWidget {
                             padding: const EdgeInsets.only(top: 4),
                             child: Text(
                               '+${chiTiet.length - 3} khác',
-                              style: const TextStyle(fontSize: 11, color: _LichKhamCuaToiViewState._muted, fontStyle: FontStyle.italic),
+                              style: const TextStyle(fontSize: 11, color: AppColors.subLabel, fontStyle: FontStyle.italic),
                             ),
                           ),
                       ],
@@ -960,7 +909,7 @@ class _DetailSheet extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: const Color(0xFFF4F7FB),
+                color: AppColors.fill,
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Row(
@@ -968,7 +917,7 @@ class _DetailSheet extends StatelessWidget {
                    const Text(
                     'Tổng tiền',
                     style: TextStyle(
-                      color: _LichKhamCuaToiViewState._muted,
+                      color: AppColors.subLabel,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -976,7 +925,7 @@ class _DetailSheet extends StatelessWidget {
                   Text(
                     moneyText,
                     style: const TextStyle(
-                      color: _LichKhamCuaToiViewState._primary,
+                      color: AppColors.primary,
                       fontSize: 18,
                       fontWeight: FontWeight.w900,
                     ),
@@ -992,7 +941,7 @@ class _DetailSheet extends StatelessWidget {
                 child: FilledButton.icon(
                   onPressed: () => _showConclusionModal(context, appointment),
                   style: FilledButton.styleFrom(
-                    backgroundColor: _LichKhamCuaToiViewState._warning,
+                    backgroundColor: AppColors.warning,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
@@ -1051,7 +1000,7 @@ class _DetailSheet extends StatelessWidget {
                 child: OutlinedButton.icon(
                   onPressed: () => _showPrescriptionModal(context, appointment['DonThuoc']),
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: _LichKhamCuaToiViewState._primary, width: 2),
+                    side: const BorderSide(color: AppColors.primary, width: 2),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                   ),
                   icon: const Icon(Icons.medication_liquid_rounded),
@@ -1068,37 +1017,18 @@ class _DetailSheet extends StatelessWidget {
   void _showPrescriptionModal(BuildContext buildCtx, Map<String, dynamic> donThuoc) {
     final chiTiet = donThuoc['ChiTiet'] as List? ?? [];
 
-    const primary = Color(0xFF1565C0);
-    const text = Color(0xFF172033);
-    const muted = Color(0xFF667085);
-
     Get.dialog(
       Dialog(
         backgroundColor: Colors.transparent,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(24),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-            child: Container(
+        child: Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Colors.white.withValues(alpha: 0.95),
-                    Colors.white.withValues(alpha: 0.92),
-                  ],
-                ),
+                color: AppColors.surface,
                 borderRadius: BorderRadius.circular(24),
-                border: Border.all(
-                  color: primary.withValues(alpha: 0.2),
-                  width: 1.5,
-                ),
                 boxShadow: [
                   BoxShadow(
-                    color: primary.withValues(alpha: 0.1),
+                    color: AppColors.primary.withValues(alpha: 0.1),
                     blurRadius: 20,
                     offset: const Offset(0, 10),
                   ),
@@ -1112,22 +1042,12 @@ class _DetailSheet extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              primary.withValues(alpha: 0.2),
-                              primary.withValues(alpha: 0.1),
-                            ],
-                          ),
+                          color: AppColors.primaryBg,
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: primary.withValues(alpha: 0.3),
-                          ),
                         ),
                         child: const Icon(
                           Icons.medication_liquid_rounded,
-                          color: primary,
+                          color: AppColors.primary,
                           size: 24,
                         ),
                       ),
@@ -1135,10 +1055,10 @@ class _DetailSheet extends StatelessWidget {
                       Expanded(
                         child: Text(
                           'Toa thuốc',
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.w900,
-                            color: text,
+                            color: AppColors.label,
                           ),
                         ),
                       ),
@@ -1150,7 +1070,7 @@ class _DetailSheet extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(vertical: 20),
                       child: Text(
                         'Không có thông tin thuốc.',
-                        style: TextStyle(color: muted, fontSize: 14),
+                        style: TextStyle(color: AppColors.subLabel, fontSize: 14),
                       ),
                     )
                   else
@@ -1163,7 +1083,7 @@ class _DetailSheet extends StatelessWidget {
                         separatorBuilder: (_, _) => Padding(
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           child: Divider(
-                            color: primary.withValues(alpha: 0.1),
+                            color: AppColors.primary.withValues(alpha: 0.1),
                             height: 1,
                           ),
                         ),
@@ -1180,17 +1100,10 @@ class _DetailSheet extends StatelessWidget {
                                       width: 28,
                                       height: 28,
                                       decoration: BoxDecoration(
-                                        gradient: LinearGradient(
-                                          begin: Alignment.topLeft,
-                                          end: Alignment.bottomRight,
-                                          colors: [
-                                            primary.withValues(alpha: 0.3),
-                                            primary.withValues(alpha: 0.15),
-                                          ],
-                                        ),
+                                        color: AppColors.primaryBg,
                                         shape: BoxShape.circle,
                                         border: Border.all(
-                                          color: primary.withValues(alpha: 0.4),
+                                          color: AppColors.primary.withValues(alpha: 0.4),
                                         ),
                                       ),
                                       child: Center(
@@ -1199,7 +1112,7 @@ class _DetailSheet extends StatelessWidget {
                                           style: TextStyle(
                                             fontWeight: FontWeight.bold,
                                             fontSize: 12,
-                                            color: primary,
+                                            color: AppColors.primary,
                                           ),
                                         ),
                                       ),
@@ -1214,14 +1127,14 @@ class _DetailSheet extends StatelessWidget {
                                             style: TextStyle(
                                               fontWeight: FontWeight.w900,
                                               fontSize: 16,
-                                              color: text,
+                                            color: AppColors.label,
                                             ),
                                           ),
                                           const SizedBox(height: 4),
                                           Text(
                                             '${item['HamLuong']} - ${item['DonViTinh']}',
                                             style: TextStyle(
-                                              color: muted,
+                                              color: AppColors.subLabel,
                                               fontSize: 13,
                                             ),
                                           ),
@@ -1234,17 +1147,10 @@ class _DetailSheet extends StatelessWidget {
                                         vertical: 6,
                                       ),
                                       decoration: BoxDecoration(
-                                        gradient: LinearGradient(
-                                          begin: Alignment.topLeft,
-                                          end: Alignment.bottomRight,
-                                          colors: [
-                                            primary.withValues(alpha: 0.15),
-                                            primary.withValues(alpha: 0.08),
-                                          ],
-                                        ),
+                                        color: AppColors.primaryBg,
                                         borderRadius: BorderRadius.circular(8),
                                         border: Border.all(
-                                          color: primary.withValues(alpha: 0.3),
+                                          color: AppColors.primary.withValues(alpha: 0.3),
                                         ),
                                       ),
                                       child: Text(
@@ -1252,7 +1158,7 @@ class _DetailSheet extends StatelessWidget {
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 14,
-                                          color: primary,
+                                          color: AppColors.primary,
                                         ),
                                       ),
                                     ),
@@ -1267,16 +1173,13 @@ class _DetailSheet extends StatelessWidget {
                                       vertical: 8,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: primary.withValues(alpha: 0.08),
+                                      color: AppColors.primaryBg,
                                       borderRadius: BorderRadius.circular(8),
-                                      border: Border.all(
-                                        color: primary.withValues(alpha: 0.2),
-                                      ),
                                     ),
                                     child: Text(
                                       'Hướng dẫn: ${item['LieuDung']}',
                                       style: TextStyle(
-                                        color: primary,
+                                        color: AppColors.primary,
                                         fontWeight: FontWeight.w600,
                                         fontSize: 12,
                                       ),
@@ -1295,7 +1198,7 @@ class _DetailSheet extends StatelessWidget {
                     child: FilledButton(
                       onPressed: () => Get.back(),
                       style: FilledButton.styleFrom(
-                        backgroundColor: primary,
+                        backgroundColor: AppColors.primary,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -1313,8 +1216,6 @@ class _DetailSheet extends StatelessWidget {
                 ],
               ),
             ),
-          ),
-        ),
       ),
     );
   }
@@ -1325,7 +1226,7 @@ class _DetailSheet extends StatelessWidget {
       children: [
         Text(label, style: const TextStyle(color: Colors.grey, fontWeight: FontWeight.bold, fontSize: 13)),
         const SizedBox(height: 4),
-        Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: _LichKhamCuaToiViewState._text)),
+        Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.label)),
       ],
     );
   }
@@ -1348,12 +1249,12 @@ class _DetailRow extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
-          Icon(icon, size: 20, color: _LichKhamCuaToiViewState._primary),
+          Icon(icon, size: 20, color: AppColors.primary),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
               label,
-              style: const TextStyle(color: _LichKhamCuaToiViewState._muted),
+              style: const TextStyle(color: AppColors.subLabel),
             ),
           ),
           const SizedBox(width: 12),
@@ -1364,7 +1265,7 @@ class _DetailRow extends StatelessWidget {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
-                color: _LichKhamCuaToiViewState._text,
+                color: AppColors.label,
                 fontWeight: FontWeight.w800,
               ),
             ),
@@ -1407,7 +1308,7 @@ class _StatBox extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
-              color: _LichKhamCuaToiViewState._text,
+              color: AppColors.label,
               fontSize: 20,
               fontWeight: FontWeight.w900,
             ),
@@ -1418,7 +1319,7 @@ class _StatBox extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
-              color: _LichKhamCuaToiViewState._muted,
+              color: AppColors.subLabel,
               fontSize: 12,
             ),
           ),
@@ -1444,7 +1345,7 @@ class _MiniInfo extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: const TextStyle(
-            color: _LichKhamCuaToiViewState._muted,
+            color: AppColors.subLabel,
             fontSize: 11,
             fontWeight: FontWeight.w600,
           ),
@@ -1455,7 +1356,7 @@ class _MiniInfo extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: const TextStyle(
-            color: _LichKhamCuaToiViewState._text,
+            color: AppColors.label,
             fontSize: 13,
             fontWeight: FontWeight.w800,
           ),
@@ -1531,30 +1432,6 @@ class _InfoPill extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _IconButton extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback onTap;
-
-  const _IconButton({required this.icon, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        width: 42,
-        height: 42,
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.14),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Icon(icon, color: Colors.white),
       ),
     );
   }

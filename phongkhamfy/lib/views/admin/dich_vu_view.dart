@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:phongkhamfy/theme/app_theme.dart';
 import '../../controllers/admin_controller.dart';
 import '../../utils/loading_utils.dart';
 import '../../widgets/loading_view.dart';
@@ -31,12 +32,6 @@ class _DichVuViewState extends State<DichVuView> {
   bool _isEditing = false;
   int? _editingDichVuId;
 
-  // Colors
-  final _mauXanh = const Color(0xFF4CAF50);
-  final _mauNen = const Color(0xFFF1F8F5);
-  final _mauTrang = Colors.white;
-  final _mauChuDen = const Color(0xFF1B5E20);
-  final _mauChuXam = const Color(0xFF5A8A70);
 
   @override
   void initState() {
@@ -250,7 +245,7 @@ class _DichVuViewState extends State<DichVuView> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: isError ? Colors.red : _mauXanh,
+        backgroundColor: isError ? Colors.red : AppColors.primary,
         duration: const Duration(seconds: 2),
       ),
     );
@@ -277,7 +272,7 @@ class _DichVuViewState extends State<DichVuView> {
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
-                        color: _mauChuDen,
+                        color: AppColors.label,
                       ),
                     ),
                     IconButton(
@@ -341,7 +336,7 @@ class _DichVuViewState extends State<DichVuView> {
                             ? null
                             : (_isEditing ? _capNhatDichVu : _themDichVu),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: _mauXanh,
+                          backgroundColor: AppColors.primary,
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -384,7 +379,7 @@ class _DichVuViewState extends State<DichVuView> {
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: _mauChuDen,
+            color: AppColors.label,
           ),
         ),
         const SizedBox(height: 6),
@@ -394,18 +389,18 @@ class _DichVuViewState extends State<DichVuView> {
           keyboardType: keyboardType,
           decoration: InputDecoration(
             hintText: hintText,
-            prefixIcon: Icon(icon, color: _mauXanh),
+            prefixIcon: Icon(icon, color: AppColors.primary),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: _mauXanh.withValues(alpha: 0.3)),
+              borderSide: BorderSide(color: AppColors.primary.withValues(alpha: 0.3)),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: _mauXanh.withValues(alpha: 0.3)),
+              borderSide: BorderSide(color: AppColors.primary.withValues(alpha: 0.3)),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: _mauXanh, width: 2),
+              borderSide: BorderSide(color: AppColors.primary, width: 2),
             ),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
@@ -431,7 +426,7 @@ class _DichVuViewState extends State<DichVuView> {
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: _mauChuDen,
+            color: AppColors.label,
           ),
         ),
         const SizedBox(height: 6),
@@ -440,7 +435,7 @@ class _DichVuViewState extends State<DichVuView> {
           decoration: InputDecoration(
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: _mauXanh.withValues(alpha: 0.3)),
+              borderSide: BorderSide(color: AppColors.primary.withValues(alpha: 0.3)),
             ),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
@@ -465,17 +460,8 @@ class _DichVuViewState extends State<DichVuView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _mauNen,
-      appBar: AppBar(
-        title: const Text(
-          'Quản Lý Dịch Vụ',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
-        ),
-        backgroundColor: _mauXanh,
-        foregroundColor: _mauTrang,
-        elevation: 0,
-        centerTitle: false,
-      ),
+      backgroundColor: AppColors.bg,
+      appBar: iosAppBar(title: 'Quản Lý Dịch Vụ'),
       body: _isLoading && _danhSachDichVu.isEmpty
           ? const LoadingView(
               message: 'Đang tải danh sách dịch vụ...',
@@ -496,11 +482,11 @@ class _DichVuViewState extends State<DichVuView> {
                         },
                         decoration: InputDecoration(
                           hintText: 'Tìm kiếm dịch vụ...',
-                          prefixIcon: Icon(Icons.search, color: _mauXanh),
+                          prefixIcon: Icon(Icons.search, color: AppColors.primary),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide(
-                              color: _mauXanh.withValues(alpha: 0.3),
+                              color: AppColors.primary.withValues(alpha: 0.3),
                             ),
                           ),
                           contentPadding: const EdgeInsets.symmetric(
@@ -523,11 +509,11 @@ class _DichVuViewState extends State<DichVuView> {
                                 setState(() {});
                               },
                               backgroundColor: Colors.grey[200],
-                              selectedColor: _mauXanh,
+                              selectedColor: AppColors.primary,
                               labelStyle: TextStyle(
                                 color: _filterKhoa == null
-                                    ? _mauTrang
-                                    : _mauChuDen,
+                                    ? Colors.white
+                                    : AppColors.label,
                               ),
                             ),
                             const SizedBox(width: 8),
@@ -544,12 +530,12 @@ class _DichVuViewState extends State<DichVuView> {
                                     setState(() {});
                                   },
                                   backgroundColor: Colors.grey[200],
-                                  selectedColor: _mauXanh,
+                                  selectedColor: AppColors.primary,
                                   labelStyle: TextStyle(
                                     color:
                                         _filterKhoa == khoa['MaKhoa'].toString()
-                                        ? _mauTrang
-                                        : _mauChuDen,
+                                        ? Colors.white
+                                        : AppColors.label,
                                   ),
                                 ),
                               ),
@@ -570,14 +556,14 @@ class _DichVuViewState extends State<DichVuView> {
                               Icon(
                                 Icons.medical_services,
                                 size: 64,
-                                color: _mauChuXam.withValues(alpha: 0.3),
+                                color: AppColors.subLabel.withValues(alpha: 0.3),
                               ),
                               const SizedBox(height: 16),
                               Text(
                                 'Không tìm thấy dịch vụ',
                                 style: TextStyle(
                                   fontSize: 16,
-                                  color: _mauChuXam,
+                                  color: AppColors.subLabel,
                                 ),
                               ),
                             ],
@@ -585,7 +571,7 @@ class _DichVuViewState extends State<DichVuView> {
                         )
                       : RefreshIndicator(
                           onRefresh: _taiDanhSachDichVu,
-                          color: _mauXanh,
+                          color: AppColors.primary,
                           child: ListView.builder(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 16,
@@ -606,7 +592,7 @@ class _DichVuViewState extends State<DichVuView> {
           _clearForm();
           _showFormDialog();
         },
-        backgroundColor: _mauXanh,
+        backgroundColor: AppColors.info,
         icon: const Icon(Icons.add),
         label: const Text('Thêm dịch vụ'),
       ),
@@ -621,11 +607,7 @@ class _DichVuViewState extends State<DichVuView> {
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [_mauTrang, _mauNen],
-          ),
+          color: AppColors.surface,
         ),
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -636,10 +618,10 @@ class _DichVuViewState extends State<DichVuView> {
                 children: [
                   CircleAvatar(
                     radius: 28,
-                    backgroundColor: _mauXanh.withValues(alpha: 0.1),
+                    backgroundColor: AppColors.primary.withValues(alpha: 0.1),
                     child: Icon(
                       Icons.medical_services,
-                      color: _mauXanh,
+                      color: AppColors.primary,
                       size: 28,
                     ),
                   ),
@@ -653,14 +635,14 @@ class _DichVuViewState extends State<DichVuView> {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: _mauChuDen,
+                            color: AppColors.label,
                           ),
                         ),
                         Text(
                           'Mã: ${dichVu['madichvuyte'] ?? 'N/A'}',
                           style: TextStyle(
                             fontSize: 13,
-                            color: _mauChuXam,
+                            color: AppColors.subLabel,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -728,19 +710,19 @@ class _DichVuViewState extends State<DichVuView> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: _mauXanh.withValues(alpha: 0.1),
+        color: AppColors.primary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: _mauXanh),
+          Icon(icon, size: 14, color: AppColors.primary),
           const SizedBox(width: 6),
           Text(
             value,
             style: TextStyle(
               fontSize: 12,
-              color: _mauChuDen,
+              color: AppColors.label,
               fontWeight: FontWeight.w500,
             ),
             maxLines: 1,

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'dart:ui';
+import 'package:phongkhamfy/theme/app_theme.dart';
 import 'package:intl/intl.dart';
 import 'package:dio/dio.dart';
 import 'package:phongkhamfy/config/api_config.dart';
@@ -13,13 +13,6 @@ class XuLyThanhToanView extends StatefulWidget {
 }
 
 class _XuLyThanhToanViewState extends State<XuLyThanhToanView> {
-  static const _primary = Color(0xFF1565C0);
-  static const _background = Color(0xFFF4F7FB);
-  static const _text = Color(0xFF172033);
-  static const _muted = Color(0xFF667085);
-  static const _success = Color(0xFF43A047);
-  static const _warning = Color(0xFFFFB020);
-
   final _dio = Dio();
   final _sessionManager = SessionManager();
   final _searchController = TextEditingController();
@@ -112,13 +105,8 @@ class _XuLyThanhToanViewState extends State<XuLyThanhToanView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _background,
-      appBar: AppBar(
-        title: const Text('Xử lý thanh toán', style: TextStyle(fontWeight: FontWeight.w900)),
-        backgroundColor: Colors.white,
-        foregroundColor: _text,
-        elevation: 0,
-      ),
+      backgroundColor: AppColors.bg,
+      appBar: iosAppBar(title: 'Xử lý thanh toán'),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
@@ -135,7 +123,7 @@ class _XuLyThanhToanViewState extends State<XuLyThanhToanView> {
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w900,
-                      color: _text,
+                      color: AppColors.label,
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -147,38 +135,27 @@ class _XuLyThanhToanViewState extends State<XuLyThanhToanView> {
   }
 
   Widget _buildDateSelector() {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: GestureDetector(
-          onTap: _selectDate,
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  _primary.withValues(alpha: 0.2),
-                  _primary.withValues(alpha: 0.1),
-                ],
-              ),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: _primary.withValues(alpha: 0.3),
-                width: 1.5,
-              ),
-            ),
+    return GestureDetector(
+      onTap: _selectDate,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppColors.primaryBg,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: AppColors.primary.withValues(alpha: 0.3),
+            width: 1.5,
+          ),
+        ),
             child: Row(
               children: [
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: _primary.withValues(alpha: 0.1),
+                    color: AppColors.primary.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(Icons.calendar_today, color: _primary, size: 24),
+                  child: Icon(Icons.calendar_today, color: AppColors.primary, size: 24),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -187,7 +164,7 @@ class _XuLyThanhToanViewState extends State<XuLyThanhToanView> {
                     children: [
                       const Text(
                         'Chọn ngày',
-                        style: TextStyle(fontSize: 12, color: _muted),
+                        style: TextStyle(fontSize: 12, color: AppColors.subLabel),
                       ),
                       const SizedBox(height: 4),
                       Text(
@@ -195,51 +172,39 @@ class _XuLyThanhToanViewState extends State<XuLyThanhToanView> {
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w900,
-                          color: _text,
+                          color: AppColors.label,
                         ),
                       ),
                     ],
                   ),
                 ),
-                Icon(Icons.arrow_forward, color: _primary),
+                Icon(Icons.arrow_forward, color: AppColors.primary),
               ],
             ),
           ),
-        ),
-      ),
-    );
+        );
   }
 
   Widget _buildSearchBox() {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.8),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: _primary.withValues(alpha: 0.2),
-              width: 1.5,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: _primary.withValues(alpha: 0.05),
-                blurRadius: 10,
-              ),
-            ],
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 10,
           ),
-          child: TextField(
-            controller: _searchController,
-            decoration: InputDecoration(
-              hintText: 'Tìm mã hóa đơn hoặc tên bệnh nhân...',
-              hintStyle: TextStyle(color: _muted),
-              prefixIcon: Icon(Icons.search, color: _primary),
-              border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(vertical: 14),
-            ),
-          ),
+        ],
+      ),
+      child: TextField(
+        controller: _searchController,
+        decoration: InputDecoration(
+          hintText: 'Tìm mã hóa đơn hoặc tên bệnh nhân...',
+          hintStyle: TextStyle(color: AppColors.subLabel),
+          prefixIcon: Icon(Icons.search, color: AppColors.primary),
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(vertical: 14),
         ),
       ),
     );
@@ -255,12 +220,12 @@ class _XuLyThanhToanViewState extends State<XuLyThanhToanView> {
               Icon(
                 Icons.inbox_rounded,
                 size: 48,
-                color: _primary.withValues(alpha: 0.3),
+                color: AppColors.primary.withValues(alpha: 0.3),
               ),
               const SizedBox(height: 16),
               Text(
                 'Không có hóa đơn chưa thanh toán',
-                style: TextStyle(color: _text, fontSize: 16, fontWeight: FontWeight.w600),
+                style: TextStyle(color: AppColors.label, fontSize: 16, fontWeight: FontWeight.w600),
               ),
             ],
           ),
@@ -277,131 +242,109 @@ class _XuLyThanhToanViewState extends State<XuLyThanhToanView> {
   }
 
   Widget _buildInvoiceCard(Map<String, dynamic> invoice) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Colors.white.withValues(alpha: 0.95),
-                Colors.white.withValues(alpha: 0.92),
-              ],
-            ),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: _primary.withValues(alpha: 0.15),
-              width: 1.5,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: _primary.withValues(alpha: 0.08),
-                blurRadius: 15,
-                offset: const Offset(0, 8),
-              ),
-            ],
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: () => _showPaymentOptions(invoice),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Hóa đơn #${invoice['MaHoaDon']}',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w900,
-                                  fontSize: 14,
-                                  color: _text,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                invoice['TenBenhNhan'] ?? 'N/A',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: _muted,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: _warning.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                              color: _warning.withValues(alpha: 0.3),
-                            ),
-                          ),
-                          child: const Text(
-                            'Chờ thanh toán',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
-                              color: _warning,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Divider(color: _primary.withValues(alpha: 0.1), height: 1),
-                    const SizedBox(height: 12),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () => _showPaymentOptions(invoice),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Số tiền phải trả',
-                              style: TextStyle(fontSize: 12, color: _muted),
+                              'Hóa đơn #${invoice['MaHoaDon']}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w900,
+                                fontSize: 14,
+                                color: AppColors.label,
+                              ),
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              _formatMoney(invoice['SoTienPhaiTra']),
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w900,
-                                color: _primary,
+                              invoice['TenBenhNhan'] ?? 'N/A',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: AppColors.subLabel,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                           ],
                         ),
-                        FilledButton.icon(
-                          onPressed: () => _showPaymentOptions(invoice),
-                          icon: const Icon(Icons.payment_rounded, size: 20),
-                          label: const Text('Thanh toán'),
-                          style: FilledButton.styleFrom(
-                            backgroundColor: _primary,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: AppColors.warning.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Text(
+                          'Chờ thanh toán',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.warning,
                           ),
                         ),
-                      ],
-                    ),
-                  ],
-                ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Divider(color: AppColors.separator, height: 1),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Số tiền phải trả',
+                              style: TextStyle(fontSize: 12, color: AppColors.subLabel)),
+                          const SizedBox(height: 4),
+                          Text(
+                            _formatMoney(invoice['SoTienPhaiTra']),
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w900,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                        ],
+                      ),
+                      FilledButton.icon(
+                        onPressed: () => _showPaymentOptions(invoice),
+                        icon: const Icon(Icons.payment_rounded, size: 20),
+                        label: const Text('Thanh toán'),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ),
@@ -424,71 +367,58 @@ class _XuLyThanhToanViewState extends State<XuLyThanhToanView> {
       initialChildSize: 0.6,
       minChildSize: 0.5,
       maxChildSize: 0.9,
-      builder: (context, scrollController) => ClipRRect(
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Colors.white.withValues(alpha: 0.98),
-                  Colors.white.withValues(alpha: 0.95),
-                ],
-              ),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-            ),
-            child: SingleChildScrollView(
-              controller: scrollController,
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
+      builder: (context, scrollController) => Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+        ),
+        child: SingleChildScrollView(
+          controller: scrollController,
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Phương thức thanh toán',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w900,
-                            color: _text,
-                          ),
-                        ),
-                        IconButton(
-                          onPressed: () => Navigator.pop(context),
-                          icon: const Icon(Icons.close_rounded),
-                        ),
-                      ],
+                    const Text(
+                      'Phương thức thanh toán',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w900,
+                        color: AppColors.label,
+                      ),
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Hóa đơn #${invoice['MaHoaDon']} - ${invoice['TenBenhNhan']}',
-                      style: TextStyle(fontSize: 13, color: _muted),
-                    ),
-                    const SizedBox(height: 24),
-                    _buildPaymentMethodButton(
-                      'Thanh toán ngân hàng',
-                      'Quét mã QR hoặc chuyển khoản',
-                      Icons.account_balance_rounded,
-                      _primary,
-                      () => _showBankPayment(invoice),
-                    ),
-                    const SizedBox(height: 12),
-                    _buildPaymentMethodButton(
-                      'Thanh toán tiền mặt',
-                      'Nhân viên xác nhận thanh toán',
-                      Icons.payments_rounded,
-                      _success,
-                      () => _showCashPayment(invoice),
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.close_rounded),
                     ),
                   ],
                 ),
-              ),
+                const SizedBox(height: 8),
+                Text(
+                  'Hóa đơn #${invoice['MaHoaDon']} - ${invoice['TenBenhNhan']}',
+                  style: const TextStyle(fontSize: 13, color: AppColors.subLabel),
+                ),
+                const SizedBox(height: 24),
+                _buildPaymentMethodButton(
+                  'Thanh toán ngân hàng',
+                  'Quét mã QR hoặc chuyển khoản',
+                  Icons.account_balance_rounded,
+                  AppColors.primary,
+                  () => _showBankPayment(invoice),
+                ),
+                const SizedBox(height: 12),
+                _buildPaymentMethodButton(
+                  'Thanh toán tiền mặt',
+                  'Nhân viên xác nhận thanh toán',
+                  Icons.payments_rounded,
+                  AppColors.success,
+                  () => _showCashPayment(invoice),
+                ),
+              ],
             ),
           ),
         ),
@@ -505,65 +435,46 @@ class _XuLyThanhToanViewState extends State<XuLyThanhToanView> {
   ) {
     return GestureDetector(
       onTap: onTap,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  color.withValues(alpha: 0.1),
-                  color.withValues(alpha: 0.05),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: color.withValues(alpha: 0.3), width: 1.5),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: color, size: 28),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.label,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(fontSize: 12, color: AppColors.subLabel),
+                  ),
                 ],
               ),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: color.withValues(alpha: 0.3),
-                width: 1.5,
-              ),
             ),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(icon, color: color, size: 28),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w800,
-                          color: _text,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        subtitle,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: _muted,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Icon(Icons.arrow_forward_rounded, color: color, size: 20),
-              ],
-            ),
-          ),
+            Icon(Icons.arrow_forward_rounded, color: color, size: 20),
+          ],
         ),
       ),
     );
@@ -582,9 +493,9 @@ class _XuLyThanhToanViewState extends State<XuLyThanhToanView> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: _primary.withValues(alpha: 0.1),
+                  color: AppColors.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: _primary.withValues(alpha: 0.3)),
+                  border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -617,7 +528,7 @@ class _XuLyThanhToanViewState extends State<XuLyThanhToanView> {
                           style: TextStyle(
                             fontFamily: 'monospace',
                             fontWeight: FontWeight.w600,
-                            color: _primary,
+                            color: AppColors.primary,
                           ),
                         ),
                       ),
@@ -629,20 +540,20 @@ class _XuLyThanhToanViewState extends State<XuLyThanhToanView> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: _warning.withValues(alpha: 0.1),
+                  color: AppColors.warning.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: _warning.withValues(alpha: 0.3)),
+                  border: Border.all(color: AppColors.warning.withValues(alpha: 0.3)),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.info_rounded, color: _warning, size: 20),
+                    Icon(Icons.info_rounded, color: AppColors.warning, size: 20),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         'Vui lòng sử dụng mã hoá đơn làm nội dung chuyển khoản',
                         style: TextStyle(
                           fontSize: 12,
-                          color: _warning,
+                          color: AppColors.warning,
                         ),
                       ),
                     ),
@@ -663,7 +574,7 @@ class _XuLyThanhToanViewState extends State<XuLyThanhToanView> {
               Navigator.pop(context);
               Navigator.pop(context);
             },
-            style: FilledButton.styleFrom(backgroundColor: _primary),
+            style: FilledButton.styleFrom(backgroundColor: AppColors.primary),
             child: const Text('Xác nhận thanh toán'),
           ),
         ],
@@ -679,14 +590,14 @@ class _XuLyThanhToanViewState extends State<XuLyThanhToanView> {
         children: [
           Text(
             label,
-            style: TextStyle(fontSize: 12, color: _muted),
+            style: TextStyle(fontSize: 12, color: AppColors.subLabel),
           ),
           Text(
             value,
             style: TextStyle(
               fontWeight: FontWeight.w700,
               fontSize: isAmount ? 14 : 12,
-              color: isAmount ? _primary : _text,
+              color: isAmount ? AppColors.primary : AppColors.label,
             ),
           ),
         ],
@@ -695,68 +606,14 @@ class _XuLyThanhToanViewState extends State<XuLyThanhToanView> {
   }
 
   void _showCashPayment(Map<String, dynamic> invoice) {
-    showDialog(
+    Navigator.pop(context); // đóng sheet chọn phương thức
+    showModalBottomSheet(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Thanh toán tiền mặt'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: _success.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: _success.withValues(alpha: 0.3)),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Mã hóa đơn: ${invoice['MaHoaDon']}',
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Bệnh nhân: ${invoice['TenBenhNhan']}',
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    'Số tiền thu: ${_formatMoney(invoice['SoTienPhaiTra'])}',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w900,
-                      fontSize: 16,
-                      color: _primary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Vui lòng xác nhận đã nhận tiền mặt từ bệnh nhân',
-              style: TextStyle(fontSize: 13, color: _muted),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Hủy'),
-          ),
-          FilledButton(
-            onPressed: () {
-              _updatePaymentStatus(invoice['MaHoaDon'], 'cash');
-              Navigator.pop(context);
-              Navigator.pop(context);
-            },
-            style: FilledButton.styleFrom(backgroundColor: _success),
-            child: const Text('Xác nhận đã nhận tiền'),
-          ),
-        ],
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => _CashPaymentSheet(
+        invoice: invoice,
+        onConfirm: () => _updatePaymentStatus(invoice['MaHoaDon'], 'cash'),
       ),
     );
   }
@@ -781,7 +638,7 @@ class _XuLyThanhToanViewState extends State<XuLyThanhToanView> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text('Thanh toán thành công!'),
-            backgroundColor: _success,
+            backgroundColor: AppColors.success,
           ),
         );
         _loadInvoices();
@@ -797,9 +654,328 @@ class _XuLyThanhToanViewState extends State<XuLyThanhToanView> {
 
   String _formatMoney(dynamic amount) {
     final value = amount is String ? double.parse(amount) : (amount as num).toDouble();
-    return NumberFormat.currency(
-      locale: 'vi_VN',
-      symbol: 'đ',
-    ).format(value);
+    return NumberFormat.currency(locale: 'vi_VN', symbol: 'đ').format(value);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// Sheet thanh toán tiền mặt
+// ─────────────────────────────────────────────────────────────
+class _CashPaymentSheet extends StatefulWidget {
+  final Map<String, dynamic> invoice;
+  final VoidCallback onConfirm;
+
+  const _CashPaymentSheet({required this.invoice, required this.onConfirm});
+
+  @override
+  State<_CashPaymentSheet> createState() => _CashPaymentSheetState();
+}
+
+class _CashPaymentSheetState extends State<_CashPaymentSheet> {
+  static final _fmt = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ');
+
+  late final double _soTienPhaiTra;
+  late final double _tongTien;
+  late final double _giamBHYT;
+  double _khachDua = 0;
+  late final TextEditingController _ctrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _soTienPhaiTra = _parse(widget.invoice['SoTienPhaiTra']);
+    _tongTien = _parse(widget.invoice['TongTien']);
+    _giamBHYT = _parse(widget.invoice['GiamBHYT']);
+    _khachDua = _soTienPhaiTra;
+    _ctrl = TextEditingController(text: _soTienPhaiTra.toInt().toString());
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  double _parse(dynamic v) {
+    if (v == null) return 0;
+    if (v is String) return double.tryParse(v) ?? 0;
+    return (v as num).toDouble();
+  }
+
+  void _setAmount(double amount) {
+    setState(() {
+      _khachDua = amount;
+      _ctrl.text = amount.toInt().toString();
+      _ctrl.selection = TextSelection.collapsed(offset: _ctrl.text.length);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final tienThua = _khachDua - _soTienPhaiTra;
+    final canConfirm = _khachDua >= _soTienPhaiTra && _khachDua > 0;
+
+    return Padding(
+      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      child: ClipRRect(
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+        child: Container(
+          color: Colors.white,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Handle bar
+                Center(
+                  child: Container(
+                    width: 40, height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // Header
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: AppColors.success.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(Icons.payments_rounded, color: AppColors.success, size: 24),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('Thanh toán tiền mặt',
+                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.label)),
+                          Text('HĐ #${widget.invoice['MaHoaDon']} · ${widget.invoice['TenBenhNhan']}',
+                              style: const TextStyle(fontSize: 12, color: AppColors.subLabel)),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.close_rounded),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+
+                // Invoice summary
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppColors.bg,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.grey.withValues(alpha: 0.15)),
+                  ),
+                  child: Column(
+                    children: [
+                      _summaryRow('Tổng tiền dịch vụ', _tongTien, Colors.black87),
+                      if (_giamBHYT > 0) ...[
+                        const SizedBox(height: 8),
+                        _summaryRow('Giảm BHYT', -_giamBHYT, AppColors.success),
+                      ],
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        child: Divider(color: Colors.grey.withValues(alpha: 0.25), height: 1),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text('Số tiền phải trả',
+                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.label)),
+                          Text(_fmt.format(_soTienPhaiTra),
+                              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.primary)),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // Customer amount input
+                const Text('Tiền khách đưa',
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.label)),
+                const SizedBox(height: 10),
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: AppColors.primary.withValues(alpha: 0.5), width: 2),
+                    boxShadow: [BoxShadow(color: AppColors.primary.withValues(alpha: 0.07), blurRadius: 12)],
+                  ),
+                  child: Row(
+                    children: [
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: TextField(
+                          controller: _ctrl,
+                          keyboardType: TextInputType.number,
+                          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: AppColors.label),
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            hintText: '0',
+                          ),
+                          onChanged: (v) {
+                            final parsed = double.tryParse(v.replaceAll(RegExp(r'[^\d]'), '')) ?? 0;
+                            setState(() => _khachDua = parsed);
+                          },
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withValues(alpha: 0.08),
+                          borderRadius: const BorderRadius.only(
+                            topRight: Radius.circular(12),
+                            bottomRight: Radius.circular(12),
+                          ),
+                        ),
+                        child: const Text('đ',
+                            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: AppColors.primary)),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                // Quick amount buttons
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    _quickBtn('Đúng tiền', () => _setAmount(_soTienPhaiTra), filled: true),
+                    _quickBtn('+50k', () => _setAmount(_khachDua + 50000)),
+                    _quickBtn('+100k', () => _setAmount(_khachDua + 100000)),
+                    _quickBtn('+200k', () => _setAmount(_khachDua + 200000)),
+                    _quickBtn('+500k', () => _setAmount(_khachDua + 500000)),
+                    _quickBtn('+1M', () => _setAmount(_khachDua + 1000000)),
+                  ],
+                ),
+                const SizedBox(height: 20),
+
+                // Change display
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  decoration: BoxDecoration(
+                    color: tienThua >= 0
+                        ? AppColors.success.withValues(alpha: 0.08)
+                        : Colors.red.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: tienThua >= 0
+                          ? AppColors.success.withValues(alpha: 0.3)
+                          : Colors.red.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            tienThua >= 0 ? Icons.check_circle_rounded : Icons.warning_rounded,
+                            color: tienThua >= 0 ? AppColors.success : Colors.red,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            tienThua >= 0 ? 'Tiền thừa trả lại' : 'Tiền còn thiếu',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: tienThua >= 0 ? AppColors.success : Colors.red,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Text(
+                        _fmt.format(tienThua.abs()),
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w900,
+                          color: tienThua >= 0 ? AppColors.success : Colors.red,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // Confirm button
+                SizedBox(
+                  width: double.infinity,
+                  height: 56,
+                  child: FilledButton.icon(
+                    onPressed: canConfirm
+                        ? () {
+                            Navigator.pop(context);
+                            widget.onConfirm();
+                          }
+                        : null,
+                    icon: const Icon(Icons.check_circle_rounded),
+                    label: Text(
+                      canConfirm
+                          ? 'Xác nhận thu ${_fmt.format(_soTienPhaiTra)}'
+                          : 'Nhập tiền khách đưa',
+                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
+                    ),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.success,
+                      disabledBackgroundColor: Colors.grey[300],
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _summaryRow(String label, double amount, Color color) {
+    final display = amount < 0
+        ? '-${_fmt.format(amount.abs())}'
+        : _fmt.format(amount);
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(label, style: const TextStyle(fontSize: 13, color: AppColors.subLabel)),
+        Text(display, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: color)),
+      ],
+    );
+  }
+
+  Widget _quickBtn(String label, VoidCallback onTap, {bool filled = false}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: filled ? AppColors.primary : Colors.grey[100],
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: filled ? AppColors.primary : Colors.grey.withValues(alpha: 0.3)),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+            color: filled ? Colors.white : AppColors.label,
+          ),
+        ),
+      ),
+    );
   }
 }

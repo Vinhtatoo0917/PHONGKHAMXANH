@@ -9,7 +9,10 @@
       "Bash(find . -name \"LichKhamController.php\" -type f)",
       "Bash(cd \"/c/Users/ADMIN/Documents/PTDU/Doan\" && ls -la)",
       "Read(//c/c/Users/ADMIN/Documents/PTDU/**)",
-      "Bash(flutter build *)"
+      "Bash(flutter build *)",
+      "Bash(python3 -m pip install playwright -q)",
+      "Bash(flutter run *)",
+      "Bash(tee flutter_run.log)"
     ]
   }
 }

@@ -4,13 +4,15 @@ import 'package:dio/dio.dart';
 import '../../config/api_config.dart';
 import 'quan_ly_lich_lam_viec_view.dart';
 import 'quan_ly_lich_kham_view.dart';
-import 'quan_ly_bac_si_view.dart';
 import 'quan_ly_phong_kham_view.dart';
 import 'quan_ly_ca_kham_view.dart';
 import 'khoa_view.dart';
 import 'benh_view.dart';
 import 'dich_vu_view.dart';
 import 'manage_thuoc_view.dart';
+import 'quan_ly_benh_nhan_view.dart';
+import 'thong_ke_view.dart';
+import 'quan_ly_nhan_vien_view.dart';
 import '../../controllers/auth_controller.dart';
 import '../../widgets/dialog_dang_xuat.dart';
 import '../../widgets/loading_dang_xuat.dart';
@@ -36,38 +38,11 @@ class _AdminHomeViewState extends State<AdminHomeView> {
   final _authService = DichVuXacThuc();
   final _dio = Dio();
 
-  late Future<Map<String, dynamic>> _dashboardStats;
-  late Future<bool> _hasNextDaySchedules;
-
-  @override
-  void initState() {
-    super.initState();
-    _dashboardStats = _fetchDashboardStats();
-    _hasNextDaySchedules = _checkNextDaySchedules();
-  }
-
-  Future<Map<String, dynamic>> _fetchDashboardStats() async {
-    try {
-      final today = DateTime.now();
-      final response = await _dio.get(
-        ApiConfig.getFullUrl('/api/admin/dashboard-stats?date=${today.toIso8601String().split('T')[0]}'),
-        options: Options(validateStatus: (_) => true),
-      );
-
-      if (response.statusCode == 200) {
-        return response.data?['data'] ?? {};
-      }
-    } catch (e) {
-      debugPrint('Error fetching dashboard stats: $e');
-    }
-    return {};
-  }
-
   Future<bool> _checkNextDaySchedules() async {
     try {
       final tomorrow = DateTime.now().add(const Duration(days: 1));
       final response = await _dio.get(
-        ApiConfig.getFullUrl('/api/admin/doctor-schedules?date=${tomorrow.toIso8601String().split('T')[0]}'),
+        ApiConfig.getFullUrl('/admin/doctor-schedules?date=${tomorrow.toIso8601String().split('T')[0]}'),
         options: Options(validateStatus: (_) => true),
       );
 
@@ -78,7 +53,7 @@ class _AdminHomeViewState extends State<AdminHomeView> {
     } catch (e) {
       debugPrint('Error checking next day schedules: $e');
     }
-    return true; // Mặc định true (không show warning) nếu không thể kiểm tra
+    return false;
   }
 
   void _onLogout() {
@@ -148,8 +123,6 @@ class _AdminHomeViewState extends State<AdminHomeView> {
             ),
 
             const SizedBox(height: 20),
-            _buildDashboardStats(),
-            const SizedBox(height: 20),
             _buildNextDayWarning(),
             const SizedBox(height: 24),
 
@@ -183,10 +156,10 @@ class _AdminHomeViewState extends State<AdminHomeView> {
                     onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const QuanLyLichLamViecView())),
                   ),
                   IosMenuCard(
-                    icon: Icons.people_rounded,
-                    label: 'Bác sĩ',
-                    color: const Color(0xFF43A047),
-                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const QuanLyBacSiView())),
+                    icon: Icons.badge_rounded,
+                    label: 'Nhân viên',
+                    color: const Color(0xFF2E7D32),
+                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const QuanLyNhanVienView())),
                   ),
                   IosMenuCard(
                     icon: Icons.meeting_room_rounded,
@@ -223,6 +196,18 @@ class _AdminHomeViewState extends State<AdminHomeView> {
                     label: 'Thuốc',
                     color: const Color(0xFFF4511E),
                     onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ManageThuocView())),
+                  ),
+                  IosMenuCard(
+                    icon: Icons.person_search_rounded,
+                    label: 'Bệnh nhân',
+                    color: const Color(0xFF6D4C41),
+                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const QuanLyBenhNhanView())),
+                  ),
+                  IosMenuCard(
+                    icon: Icons.bar_chart_rounded,
+                    label: 'Thống kê',
+                    color: const Color(0xFF9C27B0),
+                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ThongKeView())),
                   ),
                 ],
               ),
@@ -310,116 +295,9 @@ class _AdminHomeViewState extends State<AdminHomeView> {
     );
   }
 
-  Widget _buildDashboardStats() {
-    return FutureBuilder<Map<String, dynamic>>(
-      future: _dashboardStats,
-      builder: (context, snapshot) {
-        final stats = snapshot.data ?? {};
-        final lichKham = stats['lichKham'] ?? 0;
-        final revenue = stats['revenue'] ?? 0;
-        final bacSiTruc = stats['bacSiTruc'] ?? 0;
-
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('HÔM NAY', style: AppText.caption.copyWith(
-                color: AppColors.subLabel, fontWeight: FontWeight.w600, letterSpacing: 0.8)),
-              const SizedBox(height: 12),
-              GridView.count(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                crossAxisCount: 3,
-                crossAxisSpacing: 14,
-                mainAxisSpacing: 14,
-                childAspectRatio: 0.95,
-                children: [
-                  _buildLargeStatCard(
-                    'Lịch khám',
-                    lichKham.toString(),
-                    Icons.event_available_rounded,
-                    AppColors.primary,
-                  ),
-                  _buildLargeStatCard(
-                    'Tiền thêm vào',
-                    _formatCurrency(revenue),
-                    Icons.attach_money_rounded,
-                    const Color(0xFF4CAF50),
-                  ),
-                  _buildLargeStatCard(
-                    'Bác sĩ trực',
-                    bacSiTruc.toString(),
-                    Icons.people_rounded,
-                    const Color(0xFF43A047),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildLargeStatCard(String label, String value, IconData icon, Color color) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        color: AppColors.surface,
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 8)],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 50,
-              height: 50,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                color: color.withValues(alpha: 0.15),
-              ),
-              child: Icon(icon, color: color, size: 26),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              value,
-              style: AppText.title3.copyWith(
-                color: color,
-                fontWeight: FontWeight.w700,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 6),
-            Text(
-              label,
-              style: AppText.caption.copyWith(color: AppColors.subLabel),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  String _formatCurrency(dynamic amount) {
-    if (amount is int) return amount.toString();
-    if (amount is double) {
-      if (amount >= 1000000) {
-        return '${(amount / 1000000).toStringAsFixed(1)}M';
-      } else if (amount >= 1000) {
-        return '${(amount / 1000).toStringAsFixed(1)}K';
-      }
-      return amount.toStringAsFixed(0);
-    }
-    return '0';
-  }
-
   Widget _buildNextDayWarning() {
     return FutureBuilder<bool>(
-      future: _hasNextDaySchedules,
+      future: _checkNextDaySchedules(),
       builder: (context, snapshot) {
         final hasSchedules = snapshot.data ?? true;
 
